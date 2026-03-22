@@ -1,16 +1,60 @@
-# React + Vite
+# Quiz App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A multi-question quiz application built with React. Answer questions one at a time, get instant feedback, and see your final score at the end.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 6 questions with multiple choice answers
+- Instant correct / incorrect feedback after each answer
+- Answer locking — cannot change answer once selected
+- Score tracking across all questions
+- Results screen with final score
+- Restart quiz without page reload
 
-## React Compiler
+## Concepts Practiced
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Concept                    | Where used                                               |
+| -------------------------- | -------------------------------------------------------- |
+| Components & JSX           | Question, Results, App                                   |
+| Props                      | Passing question data, selected state, onRestart handler |
+| useState                   | score, selected, currentIndex, isFinished                |
+| Derived state              | isCorrect, currentQuestion                               |
+| State lifting              | selected moved from Question up to App                   |
+| Conditional rendering `&&` | Feedback messages, Next/Submit buttons                   |
+| Conditional rendering `if` | Switching between quiz and results screen                |
+| `.map()` + key prop        | Rendering answer buttons dynamically                     |
+| disabled attribute         | Locking buttons after selection                          |
+| Component decomposition    | Question.jsx, Results.jsx, App.jsx                       |
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+quiz-app/
+├── src/
+│   ├── data/
+│   │   └── questionData.js    # All quiz questions and answers
+│   ├── Question.jsx           # Renders a single question + options
+│   ├── Results.jsx            # Results screen with final score
+│   ├── App.jsx                # Root component, owns all state
+│   ├── index.css              # Global styles
+│   └── main.jsx               # React entry point
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## Running Locally
+
+```bash
+cd quiz-app
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`
+
+## Built With
+
+- React 19
+- Vite
+- Plain CSS
