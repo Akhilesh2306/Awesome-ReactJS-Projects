@@ -8,6 +8,10 @@ A multi-question quiz application built with React. Answer questions one at a ti
 - Instant correct / incorrect feedback after each answer
 - Answer locking — cannot change answer once selected
 - Score tracking across all questions
+- Live score and question counter visible during quiz
+- Progress bar showing how far through the quiz you are
+- Correct answer highlighted green, wrong answer highlighted red after selection
+- Countdown timer per question — auto stops at 0
 - Results screen with final score
 - Restart quiz without page reload
 
@@ -17,13 +21,17 @@ A multi-question quiz application built with React. Answer questions one at a ti
 | -------------------------- | -------------------------------------------------------- |
 | Components & JSX           | Question, Results, App                                   |
 | Props                      | Passing question data, selected state, onRestart handler |
-| useState                   | score, selected, currentIndex, isFinished                |
-| Derived state              | isCorrect, currentQuestion                               |
+| useState                   | score, selected, currentIndex, isFinished, timer         |
+| Derived state              | isCorrect, currentQuestion, progress                     |
 | State lifting              | selected moved from Question up to App                   |
 | Conditional rendering `&&` | Feedback messages, Next/Submit buttons                   |
 | Conditional rendering `if` | Switching between quiz and results screen                |
 | `.map()` + key prop        | Rendering answer buttons dynamically                     |
+| Dynamic classNames         | Highlighting correct/incorrect options after selection   |
+| Inline styles              | Progress bar width driven by state                       |
 | disabled attribute         | Locking buttons after selection                          |
+| useEffect + setInterval    | Countdown timer with proper cleanup                      |
+| key prop reset             | Remounting Question on each new question                 |
 | Component decomposition    | Question.jsx, Results.jsx, App.jsx                       |
 
 ## Project Structure

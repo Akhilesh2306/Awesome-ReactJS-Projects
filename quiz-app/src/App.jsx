@@ -11,6 +11,8 @@ export default function App() {
 
   const currentQuestion = questionData[currentIndex];
 
+  const progress = ((currentIndex + 1) / questionData.length) * 100;
+
   if (isFinished) {
     return (
       <Result
@@ -29,12 +31,23 @@ export default function App() {
   return (
     <div className="quiz-app">
       <h1 className="quiz-title">React Quiz</h1>
+      <p className="quiz-meta">
+        Question {currentIndex + 1} of {questionData.length} | Score: {score}
+      </p>
+      <div className="progress-bar">
+        <div
+          className="progress-bar-fill"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
       <Question
+        key={currentIndex}
         question={currentQuestion.question}
         options={currentQuestion.options}
         answer={currentQuestion.answer}
         selected={selected}
         setSelected={setSelected}
+        timeLimit={10}
       />
 
       {selected && currentIndex < questionData.length - 1 && (
