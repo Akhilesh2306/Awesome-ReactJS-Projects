@@ -6,6 +6,7 @@ import Result from "./Results";
 export default function App() {
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
+  const [timedOut, setTimedOut] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -23,6 +24,7 @@ export default function App() {
           setSelected(null);
           setIsFinished(false);
           setCurrentIndex(0);
+          setTimedOut(false);
         }}
       />
     );
@@ -47,14 +49,17 @@ export default function App() {
         answer={currentQuestion.answer}
         selected={selected}
         setSelected={setSelected}
+        timedOut={timedOut}
+        setTimedOut={setTimedOut}
         timeLimit={10}
       />
 
-      {selected && currentIndex < questionData.length - 1 && (
+      {(selected || timedOut) && currentIndex < questionData.length - 1 && (
         <button
           className="btn"
           onClick={() => {
             setSelected(null);
+            setTimedOut(false);
             setCurrentIndex(currentIndex + 1);
             if (selected === currentQuestion.answer) {
               setScore(score + 1);
@@ -64,15 +69,16 @@ export default function App() {
           Next
         </button>
       )}
-      {selected && currentIndex === questionData.length - 1 && (
+      {(selected || timedOut) && currentIndex === questionData.length - 1 && (
         <button
           type="submit"
           className="btn"
           onClick={() => {
+            setTimedOut(false);
+            setIsFinished(true);
             if (selected === currentQuestion.answer) {
               setScore(score + 1);
             }
-            setIsFinished(true);
           }}
         >
           Submit

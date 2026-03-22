@@ -6,6 +6,8 @@ export default function Question({
   answer,
   selected,
   setSelected,
+  timedOut,
+  setTimedOut,
   timeLimit,
 }) {
   const isCorrect = selected === answer;
@@ -16,6 +18,7 @@ export default function Question({
       setTimer((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
+          setTimedOut(true);
           return 0;
         }
         return prev - 1;
@@ -29,7 +32,8 @@ export default function Question({
       <p className="timer">Time: {timer}s</p>
       <h2 className="question-text">{question}</h2>
       {options.map((option) => {
-        const isCurrentOptionCorrect = selected && option === answer;
+        const isCurrentOptionCorrect =
+          (selected && option === answer) || (timedOut && option === answer);
         const isCurrentOptionWrong =
           selected && option === selected && option !== answer;
 
@@ -37,7 +41,7 @@ export default function Question({
           <button
             key={option}
             onClick={() => setSelected(option)}
-            disabled={selected !== null}
+            disabled={selected !== null || timedOut}
             className={`option-btn ${isCurrentOptionCorrect ? "option-btn-correct" : ""} ${isCurrentOptionWrong ? "option-btn-incorrect" : ""}`}
           >
             {option}
@@ -50,6 +54,11 @@ export default function Question({
       {!isCorrect && selected && (
         <p className="feedback feedback-incorrect">
           Incorrect. The correct answer is: {answer}
+        </p>
+      )}
+      {timedOut && !selected && (
+        <p className="feedback feedback-incorrect">
+          Time's up! The correct answer is: {answer}
         </p>
       )}
     </div>
