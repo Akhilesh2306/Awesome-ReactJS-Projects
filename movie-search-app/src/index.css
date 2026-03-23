@@ -1,0 +1,243 @@
+/* ── Reset ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── Global ── */
+body {
+  background: #0f0f0f;
+  color: #e0e0e0;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+/* ── App wrapper ── */
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* ── Title ── */
+.app-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: #f5c518;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+}
+
+/* ── Search bar ── */
+.search-form {
+  display: flex;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #f5c518;
+}
+
+.search-input::placeholder {
+  color: #555;
+}
+
+.search-btn {
+  padding: 12px 24px;
+  background: #f5c518;
+  color: #0f0f0f;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-btn:hover {
+  background: #d4a800;
+}
+
+/* ── Status messages ── */
+.status-msg {
+  text-align: center;
+  font-size: 16px;
+  color: #888;
+  margin: 40px 0;
+}
+
+.status-msg--error {
+  text-align: center;
+  font-size: 16px;
+  color: #e74c3c;
+  margin: 40px 0;
+}
+
+/* ── Movies grid ── */
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+/* ── Movie card ── */
+.movie-card {
+  background: #1c1c1c;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  border: 1px solid #2a2a2a;
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: #f5c518;
+}
+
+.movie-card__poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  display: block;
+}
+
+.no-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 14px;
+}
+
+.movie-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e0e0;
+  padding: 10px 12px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-card__year {
+  font-size: 12px;
+  color: #888;
+  padding: 0 12px 12px;
+}
+
+/* ── Movie detail overlay ──
+   Covers the full screen with a dark backdrop
+   Centers the detail card in the middle of the viewport */
+.movie-detail {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+/* ── Detail card ──
+   Scrollable box so long content doesn't overflow */
+.detail-card {
+  background: #1c1c1c;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #2a2a2a;
+}
+
+.detail-poster {
+  width: 180px;
+  border-radius: 8px;
+  align-self: center;
+  margin-bottom: 8px;
+}
+
+.detail-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f5c518;
+  text-align: center;
+}
+
+.detail-info {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 8px;
+}
+
+.detail-info:last-child {
+  border-bottom: none;
+}
+
+.detail-close {
+  margin-top: 16px;
+  padding: 10px 32px;
+  background: #f5c518;
+  color: #0f0f0f;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.detail-close:hover {
+  background: #d4a800;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .app-title {
+    font-size: 26px;
+  }
+
+  .search-form {
+    flex-direction: column;
+  }
+
+  .movies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .detail-card {
+    padding: 20px;
+  }
+}

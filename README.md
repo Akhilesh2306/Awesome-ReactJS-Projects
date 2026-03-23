@@ -5,14 +5,16 @@ each project focused on specific concepts, written line by line without copy-pas
 
 ## Projects
 
-| # | Project | Concepts Covered | Status |
-|---|---------|-----------------|--------|
-| 01 | [Quiz App](./quiz-app) | Components, Props, useState, State Lifting, Conditional Rendering, .map() | ✅ Complete |
+| #   | Project                        | Concepts Covered                                                               | Status      |
+| --- | ------------------------------ | ------------------------------------------------------------------------------ | ----------- |
+| 01  | [Quiz App](./quiz-app)         | Components, Props, useState, State Lifting, Conditional Rendering, .map()      | ✅ Complete |
+| 02  | [Movie Search](./movie-search) | useEffect, fetch, loading/error states, API integration, conditional rendering | ✅ Complete |
 
 ## How this repo is structured
 
 Each project lives in its own folder with its own `package.json`.
 To run any project locally:
+
 ```bash
 cd project-name
 npm install
@@ -21,7 +23,7 @@ npm run dev
 
 ## Tech Stack
 
-- React 18
+- React 19
 - Vite
 - Plain CSS
 
