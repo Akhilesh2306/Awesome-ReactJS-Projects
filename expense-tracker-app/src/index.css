@@ -1,0 +1,246 @@
+/* ── Reset ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── Global ── */
+body {
+  background: #f0f2f5;
+  color: #1a1a2e;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  padding: 32px 16px;
+}
+
+/* ── App wrapper ── */
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Title ── */
+.app-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a2e;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+/* ── Summary ── */
+.summary {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 24px 28px;
+  color: #fff;
+}
+
+.summary__total {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #f5c518;
+}
+
+.summary__subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.summary__category {
+  font-size: 14px;
+  color: #ccc;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.summary__category:last-child {
+  border-bottom: none;
+}
+
+/* ── Filter bar ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-bar__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-right: 4px;
+}
+
+.filter-bar__btn {
+  padding: 7px 16px;
+  background: #fff;
+  color: #444;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-bar__btn--active {
+  background: #1a1a2e;
+  color: #fff;
+  border-color: #1a1a2e;
+}
+
+.filter-bar__btn:hover {
+  border-color: #1a1a2e;
+  color: #1a1a2e;
+}
+
+/* ── Add expense ── */
+.add-expense {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.add-expense__form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.add-expense__input,
+.add-expense__select {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1a1a2e;
+  background: #f9f9f9;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.add-expense__input:focus,
+.add-expense__select:focus {
+  border-color: #1a1a2e;
+  background: #fff;
+}
+
+.add-expense__btn {
+  padding: 10px 24px;
+  background: #1a1a2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.add-expense__btn:hover {
+  background: #2d2d4e;
+}
+
+/* ── Expense list ── */
+.expense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Expense item ── */
+.expense-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #1a1a2e;
+  transition: box-shadow 0.2s;
+}
+
+.expense-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.expense-item__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.expense-item__amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.expense-item__date {
+  font-size: 13px;
+  color: #888;
+}
+
+.expense-item__category {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  background: #1a1a2e;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.expense-item__delete {
+  padding: 6px 14px;
+  background: transparent;
+  color: #e53935;
+  border: 1px solid #e53935;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.expense-item__delete:hover {
+  background: #e53935;
+  color: #fff;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .expense-item {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .expense-item__delete {
+    grid-column: span 2;
+    width: 100%;
+  }
+
+  .add-expense__form {
+    flex-direction: column;
+  }
+
+  .add-expense__btn {
+    width: 100%;
+  }
+}
