@@ -1,39 +1,27 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import ExpenseList from "./components/ExpenseList";
 import AddExpense from "./components/AddExpense";
 import Summary from "./components/Summary";
 import FilterBar from "./components/FilterBar";
+import { expenseData } from "./data/expenseData";
 
-const expenseData = [
-  {
-    id: 1,
-    name: "Coffee shop",
-    amount: 120,
-    category: "Food",
-    date: new Date("2024-03-24"),
-  },
-  {
-    id: 2,
-    name: "Groceries",
-    amount: 500,
-    category: "Food",
-    date: new Date("2024-03-24"),
-  },
-  {
-    id: 3,
-    name: "Petrol",
-    amount: 600,
-    category: "Transport",
-    date: new Date("2024-03-22"),
-  },
-];
+function reducer(state, action) {
+  switch (action.type) {
+    case "ADD_EXPENSE":
+      return [...state, action.payload];
+    case "DELETE_EXPENSE":
+      return state.filter((expense) => expense.id !== action.payload);
+    default:
+      return state;
+  }
+}
 
 export default function App() {
-  const [expenses, setExpenses] = useState(expenseData);
+  const [expenses, dispatch] = useReducer(reducer, expenseData);
   const [filter, setFilter] = useState("All");
 
   const handleDelete = (id) => {
-    setExpenses(expenses.filter((expense) => expense.id !== id));
+    dispatch({ type: "DELETE_EXPENSE", payload: id });
   };
 
   const handleAddExpense = (expense) => {
@@ -43,8 +31,7 @@ export default function App() {
       date: new Date(),
     };
 
-    setExpenses([...expenses, newExpense]);
-    console.log(expenses);
+    dispatch({ type: "ADD_EXPENSE", payload: newExpense });
   };
 
   const handleFilter = (filter) => {
