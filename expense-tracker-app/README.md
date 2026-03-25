@@ -1,16 +1,70 @@
-# React + Vite
+# Expense Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal finance tracking application built with React. Add expenses by
+category, filter the list, and see a live summary of your spending.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Add expenses with name, amount and category
+- Delete any expense from the list
+- Filter expenses by category with active button highlight
+- Live summary showing total spent across all expenses
+- Per-category breakdown of spending
+- Input validation — rejects empty names and zero amounts
+- Numeric-only amount input with regex validation
+- Currency formatting using Intl API with INR locale
+- Responsive layout for mobile and desktop
 
-## React Compiler
+## Concepts Practiced
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Concept                 | Where used                                               |
+| ----------------------- | -------------------------------------------------------- |
+| Components & props      | ExpenseItem, ExpenseList, AddExpense, FilterBar, Summary |
+| useState                | filter state in App                                      |
+| useReducer              | expenses state — ADD_EXPENSE, DELETE_EXPENSE             |
+| Controlled inputs       | AddExpense form — name, amount, category                 |
+| Input validation        | Empty name and zero amount guard on submit               |
+| Regex validation        | Numeric-only amount input `/^\d+$/`                      |
+| State lifting           | onDelete, onAddExpense callbacks passed down             |
+| Derived state           | filteredExpenses, byCategory totals                      |
+| Array reduce            | Total calculation and per-category grouping              |
+| Object.entries          | Rendering grouped category data                          |
+| Conditional filter      | filteredExpenses based on active filter                  |
+| Dynamic classNames      | Active filter button highlight                           |
+| Intl formatting         | `toLocaleString("en-IN")` for INR currency and dates     |
+| Component decomposition | 6 components each with single responsibility             |
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+expense-tracker/
+├── src/
+│   ├── components/
+│   │   ├── AddExpense.jsx      # Controlled form to add new expense
+│   │   ├── ExpenseList.jsx     # Renders list of ExpenseItem components
+│   │   ├── ExpenseItem.jsx     # Single expense row with delete button
+│   │   ├── FilterBar.jsx       # Category filter buttons
+│   │   └── Summary.jsx         # Total and per-category breakdown
+│   ├── App.jsx                 # Root component, owns all state
+│   ├── index.css               # Global styles
+│   └── main.jsx                # React entry point
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## Running Locally
+
+```bash
+cd expense-tracker
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`
+
+## Built With
+
+- React 19
+- Vite
+- Plain CSS
