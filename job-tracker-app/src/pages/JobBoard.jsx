@@ -13,7 +13,7 @@ export default function JobBoard() {
   }, {});
 
   return (
-    <div className="kanban-board">
+    <div className="job-board">
       {STATUSES.map((status) => (
         <KanbanColumn
           key={status}

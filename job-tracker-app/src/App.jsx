@@ -5,7 +5,9 @@ export default function App() {
   return (
     <>
       <Navbar />
-      <Outlet />
+      <div className="main-content">
+        <Outlet />
+      </div>
     </>
   );
 }

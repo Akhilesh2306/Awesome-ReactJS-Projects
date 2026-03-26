@@ -12,18 +12,40 @@ export default function JobDetail() {
   if (!matchingJob) return <h1>Job not found</h1>;
 
   return (
-    <div>
-      <h1>Job Details</h1>
-      <div>
-        <h2>{matchingJob.role}</h2>
-        <p>{matchingJob.description}</p>
-        <p>{matchingJob.company}</p>
-        <p>{matchingJob.location}</p>
-        <p>{matchingJob.dateApplied}</p>
-        <p>{matchingJob.status}</p>
-        <p>{matchingJob.notes}</p>
+    <div className="job-detail">
+      <h1 className="job-detail__title">Job Details</h1>
+      <div className="job-detail__card">
+        <p className="job-detail__info">
+          <strong>Role: </strong>
+          {matchingJob.role}
+        </p>
+        <p className="job-detail__info">
+          <strong>Description: </strong>
+          {matchingJob.description}
+        </p>
+        <p className="job-detail__info">
+          <strong>Company: </strong>
+          {matchingJob.company}
+        </p>
+        <p className="job-detail__info">
+          <strong>Location: </strong>
+          {matchingJob.location}
+        </p>
+        <p className="job-detail__info">
+          <strong>Date Applied: </strong>
+          {matchingJob.dateApplied}
+        </p>
+        <p className="job-detail__info">
+          <strong>Status: </strong>
+          {matchingJob.status}
+        </p>
+        <p className="job-detail__info">
+          <strong>Notes: </strong>
+          {matchingJob.notes}
+        </p>
       </div>
       <button
+        className="btn btn--danger"
         onClick={() => {
           dispatch({ type: "DELETE_JOB", payload: Number(id) });
           navigate("/jobs");

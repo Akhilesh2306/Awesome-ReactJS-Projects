@@ -1,0 +1,315 @@
+/* ── Reset ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── Global ── */
+body {
+  background: #f4f5f7;
+  color: #172b4d;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Navbar ── */
+.navbar {
+  background: #0052cc;
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__link {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 4px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  text-decoration: none;
+}
+
+.navbar__link:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* NavLink adds .active automatically */
+.navbar__link.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* ── Main content ── */
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ── Shared button ── */
+.btn {
+  padding: 8px 20px;
+  background: #0052cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: #0747a6;
+}
+
+.btn--danger {
+  background: #de350b;
+}
+
+.btn--danger:hover {
+  background: #bf2600;
+}
+
+/* ── Dashboard ── */
+.dashboard {
+  max-width: 600px;
+}
+
+.dashboard__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #172b4d;
+}
+
+.dashboard__total {
+  font-size: 16px;
+  color: #5e6c84;
+  margin-bottom: 28px;
+}
+
+.dashboard__subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5e6c84;
+  margin-bottom: 12px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #fff;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  border: 1px solid #dfe1e6;
+}
+
+.status-row__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #172b4d;
+}
+
+.status-row__count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0052cc;
+  background: #deebff;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.recent-card {
+  background: #fff;
+  border: 1px solid #dfe1e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-card__info {
+  font-size: 14px;
+  color: #5e6c84;
+}
+
+/* ── Job Board ── */
+.job-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  align-items: start;
+  overflow-x: auto;
+}
+
+/* ── Kanban Column ── */
+.kanban-column {
+  background: #ebecf0;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 220px;
+}
+
+.kanban-column__title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5e6c84;
+  margin-bottom: 4px;
+}
+
+.kanban-column__count {
+  font-size: 12px;
+  color: #97a0af;
+  margin-bottom: 12px;
+}
+
+/* ── Job Card ── */
+.job-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+
+.job-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: #0052cc;
+}
+
+.job-card__role {
+  font-size: 14px;
+  font-weight: 600;
+  color: #172b4d;
+  margin-bottom: 4px;
+}
+
+.job-card__company {
+  font-size: 13px;
+  color: #5e6c84;
+  margin-bottom: 2px;
+}
+
+.job-card__location {
+  font-size: 12px;
+  color: #97a0af;
+}
+
+/* ── Job Detail ── */
+.job-detail {
+  max-width: 640px;
+}
+
+.job-detail__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #172b4d;
+  margin-bottom: 20px;
+}
+
+.job-detail__card {
+  background: #fff;
+  border: 1px solid #dfe1e6;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.job-detail__info {
+  font-size: 14px;
+  color: #172b4d;
+  line-height: 1.6;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f4f5f7;
+}
+
+.job-detail__info:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.job-detail__info strong {
+  color: #5e6c84;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+/* ── Add Job ── */
+.add-job {
+  max-width: 560px;
+}
+
+.add-job__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #172b4d;
+  margin-bottom: 24px;
+}
+
+.add-job__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.add-job__input {
+  padding: 10px 14px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #172b4d;
+  background: #fff;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  width: 100%;
+  font-family: inherit;
+}
+
+.add-job__input:focus {
+  border-color: #0052cc;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .job-board {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .job-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+}

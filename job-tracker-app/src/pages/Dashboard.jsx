@@ -21,26 +21,31 @@ export default function Dashboard() {
   )[0];
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Total Applications: {totalJobs}</p>
+    <div className="dashboard">
+      <h1 className="dashboard__title">Dashboard</h1>
+      <p className="dashboard__total">Total Applications: {totalJobs}</p>
 
-      <h2>By Status</h2>
+      <h2 className="dashboard__subtitle">By Status</h2>
       {STATUSES.map((status) => (
-        <div key={status}>
-          <span>{status}</span>
-          <span>{countByStatus[status] || 0}</span>
+        <div key={status} className="status-row">
+          <span className="status-row__label">{status}</span>
+          <span className="status-row__count">
+            {countByStatus[status] || 0}
+          </span>
         </div>
       ))}
 
       {mostRecent && (
-        <div>
-          <h2>Most Recent Application</h2>
-          <p>
+        <div className="recent-card">
+          <h2 className="dashboard__subtitle">Most Recent Application</h2>
+          <p className="recent-card__info">
             {mostRecent.role} at {mostRecent.company}
           </p>
-          <p>{mostRecent.dateApplied}</p>
-          <button onClick={() => navigate(`/jobs/${mostRecent.id}`)}>
+          <p className="recent-card__info">{mostRecent.dateApplied}</p>
+          <button
+            className="btn"
+            onClick={() => navigate(`/jobs/${mostRecent.id}`)}
+          >
             View
           </button>
         </div>
