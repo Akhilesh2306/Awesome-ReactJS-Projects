@@ -7,11 +7,11 @@ rather than following along with tutorials.
 
 ## Projects
 
-| #   | Project                              | Key Concepts                                                                                | Status      |
-| --- | ------------------------------------ | ------------------------------------------------------------------------------------------- | ----------- |
-| 01  | [Quiz App](./quiz-app)               | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks  | ✅ Complete |
-| 02  | [Movie Search](./movie-search)       | useEffect, fetch API, loading/error states, API integration, environment variables          | ✅ Complete |
-| 03  | [Expense Tracker](./expense-tracker) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries | ✅ Complete |
+|---|---------|-------------|--------|
+| 01 | [Quiz App](./quiz-app) | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks | ✅ Complete |
+| 02 | [Movie Search](./movie-search) | useEffect, fetch API, loading/error states, API integration, environment variables | ✅ Complete |
+| 03 | [Expense Tracker](./expense-tracker) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries | ✅ Complete |
+| 04 | [Job Tracker](./job-tracker) | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
 
 ## Concepts Learned So Far
 
@@ -20,14 +20,26 @@ rather than following along with tutorials.
 - Components and JSX
 - Props — passing data down the component tree
 - useState — local and lifted state
-- useReducer — centralised state logic with actions
+- useReducer — centralised state logic with actions and dispatch
 - useEffect — side effects, API calls, timers, cleanup
+- useContext — global state without prop drilling
+- createContext — creating a shared state channel
 - Custom hooks — extracting reusable stateful logic
-- Conditional rendering — `&&`, ternary, `if` returns
+- Conditional rendering — `&&`, ternary, early `if` returns
 - Lists with `.map()` and the `key` prop
-- Controlled components — forms driven by React state
+- Controlled components — forms fully driven by React state
 - Component decomposition — single responsibility components
 - State lifting — moving state to the lowest common ancestor
+
+### React Router
+
+- BrowserRouter, Routes, Route
+- Nested routes with Outlet
+- Dynamic routes with URL parameters
+- useParams — reading values from the URL
+- useNavigate — programmatic navigation
+- NavLink — active state on navigation links
+- Route ordering — specific before dynamic
 
 ### Patterns
 
@@ -35,16 +47,8 @@ rather than following along with tutorials.
 - Derived state — calculating values instead of storing them
 - Callback props — child to parent communication
 - Prop drilling — passing callbacks through component layers
+- Context + Reducer — global state management pattern
 - Dynamic classNames — UI driven by state
-
-### JavaScript
-
-- Array methods — `filter`, `map`, `reduce`
-- Object spread — immutable state updates
-- `Object.entries` — iterating over grouped data
-- Intl API — locale-aware number and date formatting
-- Regex — input validation
-- Environment variables — keeping API keys out of code
 
 ## How This Repo Is Structured
 
@@ -60,6 +64,7 @@ npm run dev
 ## Tech Stack
 
 - React 19
+- React Router v6
 - Vite
 - Plain CSS
 - REST APIs (OMDB)
