@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import JobBoard from "./pages/JobBoard.jsx";
 import JobDetail from "./pages/JobDetail.jsx";
+import AddJob from "./pages/AddJob.jsx";
 import { JobContextProvider } from "./context/JobContext.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -14,6 +15,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/" element={<App />}>
           <Route index element={<Dashboard />} />
           <Route path="jobs" element={<JobBoard />} />
+          <Route path="jobs/new" element={<AddJob />} />
           <Route path="jobs/:id" element={<JobDetail />} />
         </Route>
       </Routes>

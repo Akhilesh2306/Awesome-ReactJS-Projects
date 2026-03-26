@@ -1,21 +1,25 @@
 import { useContext } from "react";
 import { JobContext } from "../context/JobContext.jsx";
+import KanbanColumn from "../components/KanbanColumn.jsx";
+
+const STATUSES = ["Applied", "Screening", "Interview", "Offer", "Rejected"];
 
 export default function JobBoard() {
   const { jobs } = useContext(JobContext);
+
+  const jobsByStatus = STATUSES.reduce((acc, status) => {
+    acc[status] = jobs.filter((job) => job.status === status);
+    return acc;
+  }, {});
+
   return (
-    <div>
-      <h1>Job Board</h1>
-      {jobs.map((job) => (
-        <div key={job.id}>
-          <h2>{job.role}</h2>
-          <p>{job.description}</p>
-          <p>{job.company}</p>
-          <p>{job.location}</p>
-          <p>{job.dateApplied}</p>
-          <p>{job.status}</p>
-          <p>{job.notes}</p>
-        </div>
+    <div className="kanban-board">
+      {STATUSES.map((status) => (
+        <KanbanColumn
+          key={status}
+          status={status}
+          jobs={jobsByStatus[status]}
+        />
       ))}
     </div>
   );

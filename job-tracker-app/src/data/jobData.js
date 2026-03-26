@@ -1,5 +1,5 @@
 // Job data -> id, role, description, company, location, dateApplied, status, notes
-// Job statuses -> Applied, Screening, Interview, Offer, Rejected.
+// Job statuses -> Applied, Screening, Interview, Offer, Rejected
 
 export const jobData = [
   {
