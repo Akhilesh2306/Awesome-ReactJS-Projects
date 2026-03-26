@@ -7,11 +7,12 @@ rather than following along with tutorials.
 
 ## Projects
 
-|---|---------|-------------|--------|
-| 01 | [Quiz App](./quiz-app) | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks | ✅ Complete |
-| 02 | [Movie Search](./movie-search) | useEffect, fetch API, loading/error states, API integration, environment variables | ✅ Complete |
-| 03 | [Expense Tracker](./expense-tracker) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries | ✅ Complete |
-| 04 | [Job Tracker](./job-tracker) | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
+| #   | Project                              | Key Concepts                                                                                   | Status      |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------- |
+| 01  | [Quiz App](./quiz-app)               | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks     | ✅ Complete |
+| 02  | [Movie Search](./movie-search)       | useEffect, fetch API, loading/error states, API integration, environment variables             | ✅ Complete |
+| 03  | [Expense Tracker](./expense-tracker) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries    | ✅ Complete |
+| 04  | [Job Tracker](./job-tracker)         | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
 
 ## Concepts Learned So Far
 
