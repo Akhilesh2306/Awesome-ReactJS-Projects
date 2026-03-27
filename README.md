@@ -13,6 +13,7 @@ rather than following along with tutorials.
 | 02  | [Movie Search](./movie-search)       | useEffect, fetch API, loading/error states, API integration, environment variables             | ✅ Complete |
 | 03  | [Expense Tracker](./expense-tracker) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries    | ✅ Complete |
 | 04  | [Job Tracker](./job-tracker)         | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
+| 05  | [Notes App](./notes-fullstack-app)   | Full stack — React + FastAPI, fetch API, async handlers, API layer separation, env variables   | ✅ Complete |
 
 ## Concepts Learned So Far
 
@@ -68,7 +69,9 @@ npm run dev
 - React Router v6
 - Vite
 - Plain CSS
-- REST APIs (OMDB)
+- REST APIs (OMDB, custom FastAPI)
+- FastAPI (Project 5 backend)
+- Python / Pydantic / Uvicorn
 
 ## About
 
