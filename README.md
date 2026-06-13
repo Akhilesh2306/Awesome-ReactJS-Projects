@@ -10,9 +10,9 @@ rather than following along with tutorials.
 | #   | Project                              | Key Concepts                                                                                   | Status      |
 | --- | ------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------- |
 | 01  | [Quiz App](./quiz-app)               | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks     | ✅ Complete |
-| 02  | [Movie Search](./movie-search)       | useEffect, fetch API, loading/error states, API integration, environment variables             | ✅ Complete |
-| 03  | [Expense Tracker](./expense-tracker) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries    | ✅ Complete |
-| 04  | [Job Tracker](./job-tracker)         | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
+| 02  | [Movie Search](./movie-search-app)       | useEffect, fetch API, loading/error states, API integration, environment variables             | ✅ Complete |
+| 03  | [Expense Tracker](./expense-tracker-app) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries    | ✅ Complete |
+| 04  | [Job Tracker](./job-tracker-app)         | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
 | 05  | [Notes App](./notes-fullstack-app)   | Full stack — React + FastAPI, fetch API, async handlers, API layer separation, env variables   | ✅ Complete |
 
 ## Concepts Learned So Far
