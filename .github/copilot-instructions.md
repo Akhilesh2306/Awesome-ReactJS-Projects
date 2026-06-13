@@ -32,17 +32,16 @@ React 19 | Vite 8 | Plain CSS | JSX (no TypeScript) | No testing yet
 **What was done:** _Update me_
 **Next steps:** _Update me_
 
-## 12-Week Learning Plan (5-10 hrs/week, target: full stack ready)
+## 12-Week Learning Plan (5-10 hrs/week — feeds into PaperLens frontend)
 
-| Phase | Weeks | Focus | Projects |
-|-------|-------|-------|----------|
+| Phase | Weeks | Focus | Project |
+|-------|-------|-------|---------|
 | 1. Revision | 1-2 | Re-read existing code, make small mods | Modify 01-05 |
-| 2. Intermediate | 3-5 | useRef, useMemo, useCallback, React.memo, error boundaries | 06: Pomodoro Timer, 07: Kanban Board |
-| 3. Styling | 6-7 | Tailwind or CSS Modules, responsive design, charts | 08: Dashboard |
-| 4. State & Auth | 8-9 | Zustand, React Query, JWT auth, protected routes | 09: Auth + CRUD (React + FastAPI) |
-| 5. Deploy | 10-12 | Full production app, testing, deployment, CI/CD | 10: Portfolio-grade app |
+| 2. MockChat | 3-5 | Tailwind, useRef, streaming UI, Router, useMemo, Context | 06: MockChat (PaperLens rehearsal) |
+| 3. PaperLens FE | 6-12 | Real production frontend for PaperLens | PaperLens frontend/ |
 
 **Current phase:** 1 (Revision)
+**Detailed plan:** `.learning/plan.md`
 
 ## Available Skills
 - `/react-revision` — Walk through existing code to refresh forgotten concepts

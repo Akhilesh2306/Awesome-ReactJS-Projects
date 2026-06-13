@@ -1,187 +1,236 @@
-# 12-Week React Learning Plan
+# React Learning Plan — Revision → MockChat → PaperLens Frontend
 
-**Goal:** Go from beginner (forgotten fundamentals) to full stack ready (React + deployment)
-**Pace:** 5-10 hours/week
-**Approach:** Project-based — every concept learned by building something real
+**Goal:** Recover forgotten React skills, learn intermediate/advanced patterns, then build the PaperLens production frontend
+**Pace:** 5-10 hours/week on React (alongside PaperLens backend work)
+**Approach:** Every concept learned in Project 06 directly transfers to PaperLens frontend
+
+---
+
+## How This Plan Works
+
+```
+Weeks 1-2          Weeks 3-5                  Week 6+
+┌──────────┐      ┌──────────────────┐      ┌──────────────────────┐
+│ Revision │ ───▶ │ Project 06:      │ ───▶ │ PaperLens Frontend   │
+│ (01-05)  │      │ MockChat         │      │ (Track B, FE W1-W6)  │
+│          │      │ (training ground)│      │ (production app)     │
+└──────────┘      └──────────────────┘      └──────────────────────┘
+   refresh             learn new                apply everything
+   fundamentals        patterns needed          to real product
+                       for PaperLens
+```
+
+**Why MockChat first:**
+PaperLens frontend needs APIs (search, RAG, streaming) that don't exist yet (backend is at Week 2).
+MockChat teaches the exact same React patterns using a fake backend, so when PaperLens APIs are ready, you're ready.
+
+---
+
+## Aligned with PaperLens Backend Calendar
+
+| Your Week | React Repo | PaperLens Backend (parallel) | Why this order |
+|-----------|-----------|------------------------------|----------------|
+| 1-2 | Revision (modify projects 01-05) | Backend W3: BM25 search | Refresh fundamentals while backend catches up |
+| 3 | MockChat: Layout + Tailwind | Backend W3 continued | Learn Tailwind + layouts (PaperLens uses both) |
+| 4 | MockChat: Chat UI + streaming | Backend W4: Hybrid search | Learn SSE + useRef (PaperLens ChatPage needs both) |
+| 5 | MockChat: Search + Router | Backend W5: RAG system | Learn routing + search UI (PaperLens SearchPage) |
+| 6 | **Start PaperLens FE W1** | Backend W5 done, APIs exist | Skills are fresh, backend is ready |
+| 7-8 | PaperLens FE W2-W3 | Backend W6: Observability | Health dashboard, search page (APIs available) |
+| 9-10 | PaperLens FE W4-W5 | Backend W7: Agentic RAG | Chat + streaming, agent UI (APIs available) |
+| 11-12 | PaperLens FE W6 + polish | Backend W8: Extensions | Production polish, testing, deployment |
 
 ---
 
 ## Phase 1: Revision (Weeks 1-2)
 
-**Objective:** Recover forgotten concepts by reading and modifying your own projects.
+**Objective:** Recover forgotten React concepts by reading and modifying your own code.
+**Method:** Use `/react-revision` skill in Copilot chat.
 
-### Week 1 — Core Hooks Revision
-- [ ] Walk through **quiz-app** — Components, props, useState, state lifting, custom hooks
-- [ ] Walk through **movie-search-app** — useEffect, fetch API, loading/error states
-- [ ] Modification challenge: Add a "restart quiz" button to quiz-app
-- [ ] Modification challenge: Add a "no results" empty state to movie-search-app
+### Week 1 — Core Hooks
+- [ ] Walk through **quiz-app** — understand components, props, useState, custom hooks
+- [ ] Walk through **movie-search-app** — understand useEffect, fetch API, loading/error states
+- [ ] Modification: Add a "restart quiz" button to quiz-app
+- [ ] Modification: Add a "no results found" empty state to movie-search-app
 
-### Week 2 — Advanced Hooks + Routing Revision
-- [ ] Walk through **expense-tracker-app** — useReducer, controlled forms, derived state
-- [ ] Walk through **job-tracker-app** — React Router, useContext, useParams, useNavigate
-- [ ] Walk through **notes-fullstack-app** — API layer separation, async handlers
-- [ ] Modification challenge: Add category filter to expense-tracker
-- [ ] Modification challenge: Add a "sort by date" feature to notes app
+### Week 2 — Advanced Hooks + Routing
+- [ ] Walk through **expense-tracker-app** — understand useReducer, controlled forms, derived state
+- [ ] Walk through **job-tracker-app** — understand React Router, useContext, useParams
+- [ ] Walk through **notes-fullstack-app** — understand API layer separation, async handlers
+- [ ] Modification: Add category filter to expense-tracker
+- [ ] Modification: Add sort-by-date to notes app
 
 **Milestone:** Can explain every hook you've used without looking at docs.
 
 ---
 
-## Phase 2: Intermediate Hooks & Patterns (Weeks 3-5)
+## Phase 2: MockChat — PaperLens Training Ground (Weeks 3-5)
 
-**Objective:** Learn performance hooks, refs, and component composition patterns.
+**Objective:** Learn the React patterns PaperLens needs, using a mock backend with no API dependencies.
+**Folder:** `06-mock-chat/`
 
-### Week 3 — Project 06: Pomodoro Timer
-**New concepts:** useRef, useCallback, React.memo
+### What MockChat Is
 
-- [ ] Scaffold project: `06-pomodoro-timer/`
-- [ ] Build timer logic with useRef for interval references
-- [ ] Learn: useRef for mutable values that don't trigger re-renders
-- [ ] Learn: useRef for DOM element access (focus an input)
-- [ ] Add start/pause/reset controls
-- [ ] Add session counter (work sessions completed)
-- [ ] Learn: useCallback — memoizing event handlers
-- [ ] Learn: React.memo — preventing unnecessary child re-renders
-- [ ] Add sound notification when timer ends
+A chat interface app that simulates an AI assistant. It has:
+- Sidebar with conversation list (like ChatGPT's left panel)
+- Main chat area with message bubbles
+- Streaming responses (words appear one by one, simulated with setTimeout)
+- Search page with filters
+- Settings page
+- Responsive design (sidebar collapses on mobile)
 
-**Key takeaway:** useRef is NOT just for DOM access — it's for any mutable value that shouldn't trigger re-renders.
+The "backend" is fake — hardcoded responses with simulated delays. The point is learning React patterns, not building AI.
 
-### Week 4-5 — Project 07: Kanban Board
-**New concepts:** useMemo, complex state management, compound components, drag interaction
+### Why Each Feature Exists
 
-- [ ] Scaffold project: `07-kanban-board/`
-- [ ] Build column layout with cards (To Do, In Progress, Done)
-- [ ] Learn: useMemo — expensive calculations (filtered/sorted lists)
-- [ ] Learn: when NOT to use useMemo (premature optimization)
-- [ ] Implement card creation with modal form
-- [ ] Implement card movement between columns (button-based, not drag-drop)
-- [ ] Learn: compound component pattern (Column + Card work together)
-- [ ] Learn: error boundaries — catching render errors gracefully
-- [ ] Add local storage persistence
-- [ ] Stretch: basic drag-and-drop with HTML5 drag API
+| MockChat Feature | React Concept It Teaches | PaperLens Page That Needs It |
+|-----------------|-------------------------|------------------------------|
+| Sidebar + main layout | CSS Grid/Flex with Tailwind | Layout.jsx (all pages) |
+| Conversation list | Lists, state, active selection | Sidebar.jsx (RecentQueries) |
+| Chat message bubbles | Component composition, conditional styling | ChatPage → ChatMessage |
+| Streaming text | useRef (scroll), useEffect (intervals), state batching | ChatPage → StreamingIndicator |
+| Search with filters | Controlled forms, derived state, URL params | SearchPage → SearchBar, FilterPanel |
+| React Router (3 views) | Routes, NavLink, useNavigate, useParams | All page navigation |
+| Responsive sidebar | Media queries, state-driven layout | Mobile support |
+| Dark/light theme | useContext, CSS custom properties | SettingsProvider |
+| Loading skeletons | Conditional rendering, animation | All pages with data |
+| Error boundaries | Error handling patterns | ErrorBoundary wrapper |
 
-**Key takeaway:** useMemo and useCallback are optimizations — profile before using them. Most components don't need them.
+### Week 3 — Layout + Tailwind CSS (NEW concepts)
 
-**Milestone:** Comfortable with all core React hooks. Understands when to optimize and when not to.
+**New concepts:** Tailwind CSS, responsive layouts, CSS Grid/Flexbox in React
 
----
+- [ ] Scaffold project: `npm create vite@latest 06-mock-chat -- --template react`
+- [ ] Install and configure Tailwind CSS 4 with Vite
+- [ ] Learn: Tailwind utility classes (padding, margin, flex, grid, colors, responsive prefixes)
+- [ ] Build Navbar component (logo + nav links)
+- [ ] Build Sidebar component (conversation list with hardcoded items)
+- [ ] Build Layout component (sidebar + main area using CSS Grid)
+- [ ] Learn: responsive design with Tailwind (`sm:`, `md:`, `lg:` prefixes)
+- [ ] Make sidebar collapsible on mobile (hamburger menu)
+- [ ] Build placeholder pages (ChatView, SearchView, SettingsView)
 
-## Phase 3: Styling & Professional UI (Weeks 6-7)
+**Key takeaway:** Tailwind eliminates CSS files — you style directly in JSX with utility classes.
 
-**Objective:** Learn modern CSS tooling and build production-quality interfaces.
+### Week 4 — Chat UI + Streaming (NEW concepts)
 
-### Week 6-7 — Project 08: Analytics Dashboard
-**New concepts:** Tailwind CSS (or CSS Modules), responsive design, chart library, loading skeletons
+**New concepts:** useRef (DOM + mutable values), useCallback, simulated SSE streaming
 
-- [ ] Scaffold project: `08-analytics-dashboard/`
-- [ ] Learn: Tailwind CSS setup with Vite (or CSS Modules if preferred)
-- [ ] Build responsive sidebar + header layout
-- [ ] Learn: responsive design — mobile-first approach, breakpoints
-- [ ] Integrate Recharts (or Chart.js) for data visualization
-- [ ] Learn: third-party component integration in React
-- [ ] Build stat cards with loading skeleton states
-- [ ] Learn: loading states beyond spinners (skeleton screens, shimmer)
-- [ ] Add dark mode toggle with CSS custom properties
-- [ ] Build data table with sorting and pagination
+- [ ] Build ChatMessage component (user vs assistant bubbles, different styling)
+- [ ] Build ChatInput component (text input + send button, Ctrl+Enter to send)
+- [ ] Build message list with auto-scroll to bottom
+- [ ] Learn: useRef for DOM access — scroll to bottom of chat on new message
+- [ ] Learn: useRef for mutable values — storing interval IDs without re-renders
+- [ ] Build streaming simulation: response text appears word by word
+  - [ ] Create `mockStream(text)` — returns words one at a time with 50ms delays
+  - [ ] Display partial response while streaming, final response when done
+- [ ] Learn: useCallback — memoize the send-message handler
+- [ ] Add conversation switching (click sidebar item → load different messages)
+- [ ] Add "new conversation" button
+- [ ] Build LoadingSkeleton component for initial load state
 
-**Key takeaway:** CSS architecture matters in React. Component-scoped styles prevent global conflicts.
+**Key takeaway:** useRef is for anything that needs to persist between renders but shouldn't trigger re-renders (DOM nodes, timers, previous values).
 
-**Milestone:** Can build professional-looking, responsive UIs.
+### Week 5 — Search + Router + Polish (REINFORCE + NEW)
 
----
+**New concepts:** URL-driven state, useMemo for filtered lists, Context for theme
 
-## Phase 4: Real-World Patterns — State & Auth (Weeks 8-9)
+- [ ] Set up React Router: `/chat`, `/chat/:id`, `/search`, `/settings`
+- [ ] Learn: URL params as state — search query in URL (`/search?q=hooks&type=all`)
+- [ ] Build SearchBar component with debounced input
+- [ ] Build SearchResults with mock data (paper cards with title, date, tags)
+- [ ] Build FilterPanel (filter by type, date range)
+- [ ] Learn: useMemo — memoize filtered/sorted results to avoid recalculation
+- [ ] Build SettingsPage with theme toggle (dark/light)
+- [ ] Learn: useContext for theme — wrap app in ThemeProvider
+- [ ] Add error boundary wrapper
+- [ ] Polish: loading states, empty states, hover effects, transitions
+- [ ] Write 2-3 component tests with Vitest + React Testing Library
 
-**Objective:** Learn production patterns — auth, global state, server state, and form validation.
+**Key takeaway:** useMemo is for expensive calculations. Don't use it for everything — profile first.
 
-### Week 8-9 — Project 09: Auth + CRUD App (React + FastAPI)
-**New concepts:** Zustand, React Query (TanStack Query), JWT auth, protected routes, form validation
-
-- [ ] Scaffold project: `09-auth-crud-app/` (frontend + backend)
-- [ ] Build FastAPI backend with JWT auth endpoints
-- [ ] Learn: Zustand — lightweight global state (replaces Context + Reducer for most cases)
-- [ ] Implement login/register forms with validation
-- [ ] Learn: protected routes — redirect unauthenticated users
-- [ ] Learn: JWT token storage (httpOnly cookies vs localStorage trade-offs)
-- [ ] Learn: React Query (TanStack Query) — server state management
-  - [ ] Queries for fetching data (automatic caching, refetching)
-  - [ ] Mutations for creating/updating/deleting
-  - [ ] Optimistic updates — update UI before server confirms
-- [ ] Build CRUD interface for a resource (notes, tasks, or items)
-- [ ] Learn: error boundaries for API failure handling
-- [ ] Add toast notifications for success/error feedback
-
-**Key takeaway:** Client state (Zustand) and server state (React Query) are different concerns. Don't store fetched data in useState.
-
-**Milestone:** Can build a full auth-protected CRUD app with proper state management.
-
----
-
-## Phase 5: Production Full Stack + Deployment (Weeks 10-12)
-
-**Objective:** Build a portfolio-grade app, add testing, deploy to production.
-
-### Week 10-11 — Project 10: Portfolio-Grade Full Stack App
-**New concepts:** Testing, CI/CD, production build, environment management
-
-Choose one:
-- **Option A:** Real-time Chat App (WebSockets, presence indicators)
-- **Option B:** Project Management Tool (teams, assignments, deadlines)
-- **Option C:** E-commerce Store (cart, checkout flow, order history)
-
-- [ ] Scaffold project: `10-[chosen-app]/`
-- [ ] Build with everything learned: Router, Zustand, React Query, Tailwind, auth
-- [ ] Learn: Vitest — unit testing React components
-- [ ] Learn: React Testing Library — testing user interactions
-- [ ] Learn: mocking API calls in tests
-- [ ] Write tests for at least 3 key components
-- [ ] Learn: environment management (dev/staging/prod)
-- [ ] Production build optimization: `npm run build`, bundle analysis
-
-### Week 12 — Deployment & Polish
-**New concepts:** Deployment, CI/CD, performance basics
-
-- [ ] Learn: Vercel deployment (or Netlify) — connect GitHub repo
-- [ ] Learn: environment variables in production
-- [ ] Set up GitHub Actions for CI (lint + test on PR)
-- [ ] Performance basics: Lighthouse audit, lazy loading routes
-- [ ] Learn: React.lazy + Suspense for code splitting
-- [ ] Polish README, add screenshots, live demo link
-- [ ] Review and update all learning memory files
-
-**Milestone:** Have a deployed, tested, production-grade React app with CI/CD.
+**Milestone:** MockChat is a complete, responsive chat app using all the patterns PaperLens needs.
 
 ---
 
-## Concepts Roadmap (Summary)
+## Phase 3: PaperLens Frontend (Weeks 6-12)
 
-| Week | New Concepts |
-|------|-------------|
-| 1-2 | (Revision — no new concepts) |
-| 3 | useRef, useCallback, React.memo |
-| 4-5 | useMemo, compound components, error boundaries, local storage |
-| 6-7 | Tailwind/CSS Modules, responsive design, charts, loading skeletons, dark mode |
-| 8-9 | Zustand, React Query, JWT auth, protected routes, optimistic updates, form validation |
-| 10-11 | Vitest, React Testing Library, mocking, production builds |
-| 12 | Deployment (Vercel), CI/CD (GitHub Actions), code splitting, lazy loading |
+**Objective:** Build the real PaperLens frontend. All React skills are now in place.
+**Location:** `C:\Users\UB992GN\OneDrive - EY\Documents\Self-Projects\PaperLens\frontend\`
+**Reference:** PaperLens Master Plan, Track B (FE W1-W6)
+
+### Week 6 — PaperLens FE W1: Project Shell + Layout
+
+Transfer everything from MockChat's layout to PaperLens's real structure.
+
+- [ ] Scaffold: `npm create vite@latest frontend -- --template react` inside PaperLens
+- [ ] Set up Tailwind CSS 4
+- [ ] Build Layout.jsx (Navbar + Sidebar + MainContent + StatusBar)
+- [ ] Build common components (LoadingSpinner, ErrorMessage, Badge)
+- [ ] Build HomePage with quick-action cards
+- [ ] Build static HealthPage placeholder
+- [ ] Connect to PaperLens API base URL via `.env`
+
+**This should feel fast** — you already built a nearly identical layout in MockChat.
+
+### Weeks 7-8 — PaperLens FE W2-W3: Health Dashboard + Search
+
+- [ ] FE W2: Health dashboard — call `/api/v1/health`, show service status cards with live data
+- [ ] FE W3: Search page — call search API, render PaperCard components, pagination
+- [ ] SearchBar, SearchResults, FilterPanel — adapted from MockChat patterns
+- [ ] Add React Router for all pages
+
+### Weeks 9-10 — PaperLens FE W4-W5: Chat + Agent UI
+
+- [ ] FE W4: ChatPage with real SSE streaming from PaperLens RAG API
+- [ ] Replace MockChat's fake streaming with real `EventSource` connection
+- [ ] ChatMessage with SourceCard citations
+- [ ] FE W5: Agent mode UI — reasoning trace visualization
+- [ ] Synthesis page — SynthesisForm, FindingsList, ContradictionCard
+
+### Weeks 11-12 — PaperLens FE W6: Production Polish
+
+- [ ] Responsive design audit (mobile, tablet, desktop)
+- [ ] Error boundaries for all pages
+- [ ] Vitest component tests (3-5 key components)
+- [ ] Production Nginx config for static serving + API proxy
+- [ ] Build optimization: `npm run build`, bundle analysis
+- [ ] Docker integration: add frontend to PaperLens compose.yml
+
+**Milestone:** PaperLens has a production-ready React frontend deployed alongside the backend.
 
 ---
 
-## Concepts NOT in This Plan (Future Learning)
+## Concepts Roadmap
+
+| Week | New Concepts | Where They're Used in PaperLens |
+|------|-------------|--------------------------------|
+| 1-2 | (Revision) | Foundation for everything |
+| 3 | Tailwind CSS, responsive layouts, CSS Grid | Layout.jsx, all components |
+| 4 | useRef (DOM + mutable), useCallback, streaming UI | ChatPage, StreamingIndicator |
+| 5 | useMemo, URL-driven state, useContext (theme), error boundaries, testing basics | SearchPage, FilterPanel, SettingsProvider |
+| 6 | (Apply to PaperLens — no new concepts) | FE W1: Shell + Layout |
+| 7-8 | Real API integration, live data rendering | FE W2-W3: Health + Search |
+| 9-10 | Real SSE streaming (EventSource), complex state | FE W4-W5: Chat + Agent |
+| 11-12 | Production build, Nginx, Docker, bundle optimization | FE W6: Deploy |
+
+---
+
+## What's NOT in This Plan (Future Learning)
+
 - TypeScript with React
 - Next.js / server-side rendering
-- Redux (Zustand is simpler and sufficient for most apps)
+- Redux (Zustand or Context+Reducer is sufficient)
 - GraphQL
-- React Native (mobile)
+- React Native
 - Advanced animation (Framer Motion)
-- Micro-frontends
-- Web Workers / Service Workers
-- Storybook (component documentation)
+- Storybook
 
 ---
 
 ## Notes
+
 - This plan is a living document — adjust timelines based on actual pace
-- If a project takes longer than planned, that's fine — depth > speed
-- Skip stretch goals if short on time, come back to them later
-- Each project builds on previous ones — don't skip ahead
+- If MockChat takes longer, that's fine — depth > speed
+- MockChat is NOT throwaway — it's a direct rehearsal for PaperLens
+- Every pattern in MockChat maps to a specific PaperLens component
+- Run `/update-memory` at the end of every session
