@@ -32,13 +32,30 @@ React 19 | Vite 8 | Plain CSS | JSX (no TypeScript) | No testing yet
 **What was done:** _Update me_
 **Next steps:** _Update me_
 
+## 12-Week Learning Plan (5-10 hrs/week, target: full stack ready)
+
+| Phase | Weeks | Focus | Projects |
+|-------|-------|-------|----------|
+| 1. Revision | 1-2 | Re-read existing code, make small mods | Modify 01-05 |
+| 2. Intermediate | 3-5 | useRef, useMemo, useCallback, React.memo, error boundaries | 06: Pomodoro Timer, 07: Kanban Board |
+| 3. Styling | 6-7 | Tailwind or CSS Modules, responsive design, charts | 08: Dashboard |
+| 4. State & Auth | 8-9 | Zustand, React Query, JWT auth, protected routes | 09: Auth + CRUD (React + FastAPI) |
+| 5. Deploy | 10-12 | Full production app, testing, deployment, CI/CD | 10: Portfolio-grade app |
+
+**Current phase:** 1 (Revision)
+
+## Available Skills
+- `/react-revision` — Walk through existing code to refresh forgotten concepts
+- `/react-learn` — Guided project-based learning for new concepts
+- `/update-memory` — End-of-session memory update (run this every session!)
+
 ## Rules for Copilot
 1. When I start a new concept, create a new numbered folder (next: 06-xxx/)
 2. Explain React concepts at beginner level — I learn by understanding WHY, not just HOW
-3. At the end of each session, remind me: "Update your memory files with what you learned"
+3. At the end of each session, remind me: "Update your memory files — run /update-memory"
 4. If I make a common React mistake, flag it: "🔴 GOTCHA: [explanation]" and remind me to add it here
 5. Reference `.learning/concepts.md` for detailed concept notes
 6. Reference `.learning/gotchas.md` for full gotcha history with code examples
 7. Follow existing patterns: components in `components/`, pages in `pages/`, data in `data/`
-8. No TypeScript — use .jsx files
-9. Plain CSS — no Tailwind, no styled-components
+8. No TypeScript — use .jsx files (until Phase 4+)
+9. Plain CSS — no Tailwind (until Phase 3)
