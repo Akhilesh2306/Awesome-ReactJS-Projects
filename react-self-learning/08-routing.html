@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Routing with React Router · React from Scratch</title>
+<meta name="description" content="Routing with React Router — a deep, hands-on guide to learning React JS from scratch to production." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<!-- Libraries (CDN; needs internet on first view) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+<style>
+/* =====================================================================
+   BENTO / DASHBOARD skin — rounded cards, gradient hero, sticky chip TOC.
+   Rethemed to a React cyan/blue palette. Dark by default.
+   ===================================================================== */
+:root{
+  --font-head:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --r:18px; --r-sm:12px;
+  /* ---- alias vars so the enhancement kit (--sb-* chain) themes to this skin ---- */
+  --primary:var(--a1); --primary-2:var(--a3); --accent:var(--a2);
+  --panel:var(--card); --panel-2:var(--card2); --border:var(--line);
+  --text:var(--fg); --text-dim:var(--fg-soft); --text-mut:var(--fg-faint);
+  --hero-grad:var(--grad); --serif:var(--font-head); --mono:var(--font-mono);
+  --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+}
+[data-theme="dark"]{
+  --bg:#080d18; --card:#111a2b; --card2:#0c1322; --line:#1e2942; --line-soft:#16203a;
+  --fg:#e6eef9; --fg-soft:#9fb2cd; --fg-faint:#65748f;
+  --a1:#61dafb; --a2:#38bdf8; --a3:#818cf8;
+  --grad:linear-gradient(135deg,#61dafb,#38bdf8 55%,#818cf8);
+  --code:#070c16; --code-fg:#e2e8f0; --sel:#173453;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#eef3fb; --card:#ffffff; --card2:#f5f8fe; --line:#e0e8f4; --line-soft:#eef3fb;
+  --fg:#0e1c33; --fg-soft:#44566f; --fg-faint:#8494ac;
+  --a1:#0284c7; --a2:#0891b2; --a3:#4f46e5;
+  --grad:linear-gradient(135deg,#0284c7,#0891b2 55%,#4f46e5);
+  --code:#0f1729; --code-fg:#e2e8f0; --sel:#dbeafe;
+  --shadow:0 6px 22px rgba(15,23,42,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.7;
+  font-size:16.5px;-webkit-font-smoothing:antialiased}
+::selection{background:var(--sel)}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:var(--grad);
+  box-shadow:0 0 12px var(--a2)}
+
+/* top nav */
+header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-row{display:flex;align-items:center;gap:14px;padding:12px clamp(16px,4vw,40px)}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--font-head);font-weight:700;
+  font-size:1.02rem;text-decoration:none;color:inherit}
+.logo .mark{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;
+  place-items:center;color:#04121f;font-weight:800;font-size:16px;box-shadow:0 4px 16px rgba(97,218,251,.35)}
+.logo small{display:block;font-family:var(--font-body);font-weight:500;font-size:11.5px;color:var(--fg-faint)}
+header .spacer{flex:1}
+.btn{cursor:pointer;font-family:var(--font-body);font-size:.85rem;color:var(--fg-soft);
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 15px;transition:.2s}
+.btn:hover{color:var(--fg);border-color:var(--a1)}
+#menuToggle{display:none;cursor:pointer;border:1px solid var(--line);background:var(--card);
+  color:var(--fg);padding:6px 11px;border-radius:9px;font-size:18px;line-height:1}
+
+/* series cross-file nav */
+.series-nav-bar{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 10px;
+  scrollbar-width:thin}
+.series-nav-bar::-webkit-scrollbar{height:5px}
+.series-nav-bar::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.series-nav-bar .slabel{flex:0 0 auto;font-family:var(--font-head);font-size:11px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;color:var(--fg-faint);padding-right:2px}
+.series-nav-bar a{flex:0 0 auto;text-decoration:none;font-size:12.5px;white-space:nowrap;color:var(--fg-soft);
+  border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--card);transition:.15s}
+.series-nav-bar a:hover{color:var(--fg);border-color:var(--a1)}
+.series-nav-bar a.active{color:#04121f;background:var(--grad);border-color:transparent;font-weight:700}
+
+/* on-page chip TOC */
+nav#toc{display:flex;gap:8px;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 12px;scrollbar-width:none}
+nav#toc::-webkit-scrollbar{display:none}
+nav#toc a{white-space:nowrap;flex:none;font-size:.82rem;color:var(--fg-soft);text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;transition:.15s}
+nav#toc a:hover{color:var(--fg);border-color:var(--a1)}
+nav#toc a.h3{font-size:.78rem;color:var(--fg-faint)}
+nav#toc a.active{background:var(--grad);color:#04121f;border-color:transparent;font-weight:600}
+
+/* hero + bento */
+main{max-width:1000px;margin:0 auto;padding:30px clamp(16px,4vw,40px) 120px}
+.hero{background:var(--grad);border-radius:24px;padding:30px 32px;color:#04121f;margin-bottom:16px;
+  box-shadow:var(--shadow)}
+.hero .eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.hero h1{font-family:var(--font-head);font-weight:700;font-size:clamp(1.6rem,4vw,2.15rem);margin:6px 0 8px;
+  letter-spacing:-.02em;line-height:1.12}
+.hero p{opacity:.9;max-width:60ch;font-size:.98rem}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.bento .cell{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;
+  box-shadow:var(--shadow)}
+.bento .cell .k{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.bento .cell .v{font-family:var(--font-head);font-weight:700;font-size:1.24rem;margin-top:4px}
+.bento .cell.wide{grid-column:span 2}
+@media(max-width:720px){.bento{grid-template-columns:repeat(2,1fr)}.bento .cell.wide{grid-column:span 2}}
+
+/* content card */
+article.content{background:var(--card);border:1px solid var(--line);border-radius:24px;
+  padding:clamp(22px,4vw,46px);box-shadow:var(--shadow)}
+#content{animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.content h1{font-family:var(--font-head);font-weight:700;font-size:2.1rem;letter-spacing:-.02em;margin:0 0 6px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.content h1 + blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a1);
+  border-radius:var(--r-sm);padding:14px 18px;margin:14px 0 8px;color:var(--fg-soft)}
+.content h2{font-family:var(--font-head);font-weight:700;font-size:1.5rem;margin:48px 0 14px;
+  scroll-margin-top:150px;display:flex;align-items:center;gap:12px}
+.content h2::before{content:'';width:10px;height:26px;border-radius:6px;background:var(--grad);flex:none}
+.content h2.has-badge::before{display:none}
+.content h3{font-family:var(--font-head);font-weight:600;font-size:1.2rem;margin:30px 0 10px;
+  scroll-margin-top:150px;color:var(--a2)}
+.content h4{font-weight:600;font-size:1rem;margin:20px 0 8px;color:var(--fg-soft)}
+.content p{margin:14px 0}
+.content a{color:var(--a1);text-decoration:none;font-weight:500;border-bottom:1px dashed color-mix(in srgb,var(--a1) 45%,transparent)}
+.content a:hover{border-bottom-style:solid}
+.content strong{color:var(--fg);font-weight:700}
+.content ul,.content ol{margin:14px 0 14px 24px}
+.content li{margin:6px 0}
+.content hr{border:0;border-top:1px solid var(--line);margin:38px 0}
+
+/* code */
+.content code{font-family:var(--font-mono);font-size:.85em;background:var(--card2);color:var(--a2);
+  padding:2px 6px;border-radius:6px;border:1px solid var(--line-soft)}
+.code-wrap{position:relative;margin:20px 0}
+.content pre{background:var(--code);border-radius:var(--r-sm);padding:18px 20px;overflow-x:auto;border:1px solid var(--line)}
+.content pre code{background:none;border:0;padding:0;color:var(--code-fg);font-size:.84rem;line-height:1.62}
+.code-lang{position:absolute;top:10px;right:70px;font-family:var(--font-mono);font-size:.68rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.code-copy{position:absolute;top:8px;right:10px;font-family:var(--font-body);font-size:.74rem;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#cbd5e1;border-radius:8px;
+  padding:4px 11px;cursor:pointer;transition:.18s}
+.code-copy:hover{background:rgba(255,255,255,.16)}
+.code-copy.copied{color:var(--a1)}
+
+/* callouts (base; kit refines) */
+.content blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a2);
+  border-radius:var(--r-sm);padding:14px 18px;margin:20px 0;color:var(--fg-soft)}
+.content blockquote p{margin:4px 0}
+.content blockquote strong{color:var(--fg)}
+
+/* tables */
+.content table{width:100%;border-collapse:separate;border-spacing:0;margin:22px 0;font-size:.92rem;
+  border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.content th{background:var(--card2);text-align:left;padding:12px 16px;font-weight:600;font-family:var(--font-head);
+  border-bottom:1px solid var(--line)}
+.content td{padding:10px 16px;border-bottom:1px solid var(--line-soft);color:var(--fg-soft);vertical-align:top}
+.content tbody tr:last-child td{border-bottom:0}
+.content tbody tr:hover{background:var(--card2)}
+
+/* details / exercises */
+.content details{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);margin:16px 0;overflow:hidden}
+.content summary{cursor:pointer;padding:12px 18px;font-family:var(--font-head);font-weight:600;color:var(--a1);
+  list-style:none;user-select:none;display:flex;align-items:center;gap:8px}
+.content summary::-webkit-details-marker{display:none}
+.content summary::before{content:'+';display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;
+  background:var(--grad);color:#04121f;font-weight:800}
+.content details[open] summary::before{content:'\2212'}
+.content details>*:not(summary){padding:0 18px}
+.content details>.code-wrap{margin:10px 18px 16px}
+.content details>p:last-child{padding-bottom:14px}
+
+/* mermaid */
+.mermaid{display:flex;justify-content:center;margin:22px 0;padding:20px;background:var(--card2);
+  border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.mermaid svg{max-width:100%;height:auto}
+
+/* series footer nav */
+.series-footer{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.series-footer a{flex:1;min-width:200px;text-decoration:none;border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;background:var(--card);color:var(--fg);transition:.15s;box-shadow:var(--shadow)}
+.series-footer a:hover{border-color:var(--a1);transform:translateY(-2px)}
+.series-footer small{display:block;color:var(--fg-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.series-footer b{font-family:var(--font-head)}
+.series-footer .sn-next{text-align:right}
+
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80}
+#overlay.show{display:block}
+@media(max-width:720px){#menuToggle{display:inline-block}}
+
+/* ===== enhancement kit CSS (inlined by build.ps1) ===== */
+/* ============================================================
+   DEEP-DIVE DOCS — STORYBOOK ENHANCEMENT KIT (skin-agnostic CSS)
+   ------------------------------------------------------------
+   Callouts, section chrome, visual components (stat / flow / cards /
+   tags), deck (slide) mode, and progressive-disclosure overlays.
+
+   Skin-agnostic: every color/font resolves from a --sb-* variable whose
+   fallback chain covers the known skins (agentic-ai uses --primary /
+   --panel-2 / --hero-grad; editorial skins use --accent / --card /
+   --font-head; …) and ends in a hard-coded default. Inline this whole
+   block into any skin's <style>; it adapts to that skin automatically.
+   Pairs with assets/enhancements.js.
+   ============================================================ */
+:root{
+  --sb-accent: var(--primary, var(--accent, #7c6cff));
+  --sb-info:   var(--accent, var(--primary, #38d6f0));
+  --sb-tip:    var(--primary-2, var(--accent-soft, var(--accent, #9b8cff)));
+  --sb-ok:     var(--ok, #23b784);
+  --sb-warn:   var(--warn, #e0a52a);
+  --sb-danger: var(--danger, #e5484d);
+  --sb-bg:     var(--bg, var(--paper, #0b0f1a));
+  --sb-panel:  var(--panel-2, var(--card, #131a2b));
+  --sb-solid:  var(--panel, var(--card, #141824));
+  --sb-border: var(--border, var(--rule, #232c42));
+  --sb-text:   var(--text, var(--ink, #dbe3f4));
+  --sb-dim:    var(--text-dim, var(--ink-soft, #93a0bd));
+  --sb-mut:    var(--text-mut, var(--ink-faint, #63708f));
+  --sb-head:   var(--serif, var(--font-head, system-ui, sans-serif));
+  --sb-mono:   var(--mono, var(--font-mono, ui-monospace, monospace));
+  --sb-grad:   var(--hero-grad, linear-gradient(135deg, var(--sb-accent), var(--sb-info)));
+  --sb-shadow: var(--shadow, 0 18px 44px rgba(0,0,0,.35));
+}
+
+/* --- Section chrome: "N. Heading" -> numbered badge + purpose block --- */
+#content h2.has-badge{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sec-badge{display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;
+  background:var(--sb-grad);color:#fff;font-family:var(--sb-head);font-weight:700;font-size:17px;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+#content blockquote.purpose-block{border-left:4px solid var(--sb-info);
+  background:color-mix(in srgb,var(--sb-info) 10%,transparent);border-radius:0 12px 12px 0;
+  padding:14px 18px;margin:1em 0 1.4em;color:var(--sb-dim)}
+
+/* --- Callouts (auto-themed from emoji-led blockquotes) --- */
+#content blockquote.callout{border-left-width:4px;border-radius:0 12px 12px 0}
+#content blockquote.cx-info{border-left-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 9%,transparent)}
+#content blockquote.cx-warn{border-left-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 11%,transparent)}
+#content blockquote.cx-tip{border-left-color:var(--sb-tip);background:color-mix(in srgb,var(--sb-tip) 12%,transparent)}
+#content blockquote.cx-ok{border-left-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 11%,transparent)}
+#content blockquote.cx-risk{border-left-color:var(--sb-danger);background:color-mix(in srgb,var(--sb-danger) 11%,transparent)}
+
+/* --- Stat row --- */
+.sb-stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:1.4em 0}
+.sb-stat{flex:1;min-width:120px;background:var(--sb-panel);border:1px solid var(--sb-border);
+  border-radius:14px;padding:18px 16px;text-align:center}
+.sb-stat .num{font-family:var(--sb-head);font-size:30px;font-weight:700;line-height:1.1;
+  background:var(--sb-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sb-stat .lbl{font-size:12px;color:var(--sb-mut);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
+
+/* --- Flow diagram --- */
+.sb-flow{display:flex;align-items:stretch;flex-wrap:wrap;justify-content:center;background:var(--sb-panel);
+  border:1px solid var(--sb-border);border-radius:14px;padding:20px 14px;margin:1.4em 0}
+.sb-flow-box{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:110px;text-align:center;
+  padding:12px 14px;border:1.5px solid var(--sb-border);border-radius:10px;background:var(--sb-solid);font-size:13px}
+.sb-flow-box b{font-family:var(--sb-head);font-size:13.5px}
+.sb-flow-box small{color:var(--sb-mut);font-size:11px}
+.sb-flow-arrow{display:flex;align-items:center;color:var(--sb-mut);font-size:20px;padding:0 10px}
+.sb-flow-box.accent{border-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 12%,transparent)}
+.sb-flow-box.primary{border-color:var(--sb-accent);background:color-mix(in srgb,var(--sb-accent) 15%,transparent)}
+.sb-flow-box.ok{border-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 12%,transparent)}
+.sb-flow-box.warn{border-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 12%,transparent)}
+
+/* --- Card grid --- */
+.sb-cards{display:grid;gap:14px;margin:1.4em 0;grid-template-columns:1fr}
+.sb-cards.n2{grid-template-columns:repeat(2,1fr)}
+.sb-cards.n3{grid-template-columns:repeat(3,1fr)}
+.sb-cards.n4{grid-template-columns:repeat(4,1fr)}
+.sb-card{background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:14px;padding:18px;transition:.18s}
+.sb-card:hover{border-color:var(--sb-accent);transform:translateY(-3px);box-shadow:var(--sb-shadow)}
+.sb-card .ct{font-family:var(--sb-head);font-weight:700;margin-bottom:6px;color:var(--sb-tip)}
+.sb-card .cd{font-size:13.5px;color:var(--sb-dim);line-height:1.6}
+@media(max-width:820px){.sb-cards.n3,.sb-cards.n4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.sb-cards{grid-template-columns:1fr!important}}
+
+/* --- Tag pills --- */
+.sb-tag{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  padding:2px 9px;border-radius:999px;margin:0 3px;vertical-align:middle;border:1px solid transparent}
+.sb-tag.decided{background:color-mix(in srgb,var(--sb-ok) 18%,transparent);color:var(--sb-ok);border-color:color-mix(in srgb,var(--sb-ok) 40%,transparent)}
+.sb-tag.tbd{background:color-mix(in srgb,var(--sb-warn) 18%,transparent);color:var(--sb-warn);border-color:color-mix(in srgb,var(--sb-warn) 40%,transparent)}
+.sb-tag.risk{background:color-mix(in srgb,var(--sb-danger) 18%,transparent);color:var(--sb-danger);border-color:color-mix(in srgb,var(--sb-danger) 40%,transparent)}
+.sb-tag.info{background:color-mix(in srgb,var(--sb-info) 18%,transparent);color:var(--sb-info);border-color:color-mix(in srgb,var(--sb-info) 40%,transparent)}
+.sb-tag.new{background:color-mix(in srgb,var(--sb-accent) 20%,transparent);color:var(--sb-tip);border-color:color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+
+/* --- Overlay (progressive disclosure) trigger + modal --- */
+.sb-ov-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:14px;
+  color:var(--sb-text);background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:10px;padding:10px 16px;margin:1em 0;transition:.15s}
+.sb-ov-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.sb-ov-btn::before{content:"\2922";font-size:15px;color:var(--sb-info)}
+.sb-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(2,4,10,.68);backdrop-filter:blur(4px)}
+.sb-modal.open{display:flex}
+.sb-modal-card{background:var(--sb-solid);border:1px solid var(--sb-border);border-radius:18px;max-width:820px;width:100%;
+  max-height:86vh;overflow:auto;box-shadow:var(--sb-shadow);padding:8px 28px 28px;color:var(--sb-text)}
+.sb-modal-head{position:sticky;top:0;background:var(--sb-solid);display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0 12px;border-bottom:1px solid var(--sb-border);margin-bottom:14px}
+.sb-modal-head h3{font-family:var(--sb-head);margin:0;font-size:18px}
+.sb-modal-close{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;width:34px;height:34px;font-size:16px}
+.sb-modal-close:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+
+/* --- Deck (slide) mode --- */
+.deck-btn{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  padding:6px 12px;border-radius:999px;font-size:13px;font-family:inherit;margin-right:8px}
+.deck-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-root{position:fixed;inset:0;z-index:150;background:var(--sb-bg);display:none;flex-direction:column;color:var(--sb-text)}
+.deck-root.open{display:flex}
+.deck-top{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:14px;padding:0 20px;
+  border-bottom:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-top .dt-title{font-family:var(--sb-head);font-weight:700;font-size:15px;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deck-exit{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;padding:6px 12px;font-size:13px}
+.deck-exit:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+.deck-stage{flex:1;overflow:auto;display:grid;place-items:start center;padding:38px clamp(18px,5vw,80px) 90px}
+.deck-slide{display:none;max-width:1000px;width:100%;animation:deckIn .35s ease}
+.deck-slide.active{display:block}
+@keyframes deckIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.deck-nav{height:60px;flex:0 0 60px;display:flex;align-items:center;justify-content:center;gap:10px;
+  border-top:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-arrow{width:42px;height:42px;border-radius:11px;border:1px solid var(--sb-border);
+  background:var(--sb-panel);color:var(--sb-text);cursor:pointer;font-size:18px}
+.deck-arrow:hover:not(:disabled){border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-arrow:disabled{opacity:.35;cursor:default}
+.deck-dots{display:flex;gap:6px;align-items:center;max-width:60vw;overflow:auto;padding:0 6px}
+.deck-dot{width:9px;height:9px;border-radius:50%;background:var(--sb-border);border:none;cursor:pointer;flex:0 0 auto}
+.deck-dot.active{background:var(--sb-accent);width:24px;border-radius:6px}
+.deck-counter{font-family:var(--sb-mono);font-size:12px;color:var(--sb-mut);margin:0 6px}
+
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header>
+  <div class="nav-row topbar">
+    <button id="menuToggle" aria-label="Menu">☰</button>
+    <a class="logo" href="README.html">
+      <span class="mark">⚛</span>
+      <span>React from Scratch<small>Part 8 / 15</small></span>
+    </a>
+    <div class="spacer"></div>
+    <span class="btn" style="cursor:default">Vite · React 19</span>
+    <button class="btn" id="themeToggle">🌙 <span id="themeLabel">Dark</span></button>
+  </div>
+  <nav class="series-nav-bar" id="seriesNavBar" aria-label="Series parts">
+    <span class="slabel">Series</span>
+    <a href="README.html">Index</a>
+    <a href="01-jsx-and-rendering.html">1 · JSX</a>
+    <a href="02-components-and-props.html">2 · Components</a>
+    <a href="03-state-and-events.html">3 · State</a>
+    <a href="04-lists-keys-conditional.html">4 · Lists & Keys</a>
+    <a href="05-hooks-deep-dive.html">5 · Hooks</a>
+    <a href="06-effects-and-data-fetching.html">6 · Effects & Data</a>
+    <a href="07-forms.html">7 · Forms</a>
+    <a href="08-routing.html">8 · Routing</a>
+    <a href="09-state-management.html">9 · State Mgmt</a>
+    <a href="10-styling.html">10 · Styling</a>
+    <a href="11-performance.html">11 · Performance</a>
+    <a href="12-typescript-react.html">12 · TypeScript</a>
+    <a href="13-testing.html">13 · Testing</a>
+    <a href="14-patterns-architecture.html">14 · Patterns</a>
+    <a href="15-production-and-beyond.html">15 · Production</a>
+  </nav>
+  <nav id="toc"></nav>
+</header>
+<div id="overlay"></div>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">React from Scratch · Part 8 / 15</div>
+    <h1>Routing with React Router</h1>
+    <p>Client-side routing, nested routes, params, loaders, protected routes, and data APIs.</p>
+  </section>
+  <section class="bento">
+    <div class="cell"><div class="k">Track</div><div class="v">15 Parts</div></div>
+    <div class="cell"><div class="k">Stack</div><div class="v">Vite · React 19</div></div>
+    <div class="cell wide"><div class="k">Approach</div><div class="v">Learn by building — many exercises + projects</div></div>
+  </section>
+  <article class="content" id="content"></article>
+  <nav class="series-footer" id="seriesFooter">
+    <a class="sn-prev" href="README.html" style="display:none"><small>Previous</small><b></b></a>
+    <a class="sn-index" href="README.html"><small>Series index</small><b>⚛ All parts</b></a>
+    <a class="sn-next" href="README.html" style="display:none"><small>Next</small><b></b></a>
+  </nav>
+</main>
+
+<!-- raw markdown (source of truth) -->
+<script type="text/markdown" id="markdown-source"># Part 8 · Routing with React Router
+
+> So far every app has been a single screen. Real apps have *pages*: a home page, a list, a detail view, a settings screen — each with its own URL. But a React app is a **single-page application** (one `index.html`), so navigation happens in JavaScript, not by loading new HTML. **React Router** is the library that maps URLs to components, handles navigation, and keeps the URL and UI in sync. This part takes you from "one screen" to a real multi-page app — and kicks off **Capstone #3: a full CRUD application.**
+
+## Table of Contents
+
+1. [Why routing, and how SPAs navigate](#1-why-routing-and-how-spas-navigate)
+2. [Setting up React Router](#2-setting-up-react-router)
+3. [Links and navigation](#3-links-and-navigation)
+4. [Route parameters and reading them](#4-route-parameters-and-reading-them)
+5. [Nested routes and layouts](#5-nested-routes-and-layouts)
+6. [Programmatic navigation and query params](#6-programmatic-navigation-and-query-params)
+7. [Protected routes and redirects](#7-protected-routes-and-redirects)
+8. [Data loading with loaders and actions](#8-data-loading-with-loaders-and-actions)
+9. [Capstone kickoff: a CRUD app shell](#9-capstone-kickoff-a-crud-app-shell)
+10. [Exercises and practice problems](#10-exercises-and-practice-problems)
+11. [Glossary](#11-glossary)
+
+> **💡 Suggested learning order:** §1–5 are the core you'll use in every app. §6–7 handle real navigation needs. §8 (loaders/actions) is the modern data-router approach — powerful, and it pairs with what you learned in Part 6. This part uses React Router v6/7 (the current API).
+
+---
+
+## 1. Why routing, and how SPAs navigate
+
+Recall from the README: a React app is a **single-page application** — one HTML file, and JavaScript swaps the content. Traditional websites load a *new HTML document* from the server for every URL. SPAs don't: they intercept navigation, update the URL via the browser's History API, and render different components — no full reload.
+
+🎯 **Analogy:** A traditional multi-page site is like calling a restaurant and having them mail you a whole new menu for every question. An SPA is like having the full menu already — when you "navigate," you just flip to a different section instantly. React Router is the table of contents that maps "I want the desserts page" (a URL) to "show the dessert section" (a component), without re-fetching the whole menu.
+
+```mermaid
+flowchart LR
+  subgraph Traditional MPA
+    U1[Click link] --> S1[Server sends new HTML]
+    S1 --> R1[Full page reload]
+  end
+  subgraph SPA + React Router
+    U2[Click link] --> I[Router intercepts]
+    I --> H[Update URL via History API]
+    H --> C[Render matching component]
+    C --> NR[No reload — instant]
+  end
+```
+
+What React Router gives you:
+- **URL ↔ UI mapping:** each path (`/`, `/users`, `/users/42`) renders specific components.
+- **Client-side navigation:** instant transitions, no full reload, preserved app state.
+- **Deep linking:** `/users/42` works if pasted/refreshed — the URL is real and shareable.
+- **Browser integration:** back/forward buttons, bookmarks, and history all work.
+
+> **🔍 Under the hood:** React Router uses the browser's **History API** (`pushState`/`replaceState`) to change the URL bar *without* a server request. It listens for URL changes, matches the path against your route definitions, and renders the matching component tree. Because the URL is genuine, refreshing or sharing `/users/42` works — as long as your server is configured to serve `index.html` for all paths (Part 15 covers this "SPA fallback").
+
+> **⚠️ Common beginner mistake:** Expecting deep links to work in production without server config. In dev, Vite handles the fallback; in production, if the server returns 404 for `/users/42` (because there's no such file), refreshing breaks. You must configure the host to serve `index.html` for unknown paths (Part 15).
+
+**Key takeaways:**
+- SPAs navigate in JavaScript via the History API — no full page reloads.
+- React Router maps URLs to components and integrates with browser history.
+- Real URLs mean deep links and refreshes work (with a server SPA fallback).
+
+---
+
+## 2. Setting up React Router
+
+Install it and define your routes. There are two styles; we'll use the modern **`createBrowserRouter`** (the "data router" that unlocks loaders/actions in §8).
+
+```bash
+npm install react-router-dom
+```
+
+```jsx
+// src/main.jsx
+import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Home from './pages/Home'
+import About from './pages/About'
+import Users from './pages/Users'
+import NotFound from './pages/NotFound'
+
+// A route table: each object maps a path to an element.
+const router = createBrowserRouter([
+  { path: '/', element: <Home /> },
+  { path: '/about', element: <About /> },
+  { path: '/users', element: <Users /> },
+  { path: '*', element: <NotFound /> },   // catch-all for unmatched URLs (404)
+])
+
+createRoot(document.getElementById('root')).render(
+  <RouterProvider router={router} />
+)
+```
+
+Each route object has a `path` and an `element` (the component to render). The `path: '*'` wildcard matches anything not matched above — your 404 page.
+
+The two router APIs you'll see:
+
+| API | Style | When |
+| --- | --- | --- |
+| `createBrowserRouter` + `RouterProvider` | Route objects (data router) | ✅ Recommended — enables loaders/actions |
+| `<BrowserRouter>` + `<Routes>`/`<Route>` | JSX routes | Older/simpler; no loaders |
+
+> **🔍 Under the hood:** `createBrowserRouter` builds a route-matching tree from your objects. `RouterProvider` renders it and provides routing context to the whole app (so hooks like `useNavigate`, `useParams` work anywhere below). The "browser" variant uses clean URLs (`/users/42`); there's also `createHashRouter` (`/#/users/42`) for static hosts that can't do SPA fallback.
+
+> **⚠️ Common beginner mistake:** Forgetting the catch-all `path: '*'` route, so unmatched URLs render nothing (blank screen) instead of a helpful 404. Always include it.
+
+**Key takeaways:**
+- Install `react-router-dom`; define routes with `createBrowserRouter`.
+- Each route maps a `path` to an `element`; `path: '*'` is your 404 catch-all.
+- The data-router API (`createBrowserRouter`) is the modern default — it enables loaders/actions.
+
+---
+
+## 3. Links and navigation
+
+Never use plain `<a href>` for internal navigation — it triggers a **full page reload**, defeating the SPA. Use React Router's **`<Link>`** (or **`<NavLink>`** for nav menus that need active styling).
+
+```jsx
+import { Link, NavLink } from 'react-router-dom'
+
+function Nav() {
+  return (
+    <nav>
+      <Link to="/">Home</Link>
+      <Link to="/about">About</Link>
+
+      {/* NavLink knows when it's active — style the current page's link */}
+      <NavLink to="/users" className={({ isActive }) => (isActive ? 'active' : '')}>
+        Users
+      </NavLink>
+    </nav>
+  )
+}
+```
+
+`<Link to="/about">` renders an `<a>` but intercepts the click to navigate client-side. `<NavLink>` additionally gives you an `isActive` flag to highlight the current route.
+
+```mermaid
+flowchart TD
+  A["&lt;a href&gt;"] -->|click| FR[Full reload — ❌ loses app state]
+  L["&lt;Link to&gt;"] -->|click| CI[Router intercepts]
+  CI --> UP[URL updates, component swaps]
+  UP --> NR[No reload — ✅ instant]
+```
+
+> **🔍 Under the hood:** `<Link>` renders a real `<a href="/about">` (good for accessibility, SEO, and open-in-new-tab), but its `onClick` calls `preventDefault()` and uses the History API instead of letting the browser load a new page. That's why cmd/ctrl-click *does* open a new tab (native anchor behavior) while a plain click navigates in-app.
+
+> **⚠️ Common beginner mistake:** Using `<a href="/about">` for internal links. It works — but reloads the whole app, clearing state and re-downloading everything. Use `<a>` only for *external* links (other websites). Internal = `<Link>`.
+
+**Key takeaways:**
+- Use `<Link to="…">` for internal navigation (no reload); `<a>` only for external URLs.
+- `<NavLink>` adds an `isActive` flag for styling the current page's link.
+- Links render real anchors, so accessibility and open-in-new-tab still work.
+
+---
+
+## 4. Route parameters and reading them
+
+Detail pages need dynamic URLs: `/users/1`, `/users/42`, `/products/shoes`. Define a **route parameter** with `:name`, then read it with **`useParams`**.
+
+```jsx
+// Route definition — :userId is a parameter that matches any value
+{ path: '/users/:userId', element: <UserDetail /> }
+```
+
+```jsx
+import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+
+function UserDetail() {
+  const { userId } = useParams()          // read the URL param (a string)
+
+  // Combine with TanStack Query (Part 6) — the param drives the fetch
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetch(`/api/users/${userId}`).then((r) => r.json()),
+  })
+
+  if (isLoading) return <p>Loading…</p>
+  return <h1>{user.name}</h1>
+}
+```
+
+Visiting `/users/42` makes `useParams()` return `{ userId: '42' }`. Params are always **strings** — convert if you need a number.
+
+Multiple params work too:
+
+```jsx
+{ path: '/teams/:teamId/members/:memberId', element: <Member /> }
+// useParams() → { teamId: '...', memberId: '...' }
+```
+
+> **🔍 Under the hood:** When the URL matches `/users/:userId`, React Router extracts the segment into a params object keyed by the param name. This is *the* pattern for master-detail UIs: a list links to `/users/:id`, the detail page reads `:id` via `useParams`, and (with Part 6) fetches that user. The param is the bridge between the URL and the data.
+
+> **⚠️ Common beginner mistake:** Treating params as numbers — `userId === 42` is `false` because `userId` is the string `'42'`. Use `Number(userId)` when comparing to numbers or doing math. Also: mismatched names — the route says `:userId` but you read `useParams().id`; the names must match exactly.
+
+**Key takeaways:**
+- Define dynamic segments with `:paramName`; read them with `useParams()`.
+- Params are always strings — convert with `Number()` when needed.
+- Params + TanStack Query = the standard master-detail data pattern.
+
+---
+
+## 5. Nested routes and layouts
+
+Most apps share chrome — a header, sidebar, footer — across many pages. **Nested routes** let a parent route render shared layout plus an **`<Outlet />`** where child routes appear. This avoids repeating the layout in every page.
+
+```jsx
+// Route table with nesting: children render inside the parent's <Outlet/>
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,        // shared shell (nav + outlet)
+    children: [
+      { index: true, element: <Home /> },          // "/" (index route)
+      { path: 'users', element: <Users /> },        // "/users"
+      { path: 'users/:userId', element: <UserDetail /> }, // "/users/42"
+      { path: 'settings', element: <Settings /> },  // "/settings"
+    ],
+  },
+])
+```
+
+```jsx
+import { Outlet, NavLink } from 'react-router-dom'
+
+// The layout renders once; the Outlet swaps per child route.
+function RootLayout() {
+  return (
+    <div>
+      <header>
+        <nav>
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/users">Users</NavLink>
+          <NavLink to="/settings">Settings</NavLink>
+        </nav>
+      </header>
+      <main>
+        <Outlet />       {/* the matched child route renders HERE */}
+      </main>
+      <footer>© 2026</footer>
+    </div>
+  )
+}
+```
+
+Now the header/footer render once and persist across navigation; only the `<Outlet>` content changes. You can nest layouts arbitrarily deep (an app shell → a dashboard layout → a section layout).
+
+```mermaid
+flowchart TD
+  RL["RootLayout<br/>(header + Outlet + footer)"] --> O["&lt;Outlet /&gt;"]
+  O -->|path /| H[Home]
+  O -->|path /users| U[Users]
+  O -->|path /users/:id| D[UserDetail]
+  O -->|path /settings| S[Settings]
+```
+
+> **🔍 Under the hood:** When the URL is `/users`, React Router matches `RootLayout` (parent) *and* `Users` (child), then renders `Users` wherever the parent placed `<Outlet />`. The `index: true` route is the child shown when the parent's path matches exactly (`/`). This composition means shared UI (and shared data via nested loaders, §8) lives at the right level, once.
+
+> **⚠️ Common beginner mistake:** Forgetting `<Outlet />` in the layout — child routes match but render nothing (the layout shows, but the page content is missing). If a nested page is blank, check that the parent renders an `<Outlet />`.
+
+**Key takeaways:**
+- Nested routes share layout via a parent route + `<Outlet />` for children.
+- `index: true` marks the default child for the parent's exact path.
+- Layout renders once and persists; only the outlet content changes on navigation.
+
+---
+
+## 6. Programmatic navigation and query params
+
+Sometimes you navigate from *code*, not a click — after a form submits, a login succeeds, or a timeout. Use the **`useNavigate`** hook.
+
+```jsx
+import { useNavigate } from 'react-router-dom'
+
+function CreateUser() {
+  const navigate = useNavigate()
+
+  async function handleSubmit(data) {
+    const user = await createUser(data)
+    navigate(`/users/${user.id}`)     // go to the new user's page
+    // navigate(-1)                    // go back (like the back button)
+    // navigate('/users', { replace: true })  // replace history (no back to this page)
+  }
+  // ...
+}
+```
+
+`navigate(path)` pushes a new history entry; `navigate(-1)` goes back; `{ replace: true }` replaces the current entry (useful after login so "back" doesn't return to the login page).
+
+**Query parameters** (`?sort=name&page=2`) — for filters, search, pagination — use **`useSearchParams`**:
+
+```jsx
+import { useSearchParams } from 'react-router-dom'
+
+function ProductList() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const sort = searchParams.get('sort') ?? 'name'      // read ?sort=
+  const page = Number(searchParams.get('page') ?? '1') // read ?page=
+
+  return (
+    <div>
+      <select value={sort} onChange={(e) => setSearchParams({ sort: e.target.value, page })}>
+        <option value="name">Name</option>
+        <option value="price">Price</option>
+      </select>
+      {/* changing the select updates the URL: ?sort=price&page=1 */}
+    </div>
+  )
+}
+```
+
+Storing filters in the URL makes them **shareable and bookmarkable** — someone can send a link to "products sorted by price, page 2."
+
+> **🔍 Under the hood:** `useSearchParams` works like `useState`, but the "state" *is* the URL query string. Reading uses the `URLSearchParams` API (`.get(key)`); writing (`setSearchParams`) updates the URL and re-renders. This is powerful: your filter/sort/pagination state lives in the URL, so it survives refreshes, is shareable, and integrates with browser history (back button undoes a filter change).
+
+> **⚠️ Common beginner mistake:** Duplicating URL state in `useState` and trying to sync them. If a value belongs in the URL (filters, search, current page), let `useSearchParams` be the source of truth — don't shadow it with local state.
+
+**Key takeaways:**
+- `useNavigate` navigates from code; `navigate(-1)` goes back, `{ replace: true }` replaces history.
+- `useSearchParams` reads/writes query params (`?sort=…`) like `useState` on the URL.
+- Put filters/search/pagination in the URL for shareable, bookmarkable state.
+
+---
+
+## 7. Protected routes and redirects
+
+Many routes require authentication — a dashboard, settings, checkout. A **protected route** checks auth and either renders the page or redirects to login. The pattern: a guard component that wraps protected content.
+
+```jsx
+import { Navigate, useLocation, Outlet } from 'react-router-dom'
+
+// A guard: render children if authed, else redirect to /login.
+function RequireAuth() {
+  const { user } = useAuth()            // your auth hook/context (Part 5/9)
+  const location = useLocation()
+
+  if (!user) {
+    // Redirect, remembering where they wanted to go (so we can return after login).
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+  return <Outlet />                     // authed — render the nested protected routes
+}
+```
+
+Wire it into the route table as a layout route around protected pages:
+
+```jsx
+const router = createBrowserRouter([
+  { path: '/login', element: <Login /> },
+  {
+    element: <RequireAuth />,           // guard wraps these children
+    children: [
+      { path: '/dashboard', element: <Dashboard /> },
+      { path: '/settings', element: <Settings /> },
+    ],
+  },
+])
+```
+
+After login, send them back where they came from:
+
+```jsx
+function Login() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname ?? '/dashboard'  // where they tried to go
+
+  async function handleLogin(creds) {
+    await signIn(creds)
+    navigate(from, { replace: true })   // return to the original destination
+  }
+}
+```
+
+```mermaid
+flowchart TD
+  V[Visit /dashboard] --> G{Authenticated?}
+  G -->|yes| D[Render Dashboard]
+  G -->|no| R["Navigate to /login<br/>(remember 'from')"]
+  R --> L[Login]
+  L -->|success| B["navigate(from)<br/>back to /dashboard"]
+```
+
+> **🔍 Under the hood:** `<Navigate>` is a component that triggers a redirect when rendered (declarative navigation). Passing `state={{ from: location }}` stashes the attempted URL in history state, so after login you can return there. `replace` avoids leaving the login page in history (so "back" doesn't loop). The guard as a layout route + `<Outlet />` cleanly protects any number of nested pages.
+
+> **⚠️ Common beginner mistake:** Doing the auth check with an effect + `navigate` inside each protected page — it flashes the protected content before redirecting. Redirect *during render* with `<Navigate>` (or in a loader, §8), so protected content never appears for unauthenticated users.
+
+**Key takeaways:**
+- Protect routes with a guard that renders `<Outlet/>` if authed, else `<Navigate to="/login">`.
+- Stash the attempted location in `state` to return there after login.
+- Redirect during render (not in an effect) to avoid flashing protected content.
+
+---
+
+## 8. Data loading with loaders and actions
+
+The data router (`createBrowserRouter`) can load data **before** a route renders, via **loaders** — so there's no loading spinner flash inside the page, and data is ready when the component mounts. **Actions** handle form submissions similarly. This is React Router's own data layer (an alternative or complement to TanStack Query).
+
+```jsx
+// A loader runs BEFORE the route renders; its return value feeds the component.
+async function userLoader({ params }) {
+  const res = await fetch(`/api/users/${params.userId}`)
+  if (!res.ok) throw new Response('Not Found', { status: 404 })  // triggers errorElement
+  return res.json()
+}
+
+const router = createBrowserRouter([
+  {
+    path: '/users/:userId',
+    element: <UserDetail />,
+    loader: userLoader,                 // data fetched before render
+    errorElement: <ErrorPage />,        // shown if the loader throws
+  },
+])
+```
+
+```jsx
+import { useLoaderData } from 'react-router-dom'
+
+function UserDetail() {
+  const user = useLoaderData()          // the loader's return value — already here!
+  return <h1>{user.name}</h1>           // no isLoading needed — data is ready
+}
+```
+
+**Actions** handle form posts declaratively with React Router's `<Form>`:
+
+```jsx
+import { Form, redirect } from 'react-router-dom'
+
+async function createUserAction({ request }) {
+  const formData = await request.formData()
+  const user = await createUser(Object.fromEntries(formData))
+  return redirect(`/users/${user.id}`)  // navigate after success
+}
+
+// Route: { path: '/users/new', element: <NewUser/>, action: createUserAction }
+function NewUser() {
+  return (
+    <Form method="post">          {/* React Router's Form posts to the route's action */}
+      <input name="name" />
+      <button>Create</button>
+    </Form>
+  )
+}
+```
+
+**Loaders/actions vs TanStack Query — how to think about it:**
+
+| | Router loaders/actions | TanStack Query |
+| --- | --- | --- |
+| When data loads | Before route renders (no in-page spinner) | On/after render, with caching |
+| Best for | Route-level data, forms | Caching, background refetch, shared data |
+| They can | Coexist! Many apps use both | |
+
+```mermaid
+flowchart LR
+  N[Navigate to /users/42] --> LO[Loader runs first]
+  LO --> RD[Data ready]
+  RD --> RC[Component renders with data]
+  RC --> NF[No in-page loading flash]
+```
+
+> **🔍 Under the hood:** When you navigate, the router calls the matching route's `loader` and *waits* for it before rendering the component — so `useLoaderData()` has the data immediately. If the loader throws (e.g., a 404 `Response`), the nearest `errorElement` renders instead. This moves data fetching to the *route* level, enabling patterns like parallel loading of nested routes' data. Many teams use loaders for initial route data and TanStack Query for caching/mutations on top.
+
+> **⚠️ Common beginner mistake:** Assuming you must choose loaders *or* TanStack Query. They complement each other — a loader can even prime the Query cache. For this series' capstone we'll lean on TanStack Query (Part 6) since you already know it, and use loaders where route-level loading shines.
+
+**Key takeaways:**
+- Loaders fetch route data *before* render — no in-page spinner flash; read with `useLoaderData`.
+- Actions + `<Form>` handle submissions declaratively; `redirect()` navigates after.
+- Loaders and TanStack Query can coexist; pick per need.
+
+---
+
+## 9. Capstone kickoff: a CRUD app shell
+
+🏗️ **Capstone #3 begins: a Contacts Manager** — a full Create/Read/Update/Delete app, the archetype of real-world React. It grows through Parts 8–14 (routing now; state, styling, TypeScript, testing, patterns later). Today you build the **routed shell**: a layout, a list page, a detail page, and a "new" page — wired with everything from this part.
+
+```bash
+npm create vite@latest contacts-manager   # React → JavaScript
+cd contacts-manager && npm install
+npm install react-router-dom @tanstack/react-query
+npm run dev
+```
+
+```jsx
+// src/main.jsx
+import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import RootLayout from './layouts/RootLayout'
+import ContactList from './pages/ContactList'
+import ContactDetail from './pages/ContactDetail'
+import NewContact from './pages/NewContact'
+import NotFound from './pages/NotFound'
+
+const queryClient = new QueryClient()
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <ContactList /> },
+      { path: 'contacts/new', element: <NewContact /> },
+      { path: 'contacts/:id', element: <ContactDetail /> },
+      { path: '*', element: <NotFound /> },
+    ],
+  },
+])
+
+createRoot(document.getElementById('root')).render(
+  <QueryClientProvider client={queryClient}>
+    <RouterProvider router={router} />
+  </QueryClientProvider>
+)
+```
+
+```jsx
+// src/layouts/RootLayout.jsx
+import { NavLink, Outlet } from 'react-router-dom'
+
+export default function RootLayout() {
+  return (
+    <div style={{ maxWidth: 640, margin: '0 auto', fontFamily: 'system-ui' }}>
+      <header style={{ display: 'flex', gap: 16, padding: 16, borderBottom: '1px solid #e2e8f0' }}>
+        <NavLink to="/" style={navStyle}>Contacts</NavLink>
+        <NavLink to="/contacts/new" style={navStyle}>+ New</NavLink>
+      </header>
+      <main style={{ padding: 16 }}>
+        <Outlet />
+      </main>
+    </div>
+  )
+}
+const navStyle = ({ isActive }) => ({ fontWeight: isActive ? 700 : 400, textDecoration: 'none', color: '#0ea5e9' })
+```
+
+```jsx
+// src/data/store.js — a tiny fake API (localStorage-backed) so the app works without a backend
+const KEY = 'contacts'
+const seed = [
+  { id: '1', name: 'Ada Lovelace', email: 'ada@compute.org', phone: '111' },
+  { id: '2', name: 'Alan Turing', email: 'alan@enigma.uk', phone: '222' },
+]
+function read() {
+  const raw = localStorage.getItem(KEY)
+  if (!raw) { localStorage.setItem(KEY, JSON.stringify(seed)); return seed }
+  return JSON.parse(raw)
+}
+function write(list) { localStorage.setItem(KEY, JSON.stringify(list)) }
+
+export const api = {
+  list: async () => read(),
+  get: async (id) => read().find((c) => c.id === id),
+  create: async (data) => {
+    const list = read(); const item = { id: crypto.randomUUID(), ...data }
+    write([...list, item]); return item
+  },
+  remove: async (id) => write(read().filter((c) => c.id !== id)),
+}
+```
+
+```jsx
+// src/pages/ContactList.jsx
+import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../data/store'
+
+export default function ContactList() {
+  const { data: contacts, isLoading } = useQuery({ queryKey: ['contacts'], queryFn: api.list })
+  if (isLoading) return <p>Loading…</p>
+  if (contacts.length === 0) return <p>No contacts yet. <Link to="/contacts/new">Add one</Link>.</p>
+  return (
+    <ul style={{ listStyle: 'none', padding: 0 }}>
+      {contacts.map((c) => (
+        <li key={c.id} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+          <Link to={`/contacts/${c.id}`}>{c.name}</Link>
+          <div style={{ color: '#64748b', fontSize: 14 }}>{c.email}</div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+```jsx
+// src/pages/ContactDetail.jsx
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../data/store'
+
+export default function ContactDetail() {
+  const { id } = useParams()                       // route param (§4)
+  const navigate = useNavigate()                   // programmatic nav (§6)
+  const qc = useQueryClient()
+
+  const { data: contact, isLoading } = useQuery({ queryKey: ['contact', id], queryFn: () => api.get(id) })
+  const del = useMutation({
+    mutationFn: () => api.remove(id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['contacts'] }); navigate('/') },
+  })
+
+  if (isLoading) return <p>Loading…</p>
+  if (!contact) return <p>Contact not found. <Link to="/">Back</Link></p>
+
+  return (
+    <article>
+      <h1>{contact.name}</h1>
+      <p>{contact.email} · {contact.phone}</p>
+      <button onClick={() => del.mutate()} disabled={del.isPending}>Delete</button>{' '}
+      <Link to="/">Back to list</Link>
+    </article>
+  )
+}
+```
+
+```jsx
+// src/pages/NewContact.jsx  (+ a simple NotFound page with a Link home)
+import { useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../data/store'
+
+export default function NewContact() {
+  const navigate = useNavigate()
+  const qc = useQueryClient()
+  const create = useMutation({
+    mutationFn: (data) => api.create(data),
+    onSuccess: (item) => { qc.invalidateQueries({ queryKey: ['contacts'] }); navigate(`/contacts/${item.id}`) },
+  })
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    const data = Object.fromEntries(new FormData(e.target))
+    create.mutate(data)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 10, maxWidth: 360 }}>
+      <input name="name" placeholder="Name" required />
+      <input name="email" placeholder="Email" type="email" required />
+      <input name="phone" placeholder="Phone" />
+      <button disabled={create.isPending}>{create.isPending ? 'Saving…' : 'Create contact'}</button>
+    </form>
+  )
+}
+```
+
+**Every Part 8 concept, working together:**
+
+```cards
+Nested routes + layout :: RootLayout + Outlet wrap all pages (§5).
+Route params :: /contacts/:id read via useParams (§4).
+Links :: <Link>/<NavLink> for internal nav, no reloads (§3).
+Programmatic nav :: navigate() after create/delete (§6).
+Data (Part 6) :: useQuery to read, useMutation + invalidate to write.
+```
+
+> **💡 Tip:** The `api` module fakes a backend with `localStorage`, so the whole CRUD app runs with no server. In Part 15 you'll swap it for a real API by changing *only* that file — the router, pages, and queries stay the same. That's the payoff of separating data access from UI.
+
+**Extend it (do at least three):**
+1. Add an **Edit** page (`/contacts/:id/edit`) reusing a shared form (Part 7's `Field`).
+2. Add search via `useSearchParams` (`?q=ada`) that filters the list (URL-driven).
+3. Add a confirm dialog before delete.
+4. Add a 404 `NotFound` with a link home, and an `errorElement`.
+5. Protect `/contacts/new` behind a fake `RequireAuth` (§7).
+
+**Key takeaways:**
+- You built a routed multi-page CRUD shell: list, detail, create, delete.
+- Routing (params, nesting, nav) + TanStack Query (read/write) compose cleanly.
+- Faking the API behind one module keeps UI independent of the backend.
+
+---
+
+## 10. Exercises and practice problems
+
+### 🧪 Warm-ups (easy)
+
+**E1.** Set up a router with `/`, `/about`, and a 404 catch-all. Add a nav with `<Link>`s.
+
+<details><summary>Show solution</summary>
+
+```jsx
+const router = createBrowserRouter([
+  { path: '/', element: <Home /> },
+  { path: '/about', element: <About /> },
+  { path: '*', element: <h1>404</h1> },
+])
+// <Link to="/">Home</Link> <Link to="/about">About</Link>
+```
+
+*Why:* Minimal route table with the essential catch-all.
+</details>
+
+**E2.** Given route `/posts/:slug`, read and display the slug.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Post() {
+  const { slug } = useParams()
+  return <h1>Post: {slug}</h1>
+}
+```
+
+*Why:* `useParams()` returns `{ slug }` from the `:slug` segment.
+</details>
+
+### 🧪 Core (medium)
+
+**E3.** Build a layout with a persistent sidebar and an `<Outlet>`. Add `/`, `/inbox`, `/sent` as children.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Layout() {
+  return (
+    <div style={{ display: 'flex' }}>
+      <aside><NavLink to="/inbox">Inbox</NavLink><NavLink to="/sent">Sent</NavLink></aside>
+      <main><Outlet /></main>
+    </div>
+  )
+}
+// { path:'/', element:<Layout/>, children:[
+//   { index:true, element:<Home/> },
+//   { path:'inbox', element:<Inbox/> },
+//   { path:'sent', element:<Sent/> } ] }
+```
+
+*Why:* Parent layout + `<Outlet>` renders shared sidebar once (§5).
+</details>
+
+**E4.** Add sort + page to a list using `useSearchParams`, so the URL reflects `?sort=name&page=2`.
+
+<details><summary>Show solution</summary>
+
+```jsx
+const [params, setParams] = useSearchParams()
+const sort = params.get('sort') ?? 'name'
+const page = Number(params.get('page') ?? '1')
+// setParams({ sort: 'price', page: String(page + 1) })
+```
+
+*Why:* URL as the source of truth for filters — shareable and bookmarkable (§6).
+</details>
+
+**E5.** Build a `RequireAuth` guard and protect `/dashboard`. Redirect to `/login` when not authed.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function RequireAuth() {
+  const { user } = useAuth()
+  return user ? <Outlet /> : <Navigate to="/login" replace />
+}
+// { element:<RequireAuth/>, children:[ { path:'/dashboard', element:<Dashboard/> } ] }
+```
+
+*Why:* Declarative redirect during render (§7), no content flash.
+</details>
+
+### 🧪 Challenge (hard)
+
+**E6.** Add a loader to `/users/:id` that fetches the user before render, with an `errorElement` for 404s.
+
+<details><summary>Show solution</summary>
+
+```jsx
+async function loader({ params }) {
+  const res = await fetch(`/api/users/${params.id}`)
+  if (!res.ok) throw new Response('Not found', { status: 404 })
+  return res.json()
+}
+// { path:'/users/:id', element:<User/>, loader, errorElement:<ErrorPage/> }
+function User() { const user = useLoaderData(); return <h1>{user.name}</h1> }
+```
+
+*Why:* Data ready before render, errors routed to `errorElement` (§8).
+</details>
+
+**E7.** Implement "return to intended page after login": visiting `/settings` unauthenticated redirects to `/login`, and logging in returns to `/settings`.
+
+<details><summary>Show solution</summary>
+
+```jsx
+// Guard: <Navigate to="/login" state={{ from: location }} replace />
+// Login: const from = location.state?.from?.pathname ?? '/'
+//        after signIn: navigate(from, { replace: true })
+```
+
+*Why:* Stash `from` in history state and navigate back after auth (§7).
+</details>
+
+**E8 (capstone step).** Add the **Edit** flow to your Contacts Manager: an `/contacts/:id/edit` route with a form pre-filled from the contact, saving via a mutation that invalidates both `['contact', id]` and `['contacts']`. Keep it — Part 9 adds global UI state (theme, toasts) and Part 10 styles the whole app.
+
+<details><summary>Show hint</summary>
+
+Add `update: async (id, data) => { ... }` to the `api` store. The edit page reads the contact with `useQuery(['contact', id])`, renders a form with `defaultValue`s, and on submit calls `useMutation` → `onSuccess` invalidates both query keys and navigates back to `/contacts/${id}`. Reuse the same form fields as `NewContact` by extracting a `<ContactForm>` (Part 2/7 composition).
+</details>
+
+---
+
+## 11. Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **SPA** | Single-Page Application — one HTML file; JS swaps content client-side. |
+| **React Router** | The library mapping URLs to components and handling navigation. |
+| **`createBrowserRouter`** | The data-router API for defining routes (enables loaders/actions). |
+| **`<Link>` / `<NavLink>`** | Client-side navigation links (NavLink adds `isActive`). |
+| **Route parameter** | A dynamic URL segment (`:id`), read with `useParams()`. |
+| **`<Outlet />`** | Where a parent route renders its matched child (nested routes). |
+| **Index route** | The default child (`index: true`) for a parent's exact path. |
+| **`useNavigate`** | Hook to navigate programmatically from code. |
+| **`useSearchParams`** | Read/write query params (`?sort=…`) like `useState` on the URL. |
+| **Protected route** | A guard that redirects unauthenticated users (`<Navigate>`). |
+| **Loader / action** | Route-level functions that load data before render / handle form posts. |
+
+---
+
+> **Your app now has real pages, navigation, and URLs.** Combined with data fetching, you can build genuine multi-screen applications. But as apps grow, sharing state across distant screens gets painful — the next part solves that with proper state management.
+>
+> **Next:** [Part 9 · State Management →](09-state-management.html)
+</script>
+
+<!-- default language for untagged code fences + jsx/tsx aliases -->
+<script>
+window.DOC_DEFAULT_LANG='javascript';
+(function(){try{
+  if(window.hljs&&hljs.registerAliases){
+    hljs.registerAliases(['jsx'],{languageName:'javascript'});
+    hljs.registerAliases(['tsx'],{languageName:'typescript'});
+  }
+}catch(e){}})();
+</script>
+
+<!-- mobile drawer toggle for the chip TOC -->
+<script>
+(function(){
+  var mt=document.getElementById('menuToggle'),toc=document.getElementById('toc'),ov=document.getElementById('overlay');
+  if(mt&&toc){mt.addEventListener('click',function(){toc.classList.toggle('open');if(ov)ov.classList.toggle('show');});}
+  if(ov){ov.addEventListener('click',function(){toc.classList.remove('open');ov.classList.remove('show');});}
+})();
+</script>
+
+<!-- cross-file series navigation: active chip + footer prev/next -->
+<script>
+(function(){
+  var order=['README.html','01-jsx-and-rendering.html','02-components-and-props.html','03-state-and-events.html','04-lists-keys-conditional.html','05-hooks-deep-dive.html','06-effects-and-data-fetching.html','07-forms.html','08-routing.html','09-state-management.html','10-styling.html','11-performance.html','12-typescript-react.html','13-testing.html','14-patterns-architecture.html','15-production-and-beyond.html'];
+  var titles={'README.html':'Series index','01-jsx-and-rendering.html':'1 · JSX & Rendering','02-components-and-props.html':'2 · Components & Props','03-state-and-events.html':'3 · State & Events','04-lists-keys-conditional.html':'4 · Lists, Keys & Conditionals','05-hooks-deep-dive.html':'5 · Hooks Deep Dive','06-effects-and-data-fetching.html':'6 · Effects & Data Fetching','07-forms.html':'7 · Forms','08-routing.html':'8 · Routing','09-state-management.html':'9 · State Management','10-styling.html':'10 · Styling','11-performance.html':'11 · Performance','12-typescript-react.html':'12 · TypeScript','13-testing.html':'13 · Testing','14-patterns-architecture.html':'14 · Patterns & Architecture','15-production-and-beyond.html':'15 · Production & Beyond'};
+  var here=(location.pathname.split('/').pop()||'README.html').toLowerCase();
+  if(here===''||here==='index.html')here='readme.html';
+  document.querySelectorAll('#seriesNavBar a').forEach(function(a){
+    if((a.getAttribute('href')||'').toLowerCase()===here){a.classList.add('active');a.setAttribute('aria-current','page');a.scrollIntoView({block:'nearest',inline:'center'});}
+  });
+  var norm=order.map(function(x){return x.toLowerCase();});
+  var i=norm.indexOf(here);
+  function fill(sel,file){var el=document.querySelector(sel);if(!el)return;if(!file){el.style.display='none';return;}el.style.display='';el.setAttribute('href',file);var b=el.querySelector('b');if(b)b.textContent=titles[file];}
+  if(i>=0){fill('.sn-prev',i>0?order[i-1]:null);fill('.sn-next',i<order.length-1?order[i+1]:null);}
+})();
+</script>
+
+<!-- rendering engine (inlined verbatim by build.ps1) -->
+<script>
+/*
+ * Deep Dive Docs — Rendering Engine (inline this verbatim into every generated .html)
+ * ---------------------------------------------------------------------------------
+ * This is the ONLY non-negotiable JavaScript. The visual design (CSS, layout, fonts,
+ * colors, decorative markup) is free to change per topic, but these element HOOKS must
+ * exist for the page to function. All hooks except #markdown-source and #content are
+ * OPTIONAL — the engine feature-detects each and silently skips what isn't present.
+ *
+ * REQUIRED hooks:
+ *   <script type="text/markdown" id="markdown-source">  ...raw markdown...  <\/script>
+ *   <... id="content">  (empty container that receives the rendered HTML)
+ *
+ * OPTIONAL hooks (include only the ones your design uses):
+ *   id="toc"          -> auto-filled with links to every h2/h3 (sidebar/top/drawer — your choice)
+ *   id="progress"     -> reading-progress bar; its style.width is set 0%..100%
+ *   id="themeToggle"  -> click toggles data-theme on <html>; persists to localStorage 'doc-theme'
+ *   id="themeLabel"   -> text set to "Dark"/"Light"
+ *   id="hljs-theme"   -> <link> whose href swaps between highlight.js dark/light CSS
+ *   id="menuToggle" + id="overlay"  -> mobile drawer open/close for #toc
+ *
+ * REQUIRED libraries (load via CDN or inline, before this script):
+ *   marked.js, highlight.js (+ a theme CSS), mermaid
+ *
+ * The default code language for un-tagged ``` blocks is set by:  window.DOC_DEFAULT_LANG
+ * (e.g. set <script>window.DOC_DEFAULT_LANG='python'<\/script> before this engine). Defaults to 'python'.
+ */
+(function () {
+  const src = document.getElementById('markdown-source');
+  const contentEl = document.getElementById('content');
+  if (!src || !contentEl) { console.error('[doc-engine] missing #markdown-source or #content'); return; }
+  // Un-escape any <\/script> the build wrote so an HTML example inside the docs can't close
+  // the <script id="markdown-source"> container early. See build.ps1's matching escape.
+  const raw = src.textContent.replace(/<\\\/script>/g, '<\/script>');
+  const $ = id => document.getElementById(id);
+  const defaultLang = window.DOC_DEFAULT_LANG || 'python';
+
+  // 1. Markdown -> HTML
+  if (window.marked) marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
+  contentEl.innerHTML = window.marked ? marked.parse(raw) : raw;
+
+  // 2. Convert ```mermaid fences into rendered diagrams
+  const mermaidBlocks = [];
+  contentEl.querySelectorAll('pre code.language-mermaid').forEach(code => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.dataset.src = code.textContent;
+    div.textContent = code.textContent;
+    code.parentElement.replaceWith(div);
+    mermaidBlocks.push(div);
+  });
+  function renderMermaid() {
+    if (!window.mermaid || mermaidBlocks.length === 0) return;
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' });
+    mermaidBlocks.forEach(div => { div.removeAttribute('data-processed'); div.innerHTML = div.dataset.src; });
+    try { mermaid.run({ nodes: mermaidBlocks }); }
+    catch (e) { try { mermaid.init(undefined, mermaidBlocks); } catch (_) {} }
+  }
+  renderMermaid();
+
+  // 3. Slugify + assign heading ids
+  const slug = t => t.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+  contentEl.querySelectorAll('h2, h3').forEach(h => { if (!h.id) h.id = slug(h.textContent); });
+
+  // 4. Build the TOC (optional)
+  const toc = $('toc');
+  if (toc) {
+    contentEl.querySelectorAll('h2, h3').forEach(h => {
+      if (/table of contents/i.test(h.textContent)) { h.style.display = 'none'; return; }
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      if (h.tagName === 'H3') a.className = 'h3';
+      a.addEventListener('click', closeMobile);
+      toc.appendChild(a);
+    });
+    // Remove the redundant in-document TOC list (right after the hidden "Table of Contents" heading)
+    const tocHeading = Array.from(contentEl.querySelectorAll('h2')).find(h => /table of contents/i.test(h.textContent));
+    if (tocHeading) {
+      let n = tocHeading.nextElementSibling;
+      while (n && n.tagName !== 'HR' && n.tagName !== 'H2') { const next = n.nextElementSibling; n.remove(); n = next; }
+      if (n && n.tagName === 'HR') n.remove();
+    }
+  }
+
+  // 5. Syntax highlight (mermaid already converted away)
+  contentEl.querySelectorAll('pre code').forEach(block => {
+    if (block.classList.contains('language-mermaid')) return;
+    if (!block.className) block.className = 'language-' + defaultLang;
+    if (window.hljs) { try { hljs.highlightElement(block); } catch (e) {} }
+  });
+
+  // 6. Scroll-spy (only if a TOC exists)
+  if (toc) {
+    const links = Array.from(toc.querySelectorAll('a'));
+    const map = {};
+    links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const link = map[e.target.id];
+          if (link) { link.classList.add('active'); link.scrollIntoView({ block: 'nearest' }); }
+        }
+      });
+    }, { rootMargin: '-70px 0px -75% 0px', threshold: 0 });
+    contentEl.querySelectorAll('h2, h3').forEach(h => { if (h.id) spy.observe(h); });
+  }
+
+  // 7. Reading-progress bar (optional)
+  const progress = $('progress');
+  if (progress) {
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      progress.style.width = ((h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100) + '%';
+    }, { passive: true });
+  }
+
+  // 8. Theme toggle (optional)
+  const root = document.documentElement;
+  const themeBtn = $('themeToggle');
+  const themeLabel = $('themeLabel');
+  const hljsTheme = $('hljs-theme');
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    const dark = t === 'dark';
+    if (themeBtn && themeBtn.firstChild) themeBtn.firstChild.textContent = dark ? '🌙 ' : '☀️ ';
+    if (themeLabel) themeLabel.textContent = dark ? 'Dark' : 'Light';
+    if (hljsTheme) hljsTheme.href = dark
+      ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
+      : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+    try { localStorage.setItem('doc-theme', t); } catch (e) {}
+    renderMermaid();
+  }
+  let saved = 'dark';
+  try { saved = localStorage.getItem('doc-theme') || root.getAttribute('data-theme') || 'dark'; } catch (e) {}
+  applyTheme(saved);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+  // 9. Mobile drawer (optional)
+  const menuToggle = $('menuToggle');
+  const overlay = $('overlay');
+  function closeMobile() { if (toc) toc.classList.remove('open'); if (overlay) overlay.classList.remove('show'); }
+  if (menuToggle && toc) menuToggle.addEventListener('click', () => { toc.classList.toggle('open'); if (overlay) overlay.classList.toggle('show'); });
+  if (overlay) overlay.addEventListener('click', closeMobile);
+})();
+
+/*
+ * STORYBOOK ENHANCEMENT LAYER (optional, additive)
+ * -------------------------------------------------
+ * Post-processes the already-rendered #content to add richer, less "wall-of-text"
+ * presentation. Everything here is feature-detected and fail-safe: if a hook is
+ * missing or a component block is malformed, it silently leaves the content as-is.
+ *
+ * Adds:
+ *   - Themed callouts     : auto-detected from emoji-led blockquotes (no authoring change)
+ *   - Section chrome      : turns "N. Heading" into a numbered badge + clean title
+ *   - Visual components   : fenced blocks  ```stat  ```flow  ```cards  ```tags  (and ~~~overlay)
+ *   - Inline tag pills    : [[decided]]  [[risk:Custom label]]  in normal prose
+ *   - Read-as-deck mode   : a top-bar button that reflows the page into keyboard-nav slides
+ */
+(function () {
+  const content = document.getElementById('content');
+  if (!content) return;
+  const hasMarked = !!window.marked;
+  const inlineMd = s => (hasMarked && marked.parseInline) ? marked.parseInline(s) : s;
+  const blockMd  = s => hasMarked ? marked.parse(s) : s;
+
+  const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+  const elText = (tag, txt) => { const n = document.createElement(tag); n.textContent = txt; return n; };
+  const elHTML = (tag, cls, html) => { const n = el(tag, cls); n.innerHTML = html; return n; };
+
+  // ---- Modal (shared by overlay components) ----
+  let modal, modalTitle, modalBody;
+  function ensureModal() {
+    if (modal) return;
+    modal = el('div', 'sb-modal');
+    const card = el('div', 'sb-modal-card');
+    const head = el('div', 'sb-modal-head');
+    modalTitle = el('h3');
+    const close = el('button', 'sb-modal-close'); close.type = 'button'; close.innerHTML = '&times;';
+    close.addEventListener('click', closeModal);
+    head.appendChild(modalTitle); head.appendChild(close);
+    modalBody = el('div', 'sb-modal-body');
+    card.appendChild(head); card.appendChild(modalBody); modal.appendChild(card);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.body.appendChild(modal);
+  }
+  function openModal(title, html) {
+    ensureModal();
+    modalTitle.textContent = title || 'Detail';
+    modalBody.innerHTML = html;
+    if (window.hljs) modalBody.querySelectorAll('pre code').forEach(b => { try { hljs.highlightElement(b); } catch (e) {} });
+    modal.classList.add('open');
+  }
+  function closeModal() { if (modal) modal.classList.remove('open'); }
+
+  // ---- Tag pill ----
+  const TAGS = ['decided', 'tbd', 'risk', 'info', 'new'];
+  function tagPill(type, label) {
+    const t = TAGS.indexOf(type) >= 0 ? type : 'info';
+    const s = el('span', 'sb-tag ' + t); s.textContent = label || type; return s;
+  }
+
+  // ---- 1. Visual components from fenced code blocks ----
+  const COMP = { stat: 'stat', 'sb-stat': 'stat', flow: 'flow', 'sb-flow': 'flow',
+    cards: 'cards', 'sb-cards': 'cards', tags: 'tags', 'sb-tags': 'tags',
+    overlay: 'overlay', 'sb-overlay': 'overlay' };
+  function build(kind, raw) {
+    const lines = raw.split('\n').map(l => l.replace(/\s+$/, '')).filter(l => l.trim());
+    if (kind === 'stat') {
+      const row = el('div', 'sb-stat-row');
+      lines.forEach(l => {
+        const i = l.indexOf('|');
+        const num = i >= 0 ? l.slice(0, i) : l;
+        const lbl = i >= 0 ? l.slice(i + 1) : '';
+        const s = el('div', 'sb-stat');
+        s.appendChild(elHTML('div', 'num', inlineMd(num.trim())));
+        s.appendChild(elHTML('div', 'lbl', inlineMd(lbl.trim())));
+        row.appendChild(s);
+      });
+      return row;
+    }
+    if (kind === 'flow') {
+      const wrap = el('div', 'sb-flow');
+      raw.replace(/\n/g, ' ').split('->').forEach((tok, idx) => {
+        tok = tok.trim(); if (!tok) return;
+        let cls = ''; const m = tok.match(/\{([a-z]+)\}\s*$/i);
+        if (m) { cls = m[1].toLowerCase(); tok = tok.replace(/\{[a-z]+\}\s*$/i, '').trim(); }
+        const parts = tok.split('::');
+        if (idx > 0) { const a = el('div', 'sb-flow-arrow'); a.textContent = '\u2192'; wrap.appendChild(a); }
+        const box = el('div', 'sb-flow-box' + (cls ? ' ' + cls : ''));
+        box.appendChild(elText('b', parts[0].trim()));
+        if (parts[1]) box.appendChild(elText('small', parts[1].trim()));
+        wrap.appendChild(box);
+      });
+      return wrap;
+    }
+    if (kind === 'cards') {
+      const cards = lines.map(l => {
+        const i = l.indexOf('::');
+        const t = i >= 0 ? l.slice(0, i) : l;
+        const d = i >= 0 ? l.slice(i + 2) : '';
+        const c = el('div', 'sb-card');
+        c.appendChild(elHTML('div', 'ct', inlineMd(t.trim())));
+        if (d.trim()) c.appendChild(elHTML('div', 'cd', inlineMd(d.trim())));
+        return c;
+      });
+      let cols = cards.length <= 4 ? cards.length : (cards.length % 3 === 0 ? 3 : (cards.length % 2 === 0 ? 2 : 3));
+      const grid = el('div', 'sb-cards' + (cols > 1 ? ' n' + cols : ''));
+      cards.forEach(c => grid.appendChild(c));
+      return grid;
+    }
+    if (kind === 'tags') {
+      const wrap = el('div'); wrap.style.margin = '1.2em 0';
+      raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean).forEach(item => {
+        const i = item.indexOf(':');
+        const type = (i >= 0 ? item.slice(0, i) : item).trim().toLowerCase();
+        const label = (i >= 0 ? item.slice(i + 1) : item).trim();
+        wrap.appendChild(tagPill(type, label));
+      });
+      return wrap;
+    }
+    if (kind === 'overlay') {
+      const nl = raw.indexOf('\n');
+      const label = (nl >= 0 ? raw.slice(0, nl) : raw).trim();
+      const body = (nl >= 0 ? raw.slice(nl + 1) : '').trim();
+      const btn = el('button', 'sb-ov-btn'); btn.type = 'button';
+      btn.textContent = label || 'Show detail';
+      btn.addEventListener('click', () => openModal(label, blockMd(body)));
+      return btn;
+    }
+    return null;
+  }
+  Array.from(content.querySelectorAll('pre > code')).forEach(code => {
+    let kind = null;
+    code.classList.forEach(c => { const k = c.replace(/^language-/, ''); if (COMP[k]) kind = COMP[k]; });
+    if (!kind) return;
+    let node = null;
+    try { node = build(kind, code.textContent.replace(/\s+$/, '')); } catch (e) { return; }
+    if (node) code.parentElement.replaceWith(node);
+  });
+
+  // ---- 2. Themed callouts from emoji-led blockquotes ----
+  const EMOJI = [
+    [/^\s*(\uD83D\uDD0D|\u2699)/, 'cx-info'],   // magnifier / gear
+    [/^\s*(\u26A0)/, 'cx-warn'],                // warning
+    [/^\s*(\uD83D\uDCA1|\uD83C\uDFAF)/, 'cx-tip'], // bulb / target
+    [/^\s*(\u2705|\uD83D\uDFE2)/, 'cx-ok'],     // check / green
+    [/^\s*(\uD83D\uDD34|\u26D4|\uD83D\uDEA8)/, 'cx-risk'] // red / no-entry / siren
+  ];
+  Array.from(content.querySelectorAll('blockquote')).forEach(bq => {
+    const txt = bq.textContent || '';
+    for (const [rx, cls] of EMOJI) { if (rx.test(txt)) { bq.classList.add('callout', cls); return; } }
+  });
+
+  // ---- 3. Section chrome: "N. Heading" -> numbered badge + clean title ----
+  Array.from(content.querySelectorAll('h2')).forEach(h => {
+    const m = h.textContent.match(/^\s*(\d+)[.):]\s+(.*)$/);
+    if (!m) return;
+    h.textContent = m[2];
+    const badge = el('span', 'sec-badge'); badge.textContent = m[1];
+    h.insertBefore(badge, h.firstChild);
+    h.classList.add('has-badge');
+    // First blockquote right after the heading becomes a purpose block (unless it's a callout).
+    const n = h.nextElementSibling;
+    if (n && n.tagName === 'BLOCKQUOTE' && !n.classList.contains('callout')) n.classList.add('purpose-block');
+  });
+
+  // ---- 4. Inline [[tag]] / [[tag:label]] pills in prose (skip code/links) ----
+  const rx = /\[\[([a-zA-Z]+)(?::([^\]]+))?\]\]/g;
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      if (!n.nodeValue || n.nodeValue.indexOf('[[') < 0) return NodeFilter.FILTER_REJECT;
+      let p = n.parentElement;
+      while (p && p !== content) {
+        const t = p.tagName;
+        if (t === 'PRE' || t === 'CODE' || t === 'A' || t === 'SCRIPT' || t === 'STYLE') return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes = []; while (walker.nextNode()) textNodes.push(walker.currentNode);
+  textNodes.forEach(tn => {
+    const val = tn.nodeValue; rx.lastIndex = 0;
+    if (!rx.test(val)) return; rx.lastIndex = 0;
+    const frag = document.createDocumentFragment(); let last = 0, m;
+    while ((m = rx.exec(val))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(val.slice(last, m.index)));
+      frag.appendChild(tagPill(m[1].toLowerCase(), m[2] ? m[2].trim() : m[1]));
+      last = m.index + m[0].length;
+    }
+    if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));
+    tn.parentNode.replaceChild(frag, tn);
+  });
+
+  // ---- 5. Read-as-deck slide mode ----
+  const topbar = document.querySelector('.topbar');
+  const themeBtn = document.getElementById('themeToggle');
+  let deckRoot, deckStage, deckTitle, deckCounter, deckDots, deckPrev, deckNext;
+  const slides = []; let cur = 0;
+  function slideTitle(i) {
+    const h = slides[i] && slides[i].querySelector('h1, h2');
+    if (!h) return 'Slide ' + (i + 1);
+    const c = h.cloneNode(true); const b = c.querySelector('.sec-badge'); if (b) b.remove();
+    return c.textContent.trim();
+  }
+  function go(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[cur].classList.remove('active'); cur = i; slides[cur].classList.add('active');
+    Array.from(deckDots.children).forEach((d, k) => d.classList.toggle('active', k === cur));
+    deckCounter.textContent = (cur + 1) + ' / ' + slides.length;
+    deckPrev.disabled = cur === 0; deckNext.disabled = cur === slides.length - 1;
+    deckStage.scrollTop = 0; deckTitle.textContent = slideTitle(cur);
+  }
+  function stripIds(node) {
+    const c = node.cloneNode(true);
+    // Clear ids so cloned headings/anchors don't collide with the live DOM, but
+    // PRESERVE ids inside rendered SVG: Mermaid scopes its <style>, arrow markers
+    // and gradients by #id / url(#id), so stripping them breaks the diagram.
+    if (c.removeAttribute && !(c.tagName && c.tagName.toLowerCase() === 'svg')) c.removeAttribute('id');
+    if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(e => { if (!e.closest('svg')) e.removeAttribute('id'); });
+    return c;
+  }
+  function buildDeck() {
+    if (deckRoot) return;
+    deckRoot = el('div', 'deck-root');
+    const top = el('div', 'deck-top');
+    deckTitle = el('div', 'dt-title');
+    const exit = el('button', 'deck-exit'); exit.type = 'button'; exit.textContent = '\u2715 Exit';
+    exit.addEventListener('click', closeDeck);
+    top.appendChild(deckTitle); top.appendChild(exit);
+    deckStage = el('div', 'deck-stage');
+    const nav = el('div', 'deck-nav');
+    deckPrev = el('button', 'deck-arrow'); deckPrev.type = 'button'; deckPrev.innerHTML = '&#8592;';
+    deckPrev.addEventListener('click', () => go(cur - 1));
+    deckNext = el('button', 'deck-arrow'); deckNext.type = 'button'; deckNext.innerHTML = '&#8594;';
+    deckNext.addEventListener('click', () => go(cur + 1));
+    deckCounter = el('div', 'deck-counter');
+    deckDots = el('div', 'deck-dots');
+    nav.appendChild(deckPrev); nav.appendChild(deckDots); nav.appendChild(deckCounter); nav.appendChild(deckNext);
+    deckRoot.appendChild(top); deckRoot.appendChild(deckStage); deckRoot.appendChild(nav);
+    document.body.appendChild(deckRoot);
+    let slide = null;
+    Array.from(content.children).forEach(node => {
+      if (node.tagName === 'H2' || !slide) { slide = el('div', 'deck-slide'); deckStage.appendChild(slide); slides.push(slide); }
+      slide.appendChild(stripIds(node));
+    });
+    slides.forEach((s, i) => { const d = el('button', 'deck-dot'); d.type = 'button'; d.addEventListener('click', () => go(i)); deckDots.appendChild(d); });
+  }
+  function openDeck() { buildDeck(); if (!slides.length) return; deckRoot.classList.add('open'); document.body.style.overflow = 'hidden'; go(Math.min(cur, slides.length - 1)); }
+  function closeDeck() { if (deckRoot) deckRoot.classList.remove('open'); document.body.style.overflow = ''; }
+  if (topbar) {
+    const deckBtn = el('button', 'deck-btn'); deckBtn.type = 'button'; deckBtn.textContent = '\u25A4 Deck';
+    if (themeBtn) topbar.insertBefore(deckBtn, themeBtn); else topbar.appendChild(deckBtn);
+    deckBtn.addEventListener('click', openDeck);
+  }
+  document.addEventListener('keydown', e => {
+    if (modal && modal.classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
+    if (!deckRoot || !deckRoot.classList.contains('open')) return;
+    if (e.key === 'Escape') closeDeck();
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(cur - 1); }
+  });
+})();
+
+</script>
+</body>
+</html>

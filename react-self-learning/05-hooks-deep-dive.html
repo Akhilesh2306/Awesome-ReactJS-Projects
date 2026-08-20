@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hooks Deep Dive · React from Scratch</title>
+<meta name="description" content="Hooks Deep Dive — a deep, hands-on guide to learning React JS from scratch to production." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<!-- Libraries (CDN; needs internet on first view) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+<style>
+/* =====================================================================
+   BENTO / DASHBOARD skin — rounded cards, gradient hero, sticky chip TOC.
+   Rethemed to a React cyan/blue palette. Dark by default.
+   ===================================================================== */
+:root{
+  --font-head:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --r:18px; --r-sm:12px;
+  /* ---- alias vars so the enhancement kit (--sb-* chain) themes to this skin ---- */
+  --primary:var(--a1); --primary-2:var(--a3); --accent:var(--a2);
+  --panel:var(--card); --panel-2:var(--card2); --border:var(--line);
+  --text:var(--fg); --text-dim:var(--fg-soft); --text-mut:var(--fg-faint);
+  --hero-grad:var(--grad); --serif:var(--font-head); --mono:var(--font-mono);
+  --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+}
+[data-theme="dark"]{
+  --bg:#080d18; --card:#111a2b; --card2:#0c1322; --line:#1e2942; --line-soft:#16203a;
+  --fg:#e6eef9; --fg-soft:#9fb2cd; --fg-faint:#65748f;
+  --a1:#61dafb; --a2:#38bdf8; --a3:#818cf8;
+  --grad:linear-gradient(135deg,#61dafb,#38bdf8 55%,#818cf8);
+  --code:#070c16; --code-fg:#e2e8f0; --sel:#173453;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#eef3fb; --card:#ffffff; --card2:#f5f8fe; --line:#e0e8f4; --line-soft:#eef3fb;
+  --fg:#0e1c33; --fg-soft:#44566f; --fg-faint:#8494ac;
+  --a1:#0284c7; --a2:#0891b2; --a3:#4f46e5;
+  --grad:linear-gradient(135deg,#0284c7,#0891b2 55%,#4f46e5);
+  --code:#0f1729; --code-fg:#e2e8f0; --sel:#dbeafe;
+  --shadow:0 6px 22px rgba(15,23,42,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.7;
+  font-size:16.5px;-webkit-font-smoothing:antialiased}
+::selection{background:var(--sel)}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:var(--grad);
+  box-shadow:0 0 12px var(--a2)}
+
+/* top nav */
+header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-row{display:flex;align-items:center;gap:14px;padding:12px clamp(16px,4vw,40px)}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--font-head);font-weight:700;
+  font-size:1.02rem;text-decoration:none;color:inherit}
+.logo .mark{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;
+  place-items:center;color:#04121f;font-weight:800;font-size:16px;box-shadow:0 4px 16px rgba(97,218,251,.35)}
+.logo small{display:block;font-family:var(--font-body);font-weight:500;font-size:11.5px;color:var(--fg-faint)}
+header .spacer{flex:1}
+.btn{cursor:pointer;font-family:var(--font-body);font-size:.85rem;color:var(--fg-soft);
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 15px;transition:.2s}
+.btn:hover{color:var(--fg);border-color:var(--a1)}
+#menuToggle{display:none;cursor:pointer;border:1px solid var(--line);background:var(--card);
+  color:var(--fg);padding:6px 11px;border-radius:9px;font-size:18px;line-height:1}
+
+/* series cross-file nav */
+.series-nav-bar{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 10px;
+  scrollbar-width:thin}
+.series-nav-bar::-webkit-scrollbar{height:5px}
+.series-nav-bar::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.series-nav-bar .slabel{flex:0 0 auto;font-family:var(--font-head);font-size:11px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;color:var(--fg-faint);padding-right:2px}
+.series-nav-bar a{flex:0 0 auto;text-decoration:none;font-size:12.5px;white-space:nowrap;color:var(--fg-soft);
+  border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--card);transition:.15s}
+.series-nav-bar a:hover{color:var(--fg);border-color:var(--a1)}
+.series-nav-bar a.active{color:#04121f;background:var(--grad);border-color:transparent;font-weight:700}
+
+/* on-page chip TOC */
+nav#toc{display:flex;gap:8px;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 12px;scrollbar-width:none}
+nav#toc::-webkit-scrollbar{display:none}
+nav#toc a{white-space:nowrap;flex:none;font-size:.82rem;color:var(--fg-soft);text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;transition:.15s}
+nav#toc a:hover{color:var(--fg);border-color:var(--a1)}
+nav#toc a.h3{font-size:.78rem;color:var(--fg-faint)}
+nav#toc a.active{background:var(--grad);color:#04121f;border-color:transparent;font-weight:600}
+
+/* hero + bento */
+main{max-width:1000px;margin:0 auto;padding:30px clamp(16px,4vw,40px) 120px}
+.hero{background:var(--grad);border-radius:24px;padding:30px 32px;color:#04121f;margin-bottom:16px;
+  box-shadow:var(--shadow)}
+.hero .eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.hero h1{font-family:var(--font-head);font-weight:700;font-size:clamp(1.6rem,4vw,2.15rem);margin:6px 0 8px;
+  letter-spacing:-.02em;line-height:1.12}
+.hero p{opacity:.9;max-width:60ch;font-size:.98rem}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.bento .cell{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;
+  box-shadow:var(--shadow)}
+.bento .cell .k{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.bento .cell .v{font-family:var(--font-head);font-weight:700;font-size:1.24rem;margin-top:4px}
+.bento .cell.wide{grid-column:span 2}
+@media(max-width:720px){.bento{grid-template-columns:repeat(2,1fr)}.bento .cell.wide{grid-column:span 2}}
+
+/* content card */
+article.content{background:var(--card);border:1px solid var(--line);border-radius:24px;
+  padding:clamp(22px,4vw,46px);box-shadow:var(--shadow)}
+#content{animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.content h1{font-family:var(--font-head);font-weight:700;font-size:2.1rem;letter-spacing:-.02em;margin:0 0 6px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.content h1 + blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a1);
+  border-radius:var(--r-sm);padding:14px 18px;margin:14px 0 8px;color:var(--fg-soft)}
+.content h2{font-family:var(--font-head);font-weight:700;font-size:1.5rem;margin:48px 0 14px;
+  scroll-margin-top:150px;display:flex;align-items:center;gap:12px}
+.content h2::before{content:'';width:10px;height:26px;border-radius:6px;background:var(--grad);flex:none}
+.content h2.has-badge::before{display:none}
+.content h3{font-family:var(--font-head);font-weight:600;font-size:1.2rem;margin:30px 0 10px;
+  scroll-margin-top:150px;color:var(--a2)}
+.content h4{font-weight:600;font-size:1rem;margin:20px 0 8px;color:var(--fg-soft)}
+.content p{margin:14px 0}
+.content a{color:var(--a1);text-decoration:none;font-weight:500;border-bottom:1px dashed color-mix(in srgb,var(--a1) 45%,transparent)}
+.content a:hover{border-bottom-style:solid}
+.content strong{color:var(--fg);font-weight:700}
+.content ul,.content ol{margin:14px 0 14px 24px}
+.content li{margin:6px 0}
+.content hr{border:0;border-top:1px solid var(--line);margin:38px 0}
+
+/* code */
+.content code{font-family:var(--font-mono);font-size:.85em;background:var(--card2);color:var(--a2);
+  padding:2px 6px;border-radius:6px;border:1px solid var(--line-soft)}
+.code-wrap{position:relative;margin:20px 0}
+.content pre{background:var(--code);border-radius:var(--r-sm);padding:18px 20px;overflow-x:auto;border:1px solid var(--line)}
+.content pre code{background:none;border:0;padding:0;color:var(--code-fg);font-size:.84rem;line-height:1.62}
+.code-lang{position:absolute;top:10px;right:70px;font-family:var(--font-mono);font-size:.68rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.code-copy{position:absolute;top:8px;right:10px;font-family:var(--font-body);font-size:.74rem;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#cbd5e1;border-radius:8px;
+  padding:4px 11px;cursor:pointer;transition:.18s}
+.code-copy:hover{background:rgba(255,255,255,.16)}
+.code-copy.copied{color:var(--a1)}
+
+/* callouts (base; kit refines) */
+.content blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a2);
+  border-radius:var(--r-sm);padding:14px 18px;margin:20px 0;color:var(--fg-soft)}
+.content blockquote p{margin:4px 0}
+.content blockquote strong{color:var(--fg)}
+
+/* tables */
+.content table{width:100%;border-collapse:separate;border-spacing:0;margin:22px 0;font-size:.92rem;
+  border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.content th{background:var(--card2);text-align:left;padding:12px 16px;font-weight:600;font-family:var(--font-head);
+  border-bottom:1px solid var(--line)}
+.content td{padding:10px 16px;border-bottom:1px solid var(--line-soft);color:var(--fg-soft);vertical-align:top}
+.content tbody tr:last-child td{border-bottom:0}
+.content tbody tr:hover{background:var(--card2)}
+
+/* details / exercises */
+.content details{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);margin:16px 0;overflow:hidden}
+.content summary{cursor:pointer;padding:12px 18px;font-family:var(--font-head);font-weight:600;color:var(--a1);
+  list-style:none;user-select:none;display:flex;align-items:center;gap:8px}
+.content summary::-webkit-details-marker{display:none}
+.content summary::before{content:'+';display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;
+  background:var(--grad);color:#04121f;font-weight:800}
+.content details[open] summary::before{content:'\2212'}
+.content details>*:not(summary){padding:0 18px}
+.content details>.code-wrap{margin:10px 18px 16px}
+.content details>p:last-child{padding-bottom:14px}
+
+/* mermaid */
+.mermaid{display:flex;justify-content:center;margin:22px 0;padding:20px;background:var(--card2);
+  border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.mermaid svg{max-width:100%;height:auto}
+
+/* series footer nav */
+.series-footer{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.series-footer a{flex:1;min-width:200px;text-decoration:none;border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;background:var(--card);color:var(--fg);transition:.15s;box-shadow:var(--shadow)}
+.series-footer a:hover{border-color:var(--a1);transform:translateY(-2px)}
+.series-footer small{display:block;color:var(--fg-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.series-footer b{font-family:var(--font-head)}
+.series-footer .sn-next{text-align:right}
+
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80}
+#overlay.show{display:block}
+@media(max-width:720px){#menuToggle{display:inline-block}}
+
+/* ===== enhancement kit CSS (inlined by build.ps1) ===== */
+/* ============================================================
+   DEEP-DIVE DOCS — STORYBOOK ENHANCEMENT KIT (skin-agnostic CSS)
+   ------------------------------------------------------------
+   Callouts, section chrome, visual components (stat / flow / cards /
+   tags), deck (slide) mode, and progressive-disclosure overlays.
+
+   Skin-agnostic: every color/font resolves from a --sb-* variable whose
+   fallback chain covers the known skins (agentic-ai uses --primary /
+   --panel-2 / --hero-grad; editorial skins use --accent / --card /
+   --font-head; …) and ends in a hard-coded default. Inline this whole
+   block into any skin's <style>; it adapts to that skin automatically.
+   Pairs with assets/enhancements.js.
+   ============================================================ */
+:root{
+  --sb-accent: var(--primary, var(--accent, #7c6cff));
+  --sb-info:   var(--accent, var(--primary, #38d6f0));
+  --sb-tip:    var(--primary-2, var(--accent-soft, var(--accent, #9b8cff)));
+  --sb-ok:     var(--ok, #23b784);
+  --sb-warn:   var(--warn, #e0a52a);
+  --sb-danger: var(--danger, #e5484d);
+  --sb-bg:     var(--bg, var(--paper, #0b0f1a));
+  --sb-panel:  var(--panel-2, var(--card, #131a2b));
+  --sb-solid:  var(--panel, var(--card, #141824));
+  --sb-border: var(--border, var(--rule, #232c42));
+  --sb-text:   var(--text, var(--ink, #dbe3f4));
+  --sb-dim:    var(--text-dim, var(--ink-soft, #93a0bd));
+  --sb-mut:    var(--text-mut, var(--ink-faint, #63708f));
+  --sb-head:   var(--serif, var(--font-head, system-ui, sans-serif));
+  --sb-mono:   var(--mono, var(--font-mono, ui-monospace, monospace));
+  --sb-grad:   var(--hero-grad, linear-gradient(135deg, var(--sb-accent), var(--sb-info)));
+  --sb-shadow: var(--shadow, 0 18px 44px rgba(0,0,0,.35));
+}
+
+/* --- Section chrome: "N. Heading" -> numbered badge + purpose block --- */
+#content h2.has-badge{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sec-badge{display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;
+  background:var(--sb-grad);color:#fff;font-family:var(--sb-head);font-weight:700;font-size:17px;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+#content blockquote.purpose-block{border-left:4px solid var(--sb-info);
+  background:color-mix(in srgb,var(--sb-info) 10%,transparent);border-radius:0 12px 12px 0;
+  padding:14px 18px;margin:1em 0 1.4em;color:var(--sb-dim)}
+
+/* --- Callouts (auto-themed from emoji-led blockquotes) --- */
+#content blockquote.callout{border-left-width:4px;border-radius:0 12px 12px 0}
+#content blockquote.cx-info{border-left-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 9%,transparent)}
+#content blockquote.cx-warn{border-left-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 11%,transparent)}
+#content blockquote.cx-tip{border-left-color:var(--sb-tip);background:color-mix(in srgb,var(--sb-tip) 12%,transparent)}
+#content blockquote.cx-ok{border-left-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 11%,transparent)}
+#content blockquote.cx-risk{border-left-color:var(--sb-danger);background:color-mix(in srgb,var(--sb-danger) 11%,transparent)}
+
+/* --- Stat row --- */
+.sb-stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:1.4em 0}
+.sb-stat{flex:1;min-width:120px;background:var(--sb-panel);border:1px solid var(--sb-border);
+  border-radius:14px;padding:18px 16px;text-align:center}
+.sb-stat .num{font-family:var(--sb-head);font-size:30px;font-weight:700;line-height:1.1;
+  background:var(--sb-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sb-stat .lbl{font-size:12px;color:var(--sb-mut);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
+
+/* --- Flow diagram --- */
+.sb-flow{display:flex;align-items:stretch;flex-wrap:wrap;justify-content:center;background:var(--sb-panel);
+  border:1px solid var(--sb-border);border-radius:14px;padding:20px 14px;margin:1.4em 0}
+.sb-flow-box{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:110px;text-align:center;
+  padding:12px 14px;border:1.5px solid var(--sb-border);border-radius:10px;background:var(--sb-solid);font-size:13px}
+.sb-flow-box b{font-family:var(--sb-head);font-size:13.5px}
+.sb-flow-box small{color:var(--sb-mut);font-size:11px}
+.sb-flow-arrow{display:flex;align-items:center;color:var(--sb-mut);font-size:20px;padding:0 10px}
+.sb-flow-box.accent{border-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 12%,transparent)}
+.sb-flow-box.primary{border-color:var(--sb-accent);background:color-mix(in srgb,var(--sb-accent) 15%,transparent)}
+.sb-flow-box.ok{border-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 12%,transparent)}
+.sb-flow-box.warn{border-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 12%,transparent)}
+
+/* --- Card grid --- */
+.sb-cards{display:grid;gap:14px;margin:1.4em 0;grid-template-columns:1fr}
+.sb-cards.n2{grid-template-columns:repeat(2,1fr)}
+.sb-cards.n3{grid-template-columns:repeat(3,1fr)}
+.sb-cards.n4{grid-template-columns:repeat(4,1fr)}
+.sb-card{background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:14px;padding:18px;transition:.18s}
+.sb-card:hover{border-color:var(--sb-accent);transform:translateY(-3px);box-shadow:var(--sb-shadow)}
+.sb-card .ct{font-family:var(--sb-head);font-weight:700;margin-bottom:6px;color:var(--sb-tip)}
+.sb-card .cd{font-size:13.5px;color:var(--sb-dim);line-height:1.6}
+@media(max-width:820px){.sb-cards.n3,.sb-cards.n4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.sb-cards{grid-template-columns:1fr!important}}
+
+/* --- Tag pills --- */
+.sb-tag{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  padding:2px 9px;border-radius:999px;margin:0 3px;vertical-align:middle;border:1px solid transparent}
+.sb-tag.decided{background:color-mix(in srgb,var(--sb-ok) 18%,transparent);color:var(--sb-ok);border-color:color-mix(in srgb,var(--sb-ok) 40%,transparent)}
+.sb-tag.tbd{background:color-mix(in srgb,var(--sb-warn) 18%,transparent);color:var(--sb-warn);border-color:color-mix(in srgb,var(--sb-warn) 40%,transparent)}
+.sb-tag.risk{background:color-mix(in srgb,var(--sb-danger) 18%,transparent);color:var(--sb-danger);border-color:color-mix(in srgb,var(--sb-danger) 40%,transparent)}
+.sb-tag.info{background:color-mix(in srgb,var(--sb-info) 18%,transparent);color:var(--sb-info);border-color:color-mix(in srgb,var(--sb-info) 40%,transparent)}
+.sb-tag.new{background:color-mix(in srgb,var(--sb-accent) 20%,transparent);color:var(--sb-tip);border-color:color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+
+/* --- Overlay (progressive disclosure) trigger + modal --- */
+.sb-ov-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:14px;
+  color:var(--sb-text);background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:10px;padding:10px 16px;margin:1em 0;transition:.15s}
+.sb-ov-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.sb-ov-btn::before{content:"\2922";font-size:15px;color:var(--sb-info)}
+.sb-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(2,4,10,.68);backdrop-filter:blur(4px)}
+.sb-modal.open{display:flex}
+.sb-modal-card{background:var(--sb-solid);border:1px solid var(--sb-border);border-radius:18px;max-width:820px;width:100%;
+  max-height:86vh;overflow:auto;box-shadow:var(--sb-shadow);padding:8px 28px 28px;color:var(--sb-text)}
+.sb-modal-head{position:sticky;top:0;background:var(--sb-solid);display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0 12px;border-bottom:1px solid var(--sb-border);margin-bottom:14px}
+.sb-modal-head h3{font-family:var(--sb-head);margin:0;font-size:18px}
+.sb-modal-close{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;width:34px;height:34px;font-size:16px}
+.sb-modal-close:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+
+/* --- Deck (slide) mode --- */
+.deck-btn{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  padding:6px 12px;border-radius:999px;font-size:13px;font-family:inherit;margin-right:8px}
+.deck-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-root{position:fixed;inset:0;z-index:150;background:var(--sb-bg);display:none;flex-direction:column;color:var(--sb-text)}
+.deck-root.open{display:flex}
+.deck-top{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:14px;padding:0 20px;
+  border-bottom:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-top .dt-title{font-family:var(--sb-head);font-weight:700;font-size:15px;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deck-exit{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;padding:6px 12px;font-size:13px}
+.deck-exit:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+.deck-stage{flex:1;overflow:auto;display:grid;place-items:start center;padding:38px clamp(18px,5vw,80px) 90px}
+.deck-slide{display:none;max-width:1000px;width:100%;animation:deckIn .35s ease}
+.deck-slide.active{display:block}
+@keyframes deckIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.deck-nav{height:60px;flex:0 0 60px;display:flex;align-items:center;justify-content:center;gap:10px;
+  border-top:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-arrow{width:42px;height:42px;border-radius:11px;border:1px solid var(--sb-border);
+  background:var(--sb-panel);color:var(--sb-text);cursor:pointer;font-size:18px}
+.deck-arrow:hover:not(:disabled){border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-arrow:disabled{opacity:.35;cursor:default}
+.deck-dots{display:flex;gap:6px;align-items:center;max-width:60vw;overflow:auto;padding:0 6px}
+.deck-dot{width:9px;height:9px;border-radius:50%;background:var(--sb-border);border:none;cursor:pointer;flex:0 0 auto}
+.deck-dot.active{background:var(--sb-accent);width:24px;border-radius:6px}
+.deck-counter{font-family:var(--sb-mono);font-size:12px;color:var(--sb-mut);margin:0 6px}
+
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header>
+  <div class="nav-row topbar">
+    <button id="menuToggle" aria-label="Menu">☰</button>
+    <a class="logo" href="README.html">
+      <span class="mark">⚛</span>
+      <span>React from Scratch<small>Part 5 / 15</small></span>
+    </a>
+    <div class="spacer"></div>
+    <span class="btn" style="cursor:default">Vite · React 19</span>
+    <button class="btn" id="themeToggle">🌙 <span id="themeLabel">Dark</span></button>
+  </div>
+  <nav class="series-nav-bar" id="seriesNavBar" aria-label="Series parts">
+    <span class="slabel">Series</span>
+    <a href="README.html">Index</a>
+    <a href="01-jsx-and-rendering.html">1 · JSX</a>
+    <a href="02-components-and-props.html">2 · Components</a>
+    <a href="03-state-and-events.html">3 · State</a>
+    <a href="04-lists-keys-conditional.html">4 · Lists & Keys</a>
+    <a href="05-hooks-deep-dive.html">5 · Hooks</a>
+    <a href="06-effects-and-data-fetching.html">6 · Effects & Data</a>
+    <a href="07-forms.html">7 · Forms</a>
+    <a href="08-routing.html">8 · Routing</a>
+    <a href="09-state-management.html">9 · State Mgmt</a>
+    <a href="10-styling.html">10 · Styling</a>
+    <a href="11-performance.html">11 · Performance</a>
+    <a href="12-typescript-react.html">12 · TypeScript</a>
+    <a href="13-testing.html">13 · Testing</a>
+    <a href="14-patterns-architecture.html">14 · Patterns</a>
+    <a href="15-production-and-beyond.html">15 · Production</a>
+  </nav>
+  <nav id="toc"></nav>
+</header>
+<div id="overlay"></div>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">React from Scratch · Part 5 / 15</div>
+    <h1>Hooks Deep Dive</h1>
+    <p>Every built-in hook explained from first principles, the Rules of Hooks, and building your own custom hooks.</p>
+  </section>
+  <section class="bento">
+    <div class="cell"><div class="k">Track</div><div class="v">15 Parts</div></div>
+    <div class="cell"><div class="k">Stack</div><div class="v">Vite · React 19</div></div>
+    <div class="cell wide"><div class="k">Approach</div><div class="v">Learn by building — many exercises + projects</div></div>
+  </section>
+  <article class="content" id="content"></article>
+  <nav class="series-footer" id="seriesFooter">
+    <a class="sn-prev" href="README.html" style="display:none"><small>Previous</small><b></b></a>
+    <a class="sn-index" href="README.html"><small>Series index</small><b>⚛ All parts</b></a>
+    <a class="sn-next" href="README.html" style="display:none"><small>Next</small><b></b></a>
+  </nav>
+</main>
+
+<!-- raw markdown (source of truth) -->
+<script type="text/markdown" id="markdown-source"># Part 5 · Hooks Deep Dive
+
+> You've been using `useState` since Part 3. It's one of about a dozen **hooks** — special functions that let components "hook into" React's features: state, lifecycle, context, refs, performance, and more. This part is a complete tour of the built-in hooks, the non-negotiable **Rules of Hooks**, and the skill that ties it all together: writing your own **custom hooks** to extract and reuse logic. Master this and you write real, idiomatic React.
+
+## Table of Contents
+
+1. [What hooks are and the Rules of Hooks](#1-what-hooks-are-and-the-rules-of-hooks)
+2. [useState, revisited: lazy init and patterns](#2-usestate-revisited-lazy-init-and-patterns)
+3. [useReducer: state logic that scales](#3-usereducer-state-logic-that-scales)
+4. [useRef: escape hatches and DOM access](#4-useref-escape-hatches-and-dom-access)
+5. [useContext: passing data without prop drilling](#5-usecontext-passing-data-without-prop-drilling)
+6. [useMemo and useCallback: a first look](#6-usememo-and-usecallback-a-first-look)
+7. [The modern hooks: useId, useTransition, useDeferredValue, useSyncExternalStore, use](#7-the-modern-hooks)
+8. [Custom hooks: your superpower](#8-custom-hooks-your-superpower)
+9. [Mini-project and capstone: extract the Todo logic](#9-mini-project-and-capstone-extract-the-todo-logic)
+10. [Exercises and practice problems](#10-exercises-and-practice-problems)
+11. [Glossary](#11-glossary)
+
+> **💡 Suggested learning order:** Read §1 carefully — the Rules of Hooks explain *why* everything else works. Then §2–4 are the workhorses you'll use daily. §5–7 you'll use situationally (and revisit in Parts 9 & 11). §8 (custom hooks) is the payoff — don't skip it.
+
+---
+
+## 1. What hooks are and the Rules of Hooks
+
+🎯 **Analogy:** A component function runs top to bottom every render, but it has no memory of its own — local variables reset each time (Part 3 §1). Hooks are how a component **remembers things between renders** and **connects to React's machinery**. Think of them as the component reaching into a backpack that React holds for it: `useState` pulls out a remembered value, `useRef` pulls out a mutable box, `useEffect` schedules work. The backpack persists; the function is re-run.
+
+Every hook is a function whose name starts with `use`. There are two ironclad **Rules of Hooks**:
+
+**Rule 1 — Only call hooks at the top level.** Never inside conditions, loops, or nested functions. Call them in the same order every render.
+
+```jsx
+function Profile({ userId }) {
+  const [name, setName] = useState('')     // ✅ top level
+
+  if (userId) {
+    const [x, setX] = useState(0)          // ❌ conditional hook — forbidden
+  }
+
+  for (const item of items) {
+    useState(item)                         // ❌ hook in a loop — forbidden
+  }
+}
+```
+
+**Rule 2 — Only call hooks from React functions.** From component functions or from other custom hooks — never from plain functions, event handlers, or class methods.
+
+```jsx
+function handleClick() {
+  const [x, setX] = useState(0)   // ❌ hook inside an event handler — forbidden
+}
+```
+
+**Why these rules exist** — this is the crucial insight from Part 3 §2. React tracks hooks by **call order**, not by name. Each render, it walks the same sequence of hook calls and matches them to stored slots:
+
+```
+Render 1:  useState → slot 0    useState → slot 1    useEffect → slot 2
+Render 2:  useState → slot 0    useState → slot 1    useEffect → slot 2   ✓ consistent
+```
+
+If you called a hook conditionally, the order could change between renders, and slot 1's state would suddenly be handed to the wrong hook — corrupting everything.
+
+```mermaid
+flowchart TD
+  A[Component renders] --> B[Hooks called in fixed order]
+  B --> C["React matches each call to a slot<br/>by position: 0, 1, 2..."]
+  C --> D{Same order every render?}
+  D -->|Yes| E[State stays correct]
+  D -->|No, conditional hook| F[Slots mismatch → corrupt state/bugs]
+```
+
+> **🔍 Under the hood:** React stores a component's hooks as a linked list attached to that component's internal "fiber" (its instance record). On each render, an internal cursor walks that list in order. `useState` call #2 always reads list node #2. Conditionally skipping a hook shifts every subsequent node by one — which is exactly the catastrophe the rules prevent. The ESLint plugin `eslint-plugin-react-hooks` enforces both rules automatically; keep it on.
+
+> **⚠️ Common beginner mistake:** "I only want this state when `x` is true, so I'll put `useState` in the `if`." Don't. Always call the hook unconditionally; put the *condition* on how you use the value: `const [v, setV] = useState(null); if (x) { /* use v */ }`.
+
+**Key takeaways:**
+- Hooks (`use…`) let components remember values and use React features across renders.
+- Rule 1: call hooks at the top level only — never in conditions/loops/nested functions.
+- Rule 2: call hooks only from components or custom hooks. React tracks them by call order.
+
+---
+
+## 2. useState, revisited: lazy init and patterns
+
+You know the basics. Two refinements make you fluent.
+
+**Lazy initialization.** If the initial state is *expensive* to compute, pass a **function** to `useState` — React calls it only once (on the first render) instead of every render.
+
+```jsx
+// ❌ readFromLocalStorage() runs on EVERY render (result thrown away after first)
+const [data, setData] = useState(readFromLocalStorage())
+
+// ✅ Pass a function — React calls it ONCE, on first render only
+const [data, setData] = useState(() => readFromLocalStorage())
+```
+
+The difference: `useState(expensiveThing())` *calls* the function every render (React ignores the result after the first, but you still paid the cost). `useState(() => expensiveThing())` passes a function React invokes only when it needs the initial value.
+
+**Grouping related state.** Prefer one object when fields change together, separate states when independent:
+
+```jsx
+// Independent values → separate states (simplest)
+const [name, setName] = useState('')
+const [age, setAge] = useState(0)
+
+// Related values that update together → one object (fewer setters)
+const [form, setForm] = useState({ name: '', age: 0 })
+setForm((prev) => ({ ...prev, name: 'Ada' }))   // remember immutable update!
+```
+
+> **🔍 Under the hood:** The lazy initializer is called by React during the first render and never again — it's not a "run once" side effect (that's `useEffect`), it's purely for computing the starting value. A common real use is reading from `localStorage` or parsing a URL once. If you pass a plain value, JS evaluates it *before* `useState` even runs, which is why the eager form always pays the cost.
+
+> **⚠️ Common beginner mistake:** `useState(new Array(10000).fill(0))` or `useState(JSON.parse(localStorage.getItem('x')))` — both run every render. Wrap in `() =>` to make them lazy.
+
+**Key takeaways:**
+- Use `useState(() => expensive())` for costly initial values — runs once.
+- `useState(value)` evaluates `value` on every render; only the first result is kept.
+- Group state that changes together; keep independent state separate.
+
+---
+
+## 3. useReducer: state logic that scales
+
+When state updates get complex — multiple sub-values, many action types, next-state-depends-on-previous logic — `useState` handlers sprawl. **`useReducer`** centralizes all update logic in one pure function, the **reducer**. If you've used Redux (Part 9), this is the same idea, built into React.
+
+🎯 **Analogy:** `useState` is like exposing a raw variable and letting anyone set it however they want. `useReducer` is like a **state machine with a single API**: instead of "set this field to that," you dispatch named *actions* ("increment", "reset", "toggle_done"), and one function decides how each action transforms state. It's the difference between many scattered setters and one well-defined transition table.
+
+```jsx
+import { useReducer } from 'react'
+
+// 1. The reducer: (currentState, action) => nextState. Pure — no side effects.
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment': return { count: state.count + 1 }
+    case 'decrement': return { count: state.count - 1 }
+    case 'set':       return { count: action.payload }
+    case 'reset':     return { count: 0 }
+    default:          throw new Error('Unknown action: ' + action.type)
+  }
+}
+
+function Counter() {
+  // 2. useReducer(reducer, initialState) => [state, dispatch]
+  const [state, dispatch] = useReducer(reducer, { count: 0 })
+
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: 'decrement' })}>−</button>
+      <span>{state.count}</span>
+      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+      <button onClick={() => dispatch({ type: 'set', payload: 100 })}>Set 100</button>
+      <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+    </div>
+  )
+}
+```
+
+**`useState` vs `useReducer` — when to reach for which:**
+
+| Use `useState` when | Use `useReducer` when |
+| --- | --- |
+| One or few independent values | Complex state with many sub-values |
+| Simple updates | Next state depends on previous in intricate ways |
+| Logic fits in a line or two | Many related actions/transitions |
+| — | You want update logic testable in isolation |
+
+```mermaid
+flowchart LR
+  E[Event handler] -->|dispatch action| D["dispatch({type, payload})"]
+  D --> R["reducer(state, action)"]
+  R -->|returns next state| S[New state]
+  S --> RR[Re-render]
+```
+
+> **🔍 Under the hood:** `dispatch` is stable — it never changes identity across renders (unlike a fresh inline function), which matters for performance and dependency arrays (Part 6/11). The reducer must be **pure**: given the same state + action, it returns the same next state, with no side effects or mutations. Return a *new* object each time (immutability, Part 3 §6) — don't mutate `state`.
+
+> **⚠️ Common beginner mistake:** Mutating state inside the reducer (`state.count++; return state`). Return a new object: `return { ...state, count: state.count + 1 }`. Also: putting side effects (API calls, logging) inside the reducer — keep it pure; side effects belong in event handlers or effects (Part 6).
+
+**Key takeaways:**
+- `useReducer` centralizes complex update logic in one pure reducer function.
+- `dispatch({ type, payload })` sends named actions; the reducer maps them to next state.
+- Reach for it when state has many actions/sub-values; `dispatch` is stable.
+
+---
+
+## 4. useRef: escape hatches and DOM access
+
+**`useRef`** gives you a mutable "box" (`{ current: value }`) that **persists across renders but does not trigger a re-render when changed**. It has two distinct uses: (1) accessing DOM nodes, and (2) holding mutable values that shouldn't cause renders.
+
+**Use 1 — accessing a DOM element** (the escape hatch to imperative DOM APIs like focus, scroll, media playback):
+
+```jsx
+import { useRef } from 'react'
+
+function SearchBox() {
+  const inputRef = useRef(null)          // will point to the <input> DOM node
+
+  function focusInput() {
+    inputRef.current.focus()             // imperative DOM call
+  }
+
+  return (
+    <div>
+      <input ref={inputRef} />           {/* React sets inputRef.current to this node */}
+      <button onClick={focusInput}>Focus</button>
+    </div>
+  )
+}
+```
+
+**Use 2 — a mutable value that survives renders without causing them** (timers, previous values, instance-like data):
+
+```jsx
+function Timer() {
+  const intervalRef = useRef(null)       // holds the interval id across renders
+
+  function start() {
+    intervalRef.current = setInterval(() => console.log('tick'), 1000)
+  }
+  function stop() {
+    clearInterval(intervalRef.current)   // read it back later
+  }
+  // Changing intervalRef.current does NOT re-render — exactly what we want here.
+}
+```
+
+**The critical distinction — state vs ref:**
+
+| | `useState` | `useRef` |
+| --- | --- | --- |
+| Persists across renders | ✅ | ✅ |
+| Changing it re-renders | ✅ Yes | ❌ No |
+| Read the latest value synchronously | ❌ (snapshot) | ✅ (`.current`) |
+| Use for | Anything shown in the UI | DOM nodes, timers, non-UI mutable data |
+
+> **🔍 Under the hood:** `useRef(initial)` returns the *same object* (`{ current }`) on every render — React just keeps handing you the identical box. Mutating `.current` doesn't schedule a render because React doesn't watch it. When you attach `ref={x}` to a JSX element, React writes the real DOM node into `x.current` after committing to the DOM (and sets it back to `null` on unmount). That's why `inputRef.current` is `null` on the very first render *before* commit, and populated after.
+
+> **⚠️ Common beginner mistake:** Using a ref for something that *should* be shown in the UI. If changing a value must update the screen, it's **state**, not a ref — a ref change won't re-render, so the UI goes stale. Rule: *does the UI need to update when this changes?* Yes → state. No → ref.
+
+```mermaid
+flowchart TD
+  Q{Does the UI need to<br/>update when it changes?} -->|Yes| S[useState]
+  Q -->|No: DOM node, timer id,<br/>previous value| R[useRef]
+```
+
+**Key takeaways:**
+- `useRef` is a persistent mutable box (`.current`) that does **not** trigger re-renders.
+- Use it for DOM access (`ref={x}`) and non-UI mutable values (timers, ids).
+- If a change must update the UI, use state, not a ref.
+
+---
+
+## 5. useContext: passing data without prop drilling
+
+**Prop drilling** is passing a prop through many intermediate components that don't use it, just to reach a deep child. **Context** lets a provider share a value with any descendant directly — no drilling. (Part 9 covers global state strategy in depth; here's the mechanism.)
+
+The problem:
+
+```jsx
+// theme has to be threaded through Layout and Sidebar just to reach ThemeButton
+<App theme={theme}>
+  <Layout theme={theme}>
+    <Sidebar theme={theme}>
+      <ThemeButton theme={theme} />   {/* only THIS needs it */}
+```
+
+The solution — three steps: **create**, **provide**, **consume**:
+
+```jsx
+import { createContext, useContext, useState } from 'react'
+
+// 1. Create a context (with an optional default value).
+const ThemeContext = createContext('light')
+
+function App() {
+  const [theme, setTheme] = useState('dark')
+  return (
+    // 2. Provide a value to the whole subtree.
+    <ThemeContext.Provider value={theme}>
+      <Layout />                            {/* no theme prop needed anywhere below */}
+    </ThemeContext.Provider>
+  )
+}
+
+function ThemeButton() {
+  // 3. Consume it directly, however deep — no props threaded through.
+  const theme = useContext(ThemeContext)
+  return <button className={theme}>Current theme: {theme}</button>
+}
+```
+
+```mermaid
+flowchart TD
+  P["ThemeContext.Provider<br/>value = 'dark'"] --> L[Layout]
+  L --> S[Sidebar]
+  S --> B["ThemeButton<br/>useContext(ThemeContext) → 'dark'"]
+  P -. "direct channel (no drilling)" .-> B
+```
+
+> **🔍 Under the hood:** When a component calls `useContext(Ctx)`, React walks *up* the tree to find the nearest `Ctx.Provider` and returns its `value`. When that `value` changes, **every** consumer of that context re-renders — regardless of `React.memo`. This is powerful but a performance consideration: don't put rapidly-changing values in a context that has many consumers, or split contexts (Part 9/11). If there's no Provider above, `useContext` returns the `createContext(default)` default.
+
+> **⚠️ Common beginner mistake:** Reaching for Context too early. For 1–2 levels of passing, plain props are clearer. Context shines for *truly global* things: theme, current user, locale, auth. Overusing it makes data flow harder to trace. Also: a new object `value={{ a, b }}` created inline re-renders all consumers every render — memoize it (Part 11).
+
+**Key takeaways:**
+- Context shares a value with any descendant, avoiding prop drilling.
+- Three steps: `createContext`, `<Ctx.Provider value=…>`, `useContext(Ctx)`.
+- All consumers re-render when the value changes; use it for global-ish data.
+
+---
+
+## 6. useMemo and useCallback: a first look
+
+These two hooks **cache** things across renders to avoid needless work. You'll rarely need them at first — add them when profiling shows a real problem (Part 11 goes deep). But you must recognize them.
+
+**`useMemo`** caches the *result of a computation*, recomputing only when its dependencies change:
+
+```jsx
+// Without: sortedList is recomputed every render, even if `items` didn't change.
+const sortedList = [...items].sort(expensiveCompare)
+
+// With: recomputed only when `items` changes.
+const sortedList = useMemo(() => [...items].sort(expensiveCompare), [items])
+```
+
+**`useCallback`** caches a *function definition* so it keeps the same identity across renders (useful when passing callbacks to memoized children or effect dependencies):
+
+```jsx
+// Without: a NEW function every render (new identity each time).
+const handleClick = () => doSomething(id)
+
+// With: same function identity until `id` changes.
+const handleClick = useCallback(() => doSomething(id), [id])
+```
+
+`useCallback(fn, deps)` is exactly `useMemo(() => fn, deps)` — one memoizes a value, the other a function.
+
+| Hook | Caches | Use when |
+| --- | --- | --- |
+| `useMemo` | A computed **value** | An expensive calculation reruns needlessly |
+| `useCallback` | A **function** identity | Passing a stable callback to memoized children / effect deps |
+
+> **🔍 Under the hood:** Both compare their dependency array to the previous render's (by reference, `Object.is`). If unchanged, they return the cached value/function; if changed, they recompute. This caching itself has a small cost (storing + comparing), so wrapping *everything* is counterproductive — it can be slower than just recomputing cheap values. Measure first (Part 11).
+
+> **⚠️ Common beginner mistake:** Sprinkling `useMemo`/`useCallback` everywhere "for performance." For trivial computations this adds overhead and clutter without benefit. Reach for them when: (a) a computation is genuinely expensive, or (b) you need a *stable identity* to prevent a memoized child from re-rendering or to satisfy an effect's dependencies. Otherwise, leave them out.
+
+**Key takeaways:**
+- `useMemo` caches a computed value; `useCallback` caches a function identity.
+- Both recompute only when their dependency array changes.
+- Don't over-apply them — add when profiling shows a real need (Part 11).
+
+---
+
+## 7. The modern hooks
+
+React 18–19 added hooks you'll meet as you grow. Know what each is *for*; you'll use them situationally.
+
+**`useId`** — generates a unique, stable id (great for linking `<label htmlFor>` to inputs, especially in reusable components and SSR):
+
+```jsx
+function Field({ label }) {
+  const id = useId()                         // e.g. ":r3:" — unique & stable
+  return (
+    <div>
+      <label htmlFor={id}>{label}</label>
+      <input id={id} />                       {/* label ↔ input linked correctly */}
+    </div>
+  )
+}
+```
+
+**`useTransition`** — marks a state update as **non-urgent** so React can keep the UI responsive (e.g., typing stays snappy while a heavy filtered list updates in the background):
+
+```jsx
+const [isPending, startTransition] = useTransition()
+
+function handleChange(e) {
+  setQuery(e.target.value)                    // urgent: the input updates immediately
+  startTransition(() => {
+    setResults(filterHugeList(e.target.value)) // non-urgent: can be interrupted
+  })
+}
+// isPending is true while the transition is rendering — show a subtle spinner.
+```
+
+**`useDeferredValue`** — a simpler cousin: gives you a "lagging" copy of a value that updates at lower priority:
+
+```jsx
+const deferredQuery = useDeferredValue(query)   // updates after urgent work settles
+const results = useMemo(() => filterHugeList(deferredQuery), [deferredQuery])
+```
+
+**`useSyncExternalStore`** — for subscribing to **external** (non-React) stores safely (used internally by Redux, Zustand). You rarely call it directly, but it's how state libraries integrate with React's rendering.
+
+**`use`** (React 19) — reads a **promise** or context during render, integrating with Suspense. It can be called conditionally (unlike other hooks):
+
+```jsx
+// Suspends until the promise resolves; Suspense shows a fallback meanwhile.
+function Profile({ userPromise }) {
+  const user = use(userPromise)               // unwraps the resolved value
+  return <h1>{user.name}</h1>
+}
+```
+
+| Hook | One-line purpose |
+| --- | --- |
+| `useId` | Stable unique ids for accessibility/SSR |
+| `useTransition` | Mark updates non-urgent to keep UI responsive |
+| `useDeferredValue` | A low-priority, lagging copy of a value |
+| `useSyncExternalStore` | Subscribe to external stores (library internals) |
+| `use` | Read a promise/context during render (Suspense) |
+
+> **💡 Tip:** Don't force these in early. `useId` you'll use soon (forms, Part 7). `useTransition`/`useDeferredValue` matter for performance (Part 11). `use` + Suspense is the modern data-loading direction (touched on in Part 6/15). Recognizing them is enough for now.
+
+**Key takeaways:**
+- `useId` for accessible unique ids; `useTransition`/`useDeferredValue` for responsiveness.
+- `useSyncExternalStore` powers state libraries; `use` reads promises/context with Suspense.
+- Learn these by need — recognition now, deep use in later parts.
+
+---
+
+## 8. Custom hooks: your superpower
+
+A **custom hook** is a function whose name starts with `use` and that calls other hooks. It lets you **extract stateful logic** into a reusable, named function — the primary way you share behavior (not UI) between components. This is what separates beginner React from fluent React.
+
+🎯 **Analogy:** Just as you refactor repeated backend logic into a shared function or service, custom hooks let you refactor repeated *stateful* logic — a data fetch, a form field, a subscription, a toggle — into one place. The component gets a clean, declarative API (`const { data, loading } = useUser(id)`) and doesn't care about the messy internals.
+
+Start with a trivial one — a boolean toggle you keep re-writing:
+
+```jsx
+// The custom hook: just a function using useState, returning a tidy API.
+function useToggle(initial = false) {
+  const [on, setOn] = useState(initial)
+  const toggle = () => setOn((v) => !v)
+  return [on, toggle]           // return whatever shape is convenient
+}
+
+// Any component can now reuse it:
+function Panel() {
+  const [open, toggleOpen] = useToggle()
+  return (
+    <div>
+      <button onClick={toggleOpen}>{open ? 'Close' : 'Open'}</button>
+      {open && <p>Panel content</p>}
+    </div>
+  )
+}
+```
+
+A more useful one — persist any state to `localStorage`:
+
+```jsx
+function useLocalStorage(key, initialValue) {
+  // Lazy init (§2): read from storage once.
+  const [value, setValue] = useState(() => {
+    const stored = localStorage.getItem(key)
+    return stored ? JSON.parse(stored) : initialValue
+  })
+
+  // Write back whenever value or key changes (useEffect — full treatment in Part 6).
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value))
+  }, [key, value])
+
+  return [value, setValue]      // same API shape as useState — drop-in replacement!
+}
+
+// Usage — identical to useState, but it persists across reloads:
+const [name, setName] = useLocalStorage('name', '')
+```
+
+**Rules and conventions for custom hooks:**
+- **Must** start with `use` (so React's linter enforces the Rules of Hooks inside it).
+- Can call any hooks (`useState`, `useEffect`, other custom hooks).
+- Each call gets **isolated** state — two components using `useToggle()` don't share state; they each get their own.
+- Return whatever's convenient: an array (`[value, setter]`), an object (`{ data, loading, error }`), or a single value.
+
+```mermaid
+flowchart TD
+  H["useUser(id) — custom hook"] --> S["useState(data)"]
+  H --> E["useEffect(fetch)"]
+  H -->|returns| API["{ user, loading, error }"]
+  C1[ProfilePage] -->|calls| H
+  C2[Header] -->|calls| H
+  Note["Each caller gets its OWN isolated state"]
+```
+
+> **🔍 Under the hood:** A custom hook isn't magic — it's just a function that happens to call hooks. When `Panel` calls `useToggle()`, the `useState` inside runs *as if it were written directly in `Panel`*, so it counts toward `Panel`'s hook order and gets `Panel`'s own state slot. That's why two components calling the same custom hook get independent state — the state belongs to the *component*, not the hook definition.
+
+> **⚠️ Common beginner mistake:** Thinking a custom hook *shares* state between components (like a global store). It shares **logic**, not state — each call is independent. To share actual state across components, you need Context (§5) or a state library (Part 9). Also: naming a custom hook without `use` (`function toggle()`) — the linter can't enforce hook rules, and you'll get subtle bugs.
+
+**Key takeaways:**
+- A custom hook is a `use…` function that calls hooks to package reusable logic.
+- It shares **logic**, not state — each caller gets isolated state.
+- Return a convenient API shape; this is how you keep components clean and DRY.
+
+---
+
+## 9. Mini-project and capstone: extract the Todo logic
+
+🏗️ Time to apply custom hooks to your **Todo app** (capstone #1). Right now all the todo logic (add, toggle, remove, filter) lives inside `App`. You'll extract it into a `useTodos` custom hook — and add persistence with `useLocalStorage`. This is exactly how real apps stay maintainable.
+
+```jsx
+// src/hooks/useLocalStorage.js
+import { useState, useEffect } from 'react'
+
+export function useLocalStorage(key, initial) {
+  const [value, setValue] = useState(() => {
+    const stored = localStorage.getItem(key)
+    return stored ? JSON.parse(stored) : initial
+  })
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value))
+  }, [key, value])
+  return [value, setValue]
+}
+```
+
+```jsx
+// src/hooks/useTodos.js
+import { useState } from 'react'
+import { useLocalStorage } from './useLocalStorage'
+
+export function useTodos() {
+  // Todos persist across reloads for free — composed from another custom hook.
+  const [todos, setTodos] = useLocalStorage('todos', [])
+  const [filter, setFilter] = useState('all')     // 'all' | 'active' | 'done'
+
+  // All the mutation logic, packaged behind a clean API:
+  const addTodo = (text) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    setTodos((prev) => [...prev, { id: crypto.randomUUID(), text: trimmed, done: false }])
+  }
+  const toggleTodo = (id) =>
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
+  const removeTodo = (id) =>
+    setTodos((prev) => prev.filter((t) => t.id !== id))
+  const clearCompleted = () =>
+    setTodos((prev) => prev.filter((t) => !t.done))
+
+  // Derived values (computed, not stored — Part 3/4 rule):
+  const visibleTodos = todos.filter((t) =>
+    filter === 'active' ? !t.done : filter === 'done' ? t.done : true
+  )
+  const remaining = todos.filter((t) => !t.done).length
+
+  // Return a tidy, declarative API. The component doesn't see the internals.
+  return { todos, visibleTodos, remaining, filter, setFilter,
+           addTodo, toggleTodo, removeTodo, clearCompleted }
+}
+```
+
+```jsx
+// src/App.jsx — now a clean, presentational component
+import { useState } from 'react'
+import { useTodos } from './hooks/useTodos'
+
+export default function App() {
+  const { visibleTodos, remaining, filter, setFilter,
+          addTodo, toggleTodo, removeTodo, clearCompleted } = useTodos()
+  const [draft, setDraft] = useState('')
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    addTodo(draft)
+    setDraft('')
+  }
+
+  return (
+    <main style={{ maxWidth: 420, margin: '40px auto', fontFamily: 'system-ui' }}>
+      <h1>Todo ({remaining} left)</h1>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8 }}>
+        <input value={draft} onChange={(e) => setDraft(e.target.value)}
+          placeholder="What needs doing?" style={{ flex: 1, padding: 8 }} />
+        <button disabled={!draft.trim()}>Add</button>
+      </form>
+
+      <div style={{ margin: '12px 0' }}>
+        {['all', 'active', 'done'].map((f) => (
+          <button key={f} onClick={() => setFilter(f)}
+            style={{ fontWeight: filter === f ? 700 : 400 }}>{f}</button>
+        ))}
+        <button onClick={clearCompleted} style={{ marginLeft: 8 }}>Clear completed</button>
+      </div>
+
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {visibleTodos.map((t) => (
+          <li key={t.id} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 0' }}>
+            <input type="checkbox" checked={t.done} onChange={() => toggleTodo(t.id)} />
+            <span style={{ flex: 1, textDecoration: t.done ? 'line-through' : 'none' }}>{t.text}</span>
+            <button onClick={() => removeTodo(t.id)}>✕</button>
+          </li>
+        ))}
+      </ul>
+    </main>
+  )
+}
+```
+
+**What just improved:**
+
+```cards
+Separation :: App is now presentational; all logic lives in useTodos.
+Reuse :: useTodos could power a mobile layout, a widget, tests — any UI.
+Composition :: useTodos builds on useLocalStorage — hooks compose like functions.
+Persistence :: todos survive a page reload, for free, via one composed hook.
+Testability :: useTodos can be tested in isolation (Part 13) without rendering UI.
+```
+
+> **💡 Tip:** Notice `useTodos` composes `useLocalStorage`, which composes `useState` + `useEffect`. Hooks compose exactly like functions — small, focused hooks combine into powerful ones. This is the core of scalable React architecture (Part 14).
+
+**Extend it (do at least three):**
+1. Add an `editTodo(id, text)` action to `useTodos` and wire up inline editing.
+2. Add `toggleAll()` (mark every todo done/undone).
+3. Extract a `useToggle` hook and use it for a "show completed" section.
+4. Add a `reorder(fromId, toId)` action (stable keys make this safe — Part 4).
+5. Write a `useDebouncedValue(value, ms)` hook (preview of Part 6) and debounce a search field.
+
+**Key takeaways:**
+- Extracting logic into `useTodos` made `App` clean and the logic reusable/testable.
+- Custom hooks compose: `useTodos` → `useLocalStorage` → `useState`/`useEffect`.
+- This is idiomatic React architecture — logic in hooks, UI in components.
+
+---
+
+## 10. Exercises and practice problems
+
+### 🧪 Warm-ups (easy)
+
+**E1.** Write a `useCounter(initial = 0)` hook returning `{ count, increment, decrement, reset }`.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function useCounter(initial = 0) {
+  const [count, setCount] = useState(initial)
+  return {
+    count,
+    increment: () => setCount((c) => c + 1),
+    decrement: () => setCount((c) => c - 1),
+    reset: () => setCount(initial),
+  }
+}
+```
+
+*Why:* Package state + actions behind a clean object API; updater functions for dependent updates.
+</details>
+
+**E2.** Why is this hook call illegal? Fix it.
+
+```jsx
+function Widget({ enabled }) {
+  if (enabled) {
+    const [x, setX] = useState(0)
+    return <p>{x}</p>
+  }
+  return <p>off</p>
+}
+```
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Widget({ enabled }) {
+  const [x, setX] = useState(0)     // always call the hook, unconditionally
+  if (!enabled) return <p>off</p>
+  return <p>{x}</p>
+}
+```
+
+*Why:* Rule 1 — hooks must be called at the top level, same order every render. Put the condition on the *rendering*, not the hook.
+</details>
+
+### 🧪 Core (medium)
+
+**E3.** Convert this `useState` counter with tangled logic into a `useReducer`.
+
+```jsx
+const [state, setState] = useState({ count: 0, step: 1 })
+// increment by step, change step, reset...
+```
+
+<details><summary>Show solution</summary>
+
+```jsx
+function reducer(state, action) {
+  switch (action.type) {
+    case 'inc':      return { ...state, count: state.count + state.step }
+    case 'setStep':  return { ...state, step: action.payload }
+    case 'reset':    return { count: 0, step: 1 }
+    default:         throw new Error('bad action')
+  }
+}
+const [state, dispatch] = useReducer(reducer, { count: 0, step: 1 })
+// dispatch({ type: 'inc' }) / dispatch({ type: 'setStep', payload: 5 })
+```
+
+*Why:* Multiple related sub-values + several actions is the sweet spot for `useReducer`.
+</details>
+
+**E4.** Build a `useDebouncedValue(value, delay)` hook: returns `value`, but only after it stops changing for `delay` ms. (Uses `useEffect` + `useState` — peek at Part 6 if needed.)
+
+<details><summary>Show solution</summary>
+
+```jsx
+function useDebouncedValue(value, delay = 300) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(id)          // cleanup cancels the pending update
+  }, [value, delay])
+  return debounced
+}
+```
+
+*Why:* Each change restarts the timer; cleanup cancels the previous one. Classic custom-hook pattern (search inputs).
+</details>
+
+**E5.** Use `useRef` to build a component that shows how many times it has rendered — *without* causing extra renders.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function RenderCounter() {
+  const renders = useRef(0)
+  renders.current++              // mutating a ref doesn't re-render
+  return <p>Rendered {renders.current} times</p>
+}
+```
+
+*Why:* A ref persists across renders and mutating it is side-effect-free (no render loop). Using state here would cause an infinite loop.
+</details>
+
+### 🧪 Challenge (hard)
+
+**E6.** Build `usePrevious(value)` — returns the value from the *previous* render.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function usePrevious(value) {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value          // runs AFTER render, so during render ref holds the old value
+  }, [value])
+  return ref.current
+}
+```
+
+*Why:* The effect updates the ref *after* the render commits, so on the next render the ref still holds the prior value at read time. A neat interplay of refs and effect timing (Part 6).
+</details>
+
+**E7.** Build `useFetch(url)` returning `{ data, loading, error }`. (Full data-fetching nuance — race conditions, cleanup — is Part 6; do a basic version now.)
+
+<details><summary>Show solution</summary>
+
+```jsx
+function useFetch(url) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false                    // guard against race conditions
+    setLoading(true)
+    fetch(url)
+      .then((r) => r.json())
+      .then((json) => { if (!cancelled) { setData(json); setError(null) } })
+      .catch((e) => { if (!cancelled) setError(e) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }        // cleanup on unmount / url change
+  }, [url])
+
+  return { data, loading, error }
+}
+```
+
+*Why:* Packages the loading/error/data trio (Part 4 §6) into a reusable hook. The `cancelled` flag prevents setting state after unmount — Part 6 explains this deeply and replaces it with TanStack Query.
+</details>
+
+**E8 (capstone step).** Finish extracting your Todo app: move ALL logic into `useTodos`, compose `useLocalStorage`, and add `editTodo`. `App` should contain only JSX + the draft input state. Keep it — Part 6 replaces manual fetching with TanStack Query on a *new* capstone (Data Dashboard).
+
+<details><summary>Show hint</summary>
+
+If `App` still has any `setTodos` or filtering logic, it's not fully extracted. The test: `App` imports `useTodos`, destructures its API, and every list operation goes through that API. The only local state left in `App` is the `draft` input.
+</details>
+
+---
+
+## 11. Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **Hook** | A `use…` function that lets a component use React features (state, refs, etc.). |
+| **Rules of Hooks** | Call hooks only at the top level and only from React functions. |
+| **Lazy initializer** | `useState(() => expensive())` — computes the initial value once. |
+| **`useReducer`** | Centralizes complex state updates in a pure reducer + `dispatch`. |
+| **Reducer** | A pure `(state, action) => nextState` function. |
+| **`useRef`** | A persistent mutable box (`.current`) that doesn't trigger re-renders. |
+| **`useContext`** | Reads the nearest Provider's value; avoids prop drilling. |
+| **Prop drilling** | Passing props through components that don't use them to reach a deep child. |
+| **`useMemo` / `useCallback`** | Cache a computed value / a function identity across renders. |
+| **Custom hook** | A `use…` function that calls hooks to package reusable *logic* (not state). |
+
+---
+
+> **You now command React's hook system** — the built-ins and, more importantly, how to write your own. Custom hooks are the architectural backbone of every serious React app. Next, we tackle the one hook that deserves its own part: `useEffect`, and how to fetch data the right way.
+>
+> **Next:** [Part 6 · Effects and Data Fetching →](06-effects-and-data-fetching.html)
+</script>
+
+<!-- default language for untagged code fences + jsx/tsx aliases -->
+<script>
+window.DOC_DEFAULT_LANG='javascript';
+(function(){try{
+  if(window.hljs&&hljs.registerAliases){
+    hljs.registerAliases(['jsx'],{languageName:'javascript'});
+    hljs.registerAliases(['tsx'],{languageName:'typescript'});
+  }
+}catch(e){}})();
+</script>
+
+<!-- mobile drawer toggle for the chip TOC -->
+<script>
+(function(){
+  var mt=document.getElementById('menuToggle'),toc=document.getElementById('toc'),ov=document.getElementById('overlay');
+  if(mt&&toc){mt.addEventListener('click',function(){toc.classList.toggle('open');if(ov)ov.classList.toggle('show');});}
+  if(ov){ov.addEventListener('click',function(){toc.classList.remove('open');ov.classList.remove('show');});}
+})();
+</script>
+
+<!-- cross-file series navigation: active chip + footer prev/next -->
+<script>
+(function(){
+  var order=['README.html','01-jsx-and-rendering.html','02-components-and-props.html','03-state-and-events.html','04-lists-keys-conditional.html','05-hooks-deep-dive.html','06-effects-and-data-fetching.html','07-forms.html','08-routing.html','09-state-management.html','10-styling.html','11-performance.html','12-typescript-react.html','13-testing.html','14-patterns-architecture.html','15-production-and-beyond.html'];
+  var titles={'README.html':'Series index','01-jsx-and-rendering.html':'1 · JSX & Rendering','02-components-and-props.html':'2 · Components & Props','03-state-and-events.html':'3 · State & Events','04-lists-keys-conditional.html':'4 · Lists, Keys & Conditionals','05-hooks-deep-dive.html':'5 · Hooks Deep Dive','06-effects-and-data-fetching.html':'6 · Effects & Data Fetching','07-forms.html':'7 · Forms','08-routing.html':'8 · Routing','09-state-management.html':'9 · State Management','10-styling.html':'10 · Styling','11-performance.html':'11 · Performance','12-typescript-react.html':'12 · TypeScript','13-testing.html':'13 · Testing','14-patterns-architecture.html':'14 · Patterns & Architecture','15-production-and-beyond.html':'15 · Production & Beyond'};
+  var here=(location.pathname.split('/').pop()||'README.html').toLowerCase();
+  if(here===''||here==='index.html')here='readme.html';
+  document.querySelectorAll('#seriesNavBar a').forEach(function(a){
+    if((a.getAttribute('href')||'').toLowerCase()===here){a.classList.add('active');a.setAttribute('aria-current','page');a.scrollIntoView({block:'nearest',inline:'center'});}
+  });
+  var norm=order.map(function(x){return x.toLowerCase();});
+  var i=norm.indexOf(here);
+  function fill(sel,file){var el=document.querySelector(sel);if(!el)return;if(!file){el.style.display='none';return;}el.style.display='';el.setAttribute('href',file);var b=el.querySelector('b');if(b)b.textContent=titles[file];}
+  if(i>=0){fill('.sn-prev',i>0?order[i-1]:null);fill('.sn-next',i<order.length-1?order[i+1]:null);}
+})();
+</script>
+
+<!-- rendering engine (inlined verbatim by build.ps1) -->
+<script>
+/*
+ * Deep Dive Docs — Rendering Engine (inline this verbatim into every generated .html)
+ * ---------------------------------------------------------------------------------
+ * This is the ONLY non-negotiable JavaScript. The visual design (CSS, layout, fonts,
+ * colors, decorative markup) is free to change per topic, but these element HOOKS must
+ * exist for the page to function. All hooks except #markdown-source and #content are
+ * OPTIONAL — the engine feature-detects each and silently skips what isn't present.
+ *
+ * REQUIRED hooks:
+ *   <script type="text/markdown" id="markdown-source">  ...raw markdown...  <\/script>
+ *   <... id="content">  (empty container that receives the rendered HTML)
+ *
+ * OPTIONAL hooks (include only the ones your design uses):
+ *   id="toc"          -> auto-filled with links to every h2/h3 (sidebar/top/drawer — your choice)
+ *   id="progress"     -> reading-progress bar; its style.width is set 0%..100%
+ *   id="themeToggle"  -> click toggles data-theme on <html>; persists to localStorage 'doc-theme'
+ *   id="themeLabel"   -> text set to "Dark"/"Light"
+ *   id="hljs-theme"   -> <link> whose href swaps between highlight.js dark/light CSS
+ *   id="menuToggle" + id="overlay"  -> mobile drawer open/close for #toc
+ *
+ * REQUIRED libraries (load via CDN or inline, before this script):
+ *   marked.js, highlight.js (+ a theme CSS), mermaid
+ *
+ * The default code language for un-tagged ``` blocks is set by:  window.DOC_DEFAULT_LANG
+ * (e.g. set <script>window.DOC_DEFAULT_LANG='python'<\/script> before this engine). Defaults to 'python'.
+ */
+(function () {
+  const src = document.getElementById('markdown-source');
+  const contentEl = document.getElementById('content');
+  if (!src || !contentEl) { console.error('[doc-engine] missing #markdown-source or #content'); return; }
+  // Un-escape any <\/script> the build wrote so an HTML example inside the docs can't close
+  // the <script id="markdown-source"> container early. See build.ps1's matching escape.
+  const raw = src.textContent.replace(/<\\\/script>/g, '<\/script>');
+  const $ = id => document.getElementById(id);
+  const defaultLang = window.DOC_DEFAULT_LANG || 'python';
+
+  // 1. Markdown -> HTML
+  if (window.marked) marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
+  contentEl.innerHTML = window.marked ? marked.parse(raw) : raw;
+
+  // 2. Convert ```mermaid fences into rendered diagrams
+  const mermaidBlocks = [];
+  contentEl.querySelectorAll('pre code.language-mermaid').forEach(code => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.dataset.src = code.textContent;
+    div.textContent = code.textContent;
+    code.parentElement.replaceWith(div);
+    mermaidBlocks.push(div);
+  });
+  function renderMermaid() {
+    if (!window.mermaid || mermaidBlocks.length === 0) return;
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' });
+    mermaidBlocks.forEach(div => { div.removeAttribute('data-processed'); div.innerHTML = div.dataset.src; });
+    try { mermaid.run({ nodes: mermaidBlocks }); }
+    catch (e) { try { mermaid.init(undefined, mermaidBlocks); } catch (_) {} }
+  }
+  renderMermaid();
+
+  // 3. Slugify + assign heading ids
+  const slug = t => t.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+  contentEl.querySelectorAll('h2, h3').forEach(h => { if (!h.id) h.id = slug(h.textContent); });
+
+  // 4. Build the TOC (optional)
+  const toc = $('toc');
+  if (toc) {
+    contentEl.querySelectorAll('h2, h3').forEach(h => {
+      if (/table of contents/i.test(h.textContent)) { h.style.display = 'none'; return; }
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      if (h.tagName === 'H3') a.className = 'h3';
+      a.addEventListener('click', closeMobile);
+      toc.appendChild(a);
+    });
+    // Remove the redundant in-document TOC list (right after the hidden "Table of Contents" heading)
+    const tocHeading = Array.from(contentEl.querySelectorAll('h2')).find(h => /table of contents/i.test(h.textContent));
+    if (tocHeading) {
+      let n = tocHeading.nextElementSibling;
+      while (n && n.tagName !== 'HR' && n.tagName !== 'H2') { const next = n.nextElementSibling; n.remove(); n = next; }
+      if (n && n.tagName === 'HR') n.remove();
+    }
+  }
+
+  // 5. Syntax highlight (mermaid already converted away)
+  contentEl.querySelectorAll('pre code').forEach(block => {
+    if (block.classList.contains('language-mermaid')) return;
+    if (!block.className) block.className = 'language-' + defaultLang;
+    if (window.hljs) { try { hljs.highlightElement(block); } catch (e) {} }
+  });
+
+  // 6. Scroll-spy (only if a TOC exists)
+  if (toc) {
+    const links = Array.from(toc.querySelectorAll('a'));
+    const map = {};
+    links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const link = map[e.target.id];
+          if (link) { link.classList.add('active'); link.scrollIntoView({ block: 'nearest' }); }
+        }
+      });
+    }, { rootMargin: '-70px 0px -75% 0px', threshold: 0 });
+    contentEl.querySelectorAll('h2, h3').forEach(h => { if (h.id) spy.observe(h); });
+  }
+
+  // 7. Reading-progress bar (optional)
+  const progress = $('progress');
+  if (progress) {
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      progress.style.width = ((h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100) + '%';
+    }, { passive: true });
+  }
+
+  // 8. Theme toggle (optional)
+  const root = document.documentElement;
+  const themeBtn = $('themeToggle');
+  const themeLabel = $('themeLabel');
+  const hljsTheme = $('hljs-theme');
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    const dark = t === 'dark';
+    if (themeBtn && themeBtn.firstChild) themeBtn.firstChild.textContent = dark ? '🌙 ' : '☀️ ';
+    if (themeLabel) themeLabel.textContent = dark ? 'Dark' : 'Light';
+    if (hljsTheme) hljsTheme.href = dark
+      ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
+      : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+    try { localStorage.setItem('doc-theme', t); } catch (e) {}
+    renderMermaid();
+  }
+  let saved = 'dark';
+  try { saved = localStorage.getItem('doc-theme') || root.getAttribute('data-theme') || 'dark'; } catch (e) {}
+  applyTheme(saved);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+  // 9. Mobile drawer (optional)
+  const menuToggle = $('menuToggle');
+  const overlay = $('overlay');
+  function closeMobile() { if (toc) toc.classList.remove('open'); if (overlay) overlay.classList.remove('show'); }
+  if (menuToggle && toc) menuToggle.addEventListener('click', () => { toc.classList.toggle('open'); if (overlay) overlay.classList.toggle('show'); });
+  if (overlay) overlay.addEventListener('click', closeMobile);
+})();
+
+/*
+ * STORYBOOK ENHANCEMENT LAYER (optional, additive)
+ * -------------------------------------------------
+ * Post-processes the already-rendered #content to add richer, less "wall-of-text"
+ * presentation. Everything here is feature-detected and fail-safe: if a hook is
+ * missing or a component block is malformed, it silently leaves the content as-is.
+ *
+ * Adds:
+ *   - Themed callouts     : auto-detected from emoji-led blockquotes (no authoring change)
+ *   - Section chrome      : turns "N. Heading" into a numbered badge + clean title
+ *   - Visual components   : fenced blocks  ```stat  ```flow  ```cards  ```tags  (and ~~~overlay)
+ *   - Inline tag pills    : [[decided]]  [[risk:Custom label]]  in normal prose
+ *   - Read-as-deck mode   : a top-bar button that reflows the page into keyboard-nav slides
+ */
+(function () {
+  const content = document.getElementById('content');
+  if (!content) return;
+  const hasMarked = !!window.marked;
+  const inlineMd = s => (hasMarked && marked.parseInline) ? marked.parseInline(s) : s;
+  const blockMd  = s => hasMarked ? marked.parse(s) : s;
+
+  const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+  const elText = (tag, txt) => { const n = document.createElement(tag); n.textContent = txt; return n; };
+  const elHTML = (tag, cls, html) => { const n = el(tag, cls); n.innerHTML = html; return n; };
+
+  // ---- Modal (shared by overlay components) ----
+  let modal, modalTitle, modalBody;
+  function ensureModal() {
+    if (modal) return;
+    modal = el('div', 'sb-modal');
+    const card = el('div', 'sb-modal-card');
+    const head = el('div', 'sb-modal-head');
+    modalTitle = el('h3');
+    const close = el('button', 'sb-modal-close'); close.type = 'button'; close.innerHTML = '&times;';
+    close.addEventListener('click', closeModal);
+    head.appendChild(modalTitle); head.appendChild(close);
+    modalBody = el('div', 'sb-modal-body');
+    card.appendChild(head); card.appendChild(modalBody); modal.appendChild(card);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.body.appendChild(modal);
+  }
+  function openModal(title, html) {
+    ensureModal();
+    modalTitle.textContent = title || 'Detail';
+    modalBody.innerHTML = html;
+    if (window.hljs) modalBody.querySelectorAll('pre code').forEach(b => { try { hljs.highlightElement(b); } catch (e) {} });
+    modal.classList.add('open');
+  }
+  function closeModal() { if (modal) modal.classList.remove('open'); }
+
+  // ---- Tag pill ----
+  const TAGS = ['decided', 'tbd', 'risk', 'info', 'new'];
+  function tagPill(type, label) {
+    const t = TAGS.indexOf(type) >= 0 ? type : 'info';
+    const s = el('span', 'sb-tag ' + t); s.textContent = label || type; return s;
+  }
+
+  // ---- 1. Visual components from fenced code blocks ----
+  const COMP = { stat: 'stat', 'sb-stat': 'stat', flow: 'flow', 'sb-flow': 'flow',
+    cards: 'cards', 'sb-cards': 'cards', tags: 'tags', 'sb-tags': 'tags',
+    overlay: 'overlay', 'sb-overlay': 'overlay' };
+  function build(kind, raw) {
+    const lines = raw.split('\n').map(l => l.replace(/\s+$/, '')).filter(l => l.trim());
+    if (kind === 'stat') {
+      const row = el('div', 'sb-stat-row');
+      lines.forEach(l => {
+        const i = l.indexOf('|');
+        const num = i >= 0 ? l.slice(0, i) : l;
+        const lbl = i >= 0 ? l.slice(i + 1) : '';
+        const s = el('div', 'sb-stat');
+        s.appendChild(elHTML('div', 'num', inlineMd(num.trim())));
+        s.appendChild(elHTML('div', 'lbl', inlineMd(lbl.trim())));
+        row.appendChild(s);
+      });
+      return row;
+    }
+    if (kind === 'flow') {
+      const wrap = el('div', 'sb-flow');
+      raw.replace(/\n/g, ' ').split('->').forEach((tok, idx) => {
+        tok = tok.trim(); if (!tok) return;
+        let cls = ''; const m = tok.match(/\{([a-z]+)\}\s*$/i);
+        if (m) { cls = m[1].toLowerCase(); tok = tok.replace(/\{[a-z]+\}\s*$/i, '').trim(); }
+        const parts = tok.split('::');
+        if (idx > 0) { const a = el('div', 'sb-flow-arrow'); a.textContent = '\u2192'; wrap.appendChild(a); }
+        const box = el('div', 'sb-flow-box' + (cls ? ' ' + cls : ''));
+        box.appendChild(elText('b', parts[0].trim()));
+        if (parts[1]) box.appendChild(elText('small', parts[1].trim()));
+        wrap.appendChild(box);
+      });
+      return wrap;
+    }
+    if (kind === 'cards') {
+      const cards = lines.map(l => {
+        const i = l.indexOf('::');
+        const t = i >= 0 ? l.slice(0, i) : l;
+        const d = i >= 0 ? l.slice(i + 2) : '';
+        const c = el('div', 'sb-card');
+        c.appendChild(elHTML('div', 'ct', inlineMd(t.trim())));
+        if (d.trim()) c.appendChild(elHTML('div', 'cd', inlineMd(d.trim())));
+        return c;
+      });
+      let cols = cards.length <= 4 ? cards.length : (cards.length % 3 === 0 ? 3 : (cards.length % 2 === 0 ? 2 : 3));
+      const grid = el('div', 'sb-cards' + (cols > 1 ? ' n' + cols : ''));
+      cards.forEach(c => grid.appendChild(c));
+      return grid;
+    }
+    if (kind === 'tags') {
+      const wrap = el('div'); wrap.style.margin = '1.2em 0';
+      raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean).forEach(item => {
+        const i = item.indexOf(':');
+        const type = (i >= 0 ? item.slice(0, i) : item).trim().toLowerCase();
+        const label = (i >= 0 ? item.slice(i + 1) : item).trim();
+        wrap.appendChild(tagPill(type, label));
+      });
+      return wrap;
+    }
+    if (kind === 'overlay') {
+      const nl = raw.indexOf('\n');
+      const label = (nl >= 0 ? raw.slice(0, nl) : raw).trim();
+      const body = (nl >= 0 ? raw.slice(nl + 1) : '').trim();
+      const btn = el('button', 'sb-ov-btn'); btn.type = 'button';
+      btn.textContent = label || 'Show detail';
+      btn.addEventListener('click', () => openModal(label, blockMd(body)));
+      return btn;
+    }
+    return null;
+  }
+  Array.from(content.querySelectorAll('pre > code')).forEach(code => {
+    let kind = null;
+    code.classList.forEach(c => { const k = c.replace(/^language-/, ''); if (COMP[k]) kind = COMP[k]; });
+    if (!kind) return;
+    let node = null;
+    try { node = build(kind, code.textContent.replace(/\s+$/, '')); } catch (e) { return; }
+    if (node) code.parentElement.replaceWith(node);
+  });
+
+  // ---- 2. Themed callouts from emoji-led blockquotes ----
+  const EMOJI = [
+    [/^\s*(\uD83D\uDD0D|\u2699)/, 'cx-info'],   // magnifier / gear
+    [/^\s*(\u26A0)/, 'cx-warn'],                // warning
+    [/^\s*(\uD83D\uDCA1|\uD83C\uDFAF)/, 'cx-tip'], // bulb / target
+    [/^\s*(\u2705|\uD83D\uDFE2)/, 'cx-ok'],     // check / green
+    [/^\s*(\uD83D\uDD34|\u26D4|\uD83D\uDEA8)/, 'cx-risk'] // red / no-entry / siren
+  ];
+  Array.from(content.querySelectorAll('blockquote')).forEach(bq => {
+    const txt = bq.textContent || '';
+    for (const [rx, cls] of EMOJI) { if (rx.test(txt)) { bq.classList.add('callout', cls); return; } }
+  });
+
+  // ---- 3. Section chrome: "N. Heading" -> numbered badge + clean title ----
+  Array.from(content.querySelectorAll('h2')).forEach(h => {
+    const m = h.textContent.match(/^\s*(\d+)[.):]\s+(.*)$/);
+    if (!m) return;
+    h.textContent = m[2];
+    const badge = el('span', 'sec-badge'); badge.textContent = m[1];
+    h.insertBefore(badge, h.firstChild);
+    h.classList.add('has-badge');
+    // First blockquote right after the heading becomes a purpose block (unless it's a callout).
+    const n = h.nextElementSibling;
+    if (n && n.tagName === 'BLOCKQUOTE' && !n.classList.contains('callout')) n.classList.add('purpose-block');
+  });
+
+  // ---- 4. Inline [[tag]] / [[tag:label]] pills in prose (skip code/links) ----
+  const rx = /\[\[([a-zA-Z]+)(?::([^\]]+))?\]\]/g;
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      if (!n.nodeValue || n.nodeValue.indexOf('[[') < 0) return NodeFilter.FILTER_REJECT;
+      let p = n.parentElement;
+      while (p && p !== content) {
+        const t = p.tagName;
+        if (t === 'PRE' || t === 'CODE' || t === 'A' || t === 'SCRIPT' || t === 'STYLE') return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes = []; while (walker.nextNode()) textNodes.push(walker.currentNode);
+  textNodes.forEach(tn => {
+    const val = tn.nodeValue; rx.lastIndex = 0;
+    if (!rx.test(val)) return; rx.lastIndex = 0;
+    const frag = document.createDocumentFragment(); let last = 0, m;
+    while ((m = rx.exec(val))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(val.slice(last, m.index)));
+      frag.appendChild(tagPill(m[1].toLowerCase(), m[2] ? m[2].trim() : m[1]));
+      last = m.index + m[0].length;
+    }
+    if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));
+    tn.parentNode.replaceChild(frag, tn);
+  });
+
+  // ---- 5. Read-as-deck slide mode ----
+  const topbar = document.querySelector('.topbar');
+  const themeBtn = document.getElementById('themeToggle');
+  let deckRoot, deckStage, deckTitle, deckCounter, deckDots, deckPrev, deckNext;
+  const slides = []; let cur = 0;
+  function slideTitle(i) {
+    const h = slides[i] && slides[i].querySelector('h1, h2');
+    if (!h) return 'Slide ' + (i + 1);
+    const c = h.cloneNode(true); const b = c.querySelector('.sec-badge'); if (b) b.remove();
+    return c.textContent.trim();
+  }
+  function go(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[cur].classList.remove('active'); cur = i; slides[cur].classList.add('active');
+    Array.from(deckDots.children).forEach((d, k) => d.classList.toggle('active', k === cur));
+    deckCounter.textContent = (cur + 1) + ' / ' + slides.length;
+    deckPrev.disabled = cur === 0; deckNext.disabled = cur === slides.length - 1;
+    deckStage.scrollTop = 0; deckTitle.textContent = slideTitle(cur);
+  }
+  function stripIds(node) {
+    const c = node.cloneNode(true);
+    // Clear ids so cloned headings/anchors don't collide with the live DOM, but
+    // PRESERVE ids inside rendered SVG: Mermaid scopes its <style>, arrow markers
+    // and gradients by #id / url(#id), so stripping them breaks the diagram.
+    if (c.removeAttribute && !(c.tagName && c.tagName.toLowerCase() === 'svg')) c.removeAttribute('id');
+    if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(e => { if (!e.closest('svg')) e.removeAttribute('id'); });
+    return c;
+  }
+  function buildDeck() {
+    if (deckRoot) return;
+    deckRoot = el('div', 'deck-root');
+    const top = el('div', 'deck-top');
+    deckTitle = el('div', 'dt-title');
+    const exit = el('button', 'deck-exit'); exit.type = 'button'; exit.textContent = '\u2715 Exit';
+    exit.addEventListener('click', closeDeck);
+    top.appendChild(deckTitle); top.appendChild(exit);
+    deckStage = el('div', 'deck-stage');
+    const nav = el('div', 'deck-nav');
+    deckPrev = el('button', 'deck-arrow'); deckPrev.type = 'button'; deckPrev.innerHTML = '&#8592;';
+    deckPrev.addEventListener('click', () => go(cur - 1));
+    deckNext = el('button', 'deck-arrow'); deckNext.type = 'button'; deckNext.innerHTML = '&#8594;';
+    deckNext.addEventListener('click', () => go(cur + 1));
+    deckCounter = el('div', 'deck-counter');
+    deckDots = el('div', 'deck-dots');
+    nav.appendChild(deckPrev); nav.appendChild(deckDots); nav.appendChild(deckCounter); nav.appendChild(deckNext);
+    deckRoot.appendChild(top); deckRoot.appendChild(deckStage); deckRoot.appendChild(nav);
+    document.body.appendChild(deckRoot);
+    let slide = null;
+    Array.from(content.children).forEach(node => {
+      if (node.tagName === 'H2' || !slide) { slide = el('div', 'deck-slide'); deckStage.appendChild(slide); slides.push(slide); }
+      slide.appendChild(stripIds(node));
+    });
+    slides.forEach((s, i) => { const d = el('button', 'deck-dot'); d.type = 'button'; d.addEventListener('click', () => go(i)); deckDots.appendChild(d); });
+  }
+  function openDeck() { buildDeck(); if (!slides.length) return; deckRoot.classList.add('open'); document.body.style.overflow = 'hidden'; go(Math.min(cur, slides.length - 1)); }
+  function closeDeck() { if (deckRoot) deckRoot.classList.remove('open'); document.body.style.overflow = ''; }
+  if (topbar) {
+    const deckBtn = el('button', 'deck-btn'); deckBtn.type = 'button'; deckBtn.textContent = '\u25A4 Deck';
+    if (themeBtn) topbar.insertBefore(deckBtn, themeBtn); else topbar.appendChild(deckBtn);
+    deckBtn.addEventListener('click', openDeck);
+  }
+  document.addEventListener('keydown', e => {
+    if (modal && modal.classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
+    if (!deckRoot || !deckRoot.classList.contains('open')) return;
+    if (e.key === 'Escape') closeDeck();
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(cur - 1); }
+  });
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Components, Props and Composition · React from Scratch</title>
+<meta name="description" content="Components, Props and Composition — a deep, hands-on guide to learning React JS from scratch to production." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<!-- Libraries (CDN; needs internet on first view) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+<style>
+/* =====================================================================
+   BENTO / DASHBOARD skin — rounded cards, gradient hero, sticky chip TOC.
+   Rethemed to a React cyan/blue palette. Dark by default.
+   ===================================================================== */
+:root{
+  --font-head:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --r:18px; --r-sm:12px;
+  /* ---- alias vars so the enhancement kit (--sb-* chain) themes to this skin ---- */
+  --primary:var(--a1); --primary-2:var(--a3); --accent:var(--a2);
+  --panel:var(--card); --panel-2:var(--card2); --border:var(--line);
+  --text:var(--fg); --text-dim:var(--fg-soft); --text-mut:var(--fg-faint);
+  --hero-grad:var(--grad); --serif:var(--font-head); --mono:var(--font-mono);
+  --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+}
+[data-theme="dark"]{
+  --bg:#080d18; --card:#111a2b; --card2:#0c1322; --line:#1e2942; --line-soft:#16203a;
+  --fg:#e6eef9; --fg-soft:#9fb2cd; --fg-faint:#65748f;
+  --a1:#61dafb; --a2:#38bdf8; --a3:#818cf8;
+  --grad:linear-gradient(135deg,#61dafb,#38bdf8 55%,#818cf8);
+  --code:#070c16; --code-fg:#e2e8f0; --sel:#173453;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#eef3fb; --card:#ffffff; --card2:#f5f8fe; --line:#e0e8f4; --line-soft:#eef3fb;
+  --fg:#0e1c33; --fg-soft:#44566f; --fg-faint:#8494ac;
+  --a1:#0284c7; --a2:#0891b2; --a3:#4f46e5;
+  --grad:linear-gradient(135deg,#0284c7,#0891b2 55%,#4f46e5);
+  --code:#0f1729; --code-fg:#e2e8f0; --sel:#dbeafe;
+  --shadow:0 6px 22px rgba(15,23,42,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.7;
+  font-size:16.5px;-webkit-font-smoothing:antialiased}
+::selection{background:var(--sel)}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:var(--grad);
+  box-shadow:0 0 12px var(--a2)}
+
+/* top nav */
+header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-row{display:flex;align-items:center;gap:14px;padding:12px clamp(16px,4vw,40px)}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--font-head);font-weight:700;
+  font-size:1.02rem;text-decoration:none;color:inherit}
+.logo .mark{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;
+  place-items:center;color:#04121f;font-weight:800;font-size:16px;box-shadow:0 4px 16px rgba(97,218,251,.35)}
+.logo small{display:block;font-family:var(--font-body);font-weight:500;font-size:11.5px;color:var(--fg-faint)}
+header .spacer{flex:1}
+.btn{cursor:pointer;font-family:var(--font-body);font-size:.85rem;color:var(--fg-soft);
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 15px;transition:.2s}
+.btn:hover{color:var(--fg);border-color:var(--a1)}
+#menuToggle{display:none;cursor:pointer;border:1px solid var(--line);background:var(--card);
+  color:var(--fg);padding:6px 11px;border-radius:9px;font-size:18px;line-height:1}
+
+/* series cross-file nav */
+.series-nav-bar{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 10px;
+  scrollbar-width:thin}
+.series-nav-bar::-webkit-scrollbar{height:5px}
+.series-nav-bar::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.series-nav-bar .slabel{flex:0 0 auto;font-family:var(--font-head);font-size:11px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;color:var(--fg-faint);padding-right:2px}
+.series-nav-bar a{flex:0 0 auto;text-decoration:none;font-size:12.5px;white-space:nowrap;color:var(--fg-soft);
+  border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--card);transition:.15s}
+.series-nav-bar a:hover{color:var(--fg);border-color:var(--a1)}
+.series-nav-bar a.active{color:#04121f;background:var(--grad);border-color:transparent;font-weight:700}
+
+/* on-page chip TOC */
+nav#toc{display:flex;gap:8px;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 12px;scrollbar-width:none}
+nav#toc::-webkit-scrollbar{display:none}
+nav#toc a{white-space:nowrap;flex:none;font-size:.82rem;color:var(--fg-soft);text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;transition:.15s}
+nav#toc a:hover{color:var(--fg);border-color:var(--a1)}
+nav#toc a.h3{font-size:.78rem;color:var(--fg-faint)}
+nav#toc a.active{background:var(--grad);color:#04121f;border-color:transparent;font-weight:600}
+
+/* hero + bento */
+main{max-width:1000px;margin:0 auto;padding:30px clamp(16px,4vw,40px) 120px}
+.hero{background:var(--grad);border-radius:24px;padding:30px 32px;color:#04121f;margin-bottom:16px;
+  box-shadow:var(--shadow)}
+.hero .eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.hero h1{font-family:var(--font-head);font-weight:700;font-size:clamp(1.6rem,4vw,2.15rem);margin:6px 0 8px;
+  letter-spacing:-.02em;line-height:1.12}
+.hero p{opacity:.9;max-width:60ch;font-size:.98rem}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.bento .cell{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;
+  box-shadow:var(--shadow)}
+.bento .cell .k{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.bento .cell .v{font-family:var(--font-head);font-weight:700;font-size:1.24rem;margin-top:4px}
+.bento .cell.wide{grid-column:span 2}
+@media(max-width:720px){.bento{grid-template-columns:repeat(2,1fr)}.bento .cell.wide{grid-column:span 2}}
+
+/* content card */
+article.content{background:var(--card);border:1px solid var(--line);border-radius:24px;
+  padding:clamp(22px,4vw,46px);box-shadow:var(--shadow)}
+#content{animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.content h1{font-family:var(--font-head);font-weight:700;font-size:2.1rem;letter-spacing:-.02em;margin:0 0 6px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.content h1 + blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a1);
+  border-radius:var(--r-sm);padding:14px 18px;margin:14px 0 8px;color:var(--fg-soft)}
+.content h2{font-family:var(--font-head);font-weight:700;font-size:1.5rem;margin:48px 0 14px;
+  scroll-margin-top:150px;display:flex;align-items:center;gap:12px}
+.content h2::before{content:'';width:10px;height:26px;border-radius:6px;background:var(--grad);flex:none}
+.content h2.has-badge::before{display:none}
+.content h3{font-family:var(--font-head);font-weight:600;font-size:1.2rem;margin:30px 0 10px;
+  scroll-margin-top:150px;color:var(--a2)}
+.content h4{font-weight:600;font-size:1rem;margin:20px 0 8px;color:var(--fg-soft)}
+.content p{margin:14px 0}
+.content a{color:var(--a1);text-decoration:none;font-weight:500;border-bottom:1px dashed color-mix(in srgb,var(--a1) 45%,transparent)}
+.content a:hover{border-bottom-style:solid}
+.content strong{color:var(--fg);font-weight:700}
+.content ul,.content ol{margin:14px 0 14px 24px}
+.content li{margin:6px 0}
+.content hr{border:0;border-top:1px solid var(--line);margin:38px 0}
+
+/* code */
+.content code{font-family:var(--font-mono);font-size:.85em;background:var(--card2);color:var(--a2);
+  padding:2px 6px;border-radius:6px;border:1px solid var(--line-soft)}
+.code-wrap{position:relative;margin:20px 0}
+.content pre{background:var(--code);border-radius:var(--r-sm);padding:18px 20px;overflow-x:auto;border:1px solid var(--line)}
+.content pre code{background:none;border:0;padding:0;color:var(--code-fg);font-size:.84rem;line-height:1.62}
+.code-lang{position:absolute;top:10px;right:70px;font-family:var(--font-mono);font-size:.68rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.code-copy{position:absolute;top:8px;right:10px;font-family:var(--font-body);font-size:.74rem;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#cbd5e1;border-radius:8px;
+  padding:4px 11px;cursor:pointer;transition:.18s}
+.code-copy:hover{background:rgba(255,255,255,.16)}
+.code-copy.copied{color:var(--a1)}
+
+/* callouts (base; kit refines) */
+.content blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a2);
+  border-radius:var(--r-sm);padding:14px 18px;margin:20px 0;color:var(--fg-soft)}
+.content blockquote p{margin:4px 0}
+.content blockquote strong{color:var(--fg)}
+
+/* tables */
+.content table{width:100%;border-collapse:separate;border-spacing:0;margin:22px 0;font-size:.92rem;
+  border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.content th{background:var(--card2);text-align:left;padding:12px 16px;font-weight:600;font-family:var(--font-head);
+  border-bottom:1px solid var(--line)}
+.content td{padding:10px 16px;border-bottom:1px solid var(--line-soft);color:var(--fg-soft);vertical-align:top}
+.content tbody tr:last-child td{border-bottom:0}
+.content tbody tr:hover{background:var(--card2)}
+
+/* details / exercises */
+.content details{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);margin:16px 0;overflow:hidden}
+.content summary{cursor:pointer;padding:12px 18px;font-family:var(--font-head);font-weight:600;color:var(--a1);
+  list-style:none;user-select:none;display:flex;align-items:center;gap:8px}
+.content summary::-webkit-details-marker{display:none}
+.content summary::before{content:'+';display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;
+  background:var(--grad);color:#04121f;font-weight:800}
+.content details[open] summary::before{content:'\2212'}
+.content details>*:not(summary){padding:0 18px}
+.content details>.code-wrap{margin:10px 18px 16px}
+.content details>p:last-child{padding-bottom:14px}
+
+/* mermaid */
+.mermaid{display:flex;justify-content:center;margin:22px 0;padding:20px;background:var(--card2);
+  border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.mermaid svg{max-width:100%;height:auto}
+
+/* series footer nav */
+.series-footer{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.series-footer a{flex:1;min-width:200px;text-decoration:none;border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;background:var(--card);color:var(--fg);transition:.15s;box-shadow:var(--shadow)}
+.series-footer a:hover{border-color:var(--a1);transform:translateY(-2px)}
+.series-footer small{display:block;color:var(--fg-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.series-footer b{font-family:var(--font-head)}
+.series-footer .sn-next{text-align:right}
+
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80}
+#overlay.show{display:block}
+@media(max-width:720px){#menuToggle{display:inline-block}}
+
+/* ===== enhancement kit CSS (inlined by build.ps1) ===== */
+/* ============================================================
+   DEEP-DIVE DOCS — STORYBOOK ENHANCEMENT KIT (skin-agnostic CSS)
+   ------------------------------------------------------------
+   Callouts, section chrome, visual components (stat / flow / cards /
+   tags), deck (slide) mode, and progressive-disclosure overlays.
+
+   Skin-agnostic: every color/font resolves from a --sb-* variable whose
+   fallback chain covers the known skins (agentic-ai uses --primary /
+   --panel-2 / --hero-grad; editorial skins use --accent / --card /
+   --font-head; …) and ends in a hard-coded default. Inline this whole
+   block into any skin's <style>; it adapts to that skin automatically.
+   Pairs with assets/enhancements.js.
+   ============================================================ */
+:root{
+  --sb-accent: var(--primary, var(--accent, #7c6cff));
+  --sb-info:   var(--accent, var(--primary, #38d6f0));
+  --sb-tip:    var(--primary-2, var(--accent-soft, var(--accent, #9b8cff)));
+  --sb-ok:     var(--ok, #23b784);
+  --sb-warn:   var(--warn, #e0a52a);
+  --sb-danger: var(--danger, #e5484d);
+  --sb-bg:     var(--bg, var(--paper, #0b0f1a));
+  --sb-panel:  var(--panel-2, var(--card, #131a2b));
+  --sb-solid:  var(--panel, var(--card, #141824));
+  --sb-border: var(--border, var(--rule, #232c42));
+  --sb-text:   var(--text, var(--ink, #dbe3f4));
+  --sb-dim:    var(--text-dim, var(--ink-soft, #93a0bd));
+  --sb-mut:    var(--text-mut, var(--ink-faint, #63708f));
+  --sb-head:   var(--serif, var(--font-head, system-ui, sans-serif));
+  --sb-mono:   var(--mono, var(--font-mono, ui-monospace, monospace));
+  --sb-grad:   var(--hero-grad, linear-gradient(135deg, var(--sb-accent), var(--sb-info)));
+  --sb-shadow: var(--shadow, 0 18px 44px rgba(0,0,0,.35));
+}
+
+/* --- Section chrome: "N. Heading" -> numbered badge + purpose block --- */
+#content h2.has-badge{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sec-badge{display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;
+  background:var(--sb-grad);color:#fff;font-family:var(--sb-head);font-weight:700;font-size:17px;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+#content blockquote.purpose-block{border-left:4px solid var(--sb-info);
+  background:color-mix(in srgb,var(--sb-info) 10%,transparent);border-radius:0 12px 12px 0;
+  padding:14px 18px;margin:1em 0 1.4em;color:var(--sb-dim)}
+
+/* --- Callouts (auto-themed from emoji-led blockquotes) --- */
+#content blockquote.callout{border-left-width:4px;border-radius:0 12px 12px 0}
+#content blockquote.cx-info{border-left-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 9%,transparent)}
+#content blockquote.cx-warn{border-left-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 11%,transparent)}
+#content blockquote.cx-tip{border-left-color:var(--sb-tip);background:color-mix(in srgb,var(--sb-tip) 12%,transparent)}
+#content blockquote.cx-ok{border-left-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 11%,transparent)}
+#content blockquote.cx-risk{border-left-color:var(--sb-danger);background:color-mix(in srgb,var(--sb-danger) 11%,transparent)}
+
+/* --- Stat row --- */
+.sb-stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:1.4em 0}
+.sb-stat{flex:1;min-width:120px;background:var(--sb-panel);border:1px solid var(--sb-border);
+  border-radius:14px;padding:18px 16px;text-align:center}
+.sb-stat .num{font-family:var(--sb-head);font-size:30px;font-weight:700;line-height:1.1;
+  background:var(--sb-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sb-stat .lbl{font-size:12px;color:var(--sb-mut);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
+
+/* --- Flow diagram --- */
+.sb-flow{display:flex;align-items:stretch;flex-wrap:wrap;justify-content:center;background:var(--sb-panel);
+  border:1px solid var(--sb-border);border-radius:14px;padding:20px 14px;margin:1.4em 0}
+.sb-flow-box{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:110px;text-align:center;
+  padding:12px 14px;border:1.5px solid var(--sb-border);border-radius:10px;background:var(--sb-solid);font-size:13px}
+.sb-flow-box b{font-family:var(--sb-head);font-size:13.5px}
+.sb-flow-box small{color:var(--sb-mut);font-size:11px}
+.sb-flow-arrow{display:flex;align-items:center;color:var(--sb-mut);font-size:20px;padding:0 10px}
+.sb-flow-box.accent{border-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 12%,transparent)}
+.sb-flow-box.primary{border-color:var(--sb-accent);background:color-mix(in srgb,var(--sb-accent) 15%,transparent)}
+.sb-flow-box.ok{border-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 12%,transparent)}
+.sb-flow-box.warn{border-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 12%,transparent)}
+
+/* --- Card grid --- */
+.sb-cards{display:grid;gap:14px;margin:1.4em 0;grid-template-columns:1fr}
+.sb-cards.n2{grid-template-columns:repeat(2,1fr)}
+.sb-cards.n3{grid-template-columns:repeat(3,1fr)}
+.sb-cards.n4{grid-template-columns:repeat(4,1fr)}
+.sb-card{background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:14px;padding:18px;transition:.18s}
+.sb-card:hover{border-color:var(--sb-accent);transform:translateY(-3px);box-shadow:var(--sb-shadow)}
+.sb-card .ct{font-family:var(--sb-head);font-weight:700;margin-bottom:6px;color:var(--sb-tip)}
+.sb-card .cd{font-size:13.5px;color:var(--sb-dim);line-height:1.6}
+@media(max-width:820px){.sb-cards.n3,.sb-cards.n4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.sb-cards{grid-template-columns:1fr!important}}
+
+/* --- Tag pills --- */
+.sb-tag{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  padding:2px 9px;border-radius:999px;margin:0 3px;vertical-align:middle;border:1px solid transparent}
+.sb-tag.decided{background:color-mix(in srgb,var(--sb-ok) 18%,transparent);color:var(--sb-ok);border-color:color-mix(in srgb,var(--sb-ok) 40%,transparent)}
+.sb-tag.tbd{background:color-mix(in srgb,var(--sb-warn) 18%,transparent);color:var(--sb-warn);border-color:color-mix(in srgb,var(--sb-warn) 40%,transparent)}
+.sb-tag.risk{background:color-mix(in srgb,var(--sb-danger) 18%,transparent);color:var(--sb-danger);border-color:color-mix(in srgb,var(--sb-danger) 40%,transparent)}
+.sb-tag.info{background:color-mix(in srgb,var(--sb-info) 18%,transparent);color:var(--sb-info);border-color:color-mix(in srgb,var(--sb-info) 40%,transparent)}
+.sb-tag.new{background:color-mix(in srgb,var(--sb-accent) 20%,transparent);color:var(--sb-tip);border-color:color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+
+/* --- Overlay (progressive disclosure) trigger + modal --- */
+.sb-ov-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:14px;
+  color:var(--sb-text);background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:10px;padding:10px 16px;margin:1em 0;transition:.15s}
+.sb-ov-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.sb-ov-btn::before{content:"\2922";font-size:15px;color:var(--sb-info)}
+.sb-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(2,4,10,.68);backdrop-filter:blur(4px)}
+.sb-modal.open{display:flex}
+.sb-modal-card{background:var(--sb-solid);border:1px solid var(--sb-border);border-radius:18px;max-width:820px;width:100%;
+  max-height:86vh;overflow:auto;box-shadow:var(--sb-shadow);padding:8px 28px 28px;color:var(--sb-text)}
+.sb-modal-head{position:sticky;top:0;background:var(--sb-solid);display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0 12px;border-bottom:1px solid var(--sb-border);margin-bottom:14px}
+.sb-modal-head h3{font-family:var(--sb-head);margin:0;font-size:18px}
+.sb-modal-close{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;width:34px;height:34px;font-size:16px}
+.sb-modal-close:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+
+/* --- Deck (slide) mode --- */
+.deck-btn{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  padding:6px 12px;border-radius:999px;font-size:13px;font-family:inherit;margin-right:8px}
+.deck-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-root{position:fixed;inset:0;z-index:150;background:var(--sb-bg);display:none;flex-direction:column;color:var(--sb-text)}
+.deck-root.open{display:flex}
+.deck-top{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:14px;padding:0 20px;
+  border-bottom:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-top .dt-title{font-family:var(--sb-head);font-weight:700;font-size:15px;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deck-exit{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;padding:6px 12px;font-size:13px}
+.deck-exit:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+.deck-stage{flex:1;overflow:auto;display:grid;place-items:start center;padding:38px clamp(18px,5vw,80px) 90px}
+.deck-slide{display:none;max-width:1000px;width:100%;animation:deckIn .35s ease}
+.deck-slide.active{display:block}
+@keyframes deckIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.deck-nav{height:60px;flex:0 0 60px;display:flex;align-items:center;justify-content:center;gap:10px;
+  border-top:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-arrow{width:42px;height:42px;border-radius:11px;border:1px solid var(--sb-border);
+  background:var(--sb-panel);color:var(--sb-text);cursor:pointer;font-size:18px}
+.deck-arrow:hover:not(:disabled){border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-arrow:disabled{opacity:.35;cursor:default}
+.deck-dots{display:flex;gap:6px;align-items:center;max-width:60vw;overflow:auto;padding:0 6px}
+.deck-dot{width:9px;height:9px;border-radius:50%;background:var(--sb-border);border:none;cursor:pointer;flex:0 0 auto}
+.deck-dot.active{background:var(--sb-accent);width:24px;border-radius:6px}
+.deck-counter{font-family:var(--sb-mono);font-size:12px;color:var(--sb-mut);margin:0 6px}
+
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header>
+  <div class="nav-row topbar">
+    <button id="menuToggle" aria-label="Menu">☰</button>
+    <a class="logo" href="README.html">
+      <span class="mark">⚛</span>
+      <span>React from Scratch<small>Part 2 / 15</small></span>
+    </a>
+    <div class="spacer"></div>
+    <span class="btn" style="cursor:default">Vite · React 19</span>
+    <button class="btn" id="themeToggle">🌙 <span id="themeLabel">Dark</span></button>
+  </div>
+  <nav class="series-nav-bar" id="seriesNavBar" aria-label="Series parts">
+    <span class="slabel">Series</span>
+    <a href="README.html">Index</a>
+    <a href="01-jsx-and-rendering.html">1 · JSX</a>
+    <a href="02-components-and-props.html">2 · Components</a>
+    <a href="03-state-and-events.html">3 · State</a>
+    <a href="04-lists-keys-conditional.html">4 · Lists & Keys</a>
+    <a href="05-hooks-deep-dive.html">5 · Hooks</a>
+    <a href="06-effects-and-data-fetching.html">6 · Effects & Data</a>
+    <a href="07-forms.html">7 · Forms</a>
+    <a href="08-routing.html">8 · Routing</a>
+    <a href="09-state-management.html">9 · State Mgmt</a>
+    <a href="10-styling.html">10 · Styling</a>
+    <a href="11-performance.html">11 · Performance</a>
+    <a href="12-typescript-react.html">12 · TypeScript</a>
+    <a href="13-testing.html">13 · Testing</a>
+    <a href="14-patterns-architecture.html">14 · Patterns</a>
+    <a href="15-production-and-beyond.html">15 · Production</a>
+  </nav>
+  <nav id="toc"></nav>
+</header>
+<div id="overlay"></div>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">React from Scratch · Part 2 / 15</div>
+    <h1>Components, Props and Composition</h1>
+    <p>Build reusable components, pass data with props, and compose UIs the React way with children and slots.</p>
+  </section>
+  <section class="bento">
+    <div class="cell"><div class="k">Track</div><div class="v">15 Parts</div></div>
+    <div class="cell"><div class="k">Stack</div><div class="v">Vite · React 19</div></div>
+    <div class="cell wide"><div class="k">Approach</div><div class="v">Learn by building — many exercises + projects</div></div>
+  </section>
+  <article class="content" id="content"></article>
+  <nav class="series-footer" id="seriesFooter">
+    <a class="sn-prev" href="README.html" style="display:none"><small>Previous</small><b></b></a>
+    <a class="sn-index" href="README.html"><small>Series index</small><b>⚛ All parts</b></a>
+    <a class="sn-next" href="README.html" style="display:none"><small>Next</small><b></b></a>
+  </nav>
+</main>
+
+<!-- raw markdown (source of truth) -->
+<script type="text/markdown" id="markdown-source"># Part 2 · Components, Props and Composition
+
+> In Part 1 you built components with hardcoded data — every `ProfileCard` looked identical. That's a dead end. This part introduces **props**: the mechanism for passing data *into* components so they become reusable, configurable building blocks. You'll also learn **composition** — how React apps are assembled from small pieces — which is the single most important architectural skill in React.
+
+## Table of Contents
+
+1. [What props are](#1-what-props-are)
+2. [Passing and reading props](#2-passing-and-reading-props)
+3. [Destructuring and default props](#3-destructuring-and-default-props)
+4. [The children prop](#4-the-children-prop)
+5. [Composition over configuration](#5-composition-over-configuration)
+6. [Props are read-only: one-way data flow](#6-props-are-read-only-one-way-data-flow)
+7. [Passing functions as props](#7-passing-functions-as-props)
+8. [Thinking in components: splitting a UI](#8-thinking-in-components-splitting-a-ui)
+9. [Mini-project: a reusable card system](#9-mini-project-a-reusable-card-system)
+10. [Exercises and practice problems](#10-exercises-and-practice-problems)
+11. [Glossary](#11-glossary)
+
+---
+
+## 1. What props are
+
+🎯 **Analogy:** A component is a function; **props are its arguments**. Just as `formatCurrency(amount, currency)` produces different output for different arguments, `<Button label="Save" color="blue" />` produces a different button than `<Button label="Delete" color="red" />`. Same function, different inputs, different output. If you're comfortable with function parameters — and you are — you already understand props.
+
+Props (short for "properties") are a single **object** that React passes to your component function, built from the attributes you write in JSX:
+
+```jsx
+// When you write this:
+<Avatar src="/ada.png" size={96} rounded />
+
+// React calls your function with this props object:
+Avatar({ src: '/ada.png', size: 96, rounded: true })
+```
+
+Notice: `rounded` with no value becomes `rounded: true` (a boolean shorthand, like HTML). String values use quotes; anything else (numbers, booleans, objects, arrays, functions) uses `{}`.
+
+```jsx
+<Product
+  name="Keyboard"          // string: quotes
+  price={49.99}            // number: braces
+  inStock={true}           // boolean: braces
+  tags={['new', 'sale']}   // array: braces
+  onBuy={handleBuy}        // function: braces
+/>
+```
+
+> **🔍 Under the hood:** In §1 of Part 1 we saw `<Avatar .../>` compiles to `React.createElement(Avatar, { src, size, rounded })`. That second argument *is* the props object. React takes it and calls `Avatar(props)`. There's no magic — props are literally the function argument, assembled from your JSX attributes.
+
+> **⚠️ Common beginner mistake:** Forgetting braces for non-strings: `size="96"` passes the **string** `"96"`, not the number `96`. Usually harmless for display, but `price="49.99"` will break arithmetic (`price * qty` becomes string concatenation nonsense). Use `{}` for anything that isn't a literal string.
+
+**Key takeaways:**
+- Props are a component's inputs — like function arguments.
+- They arrive as one object built from your JSX attributes.
+- Strings use quotes; everything else uses `{}`. `prop` alone means `prop={true}`.
+
+---
+
+## 2. Passing and reading props
+
+The parent passes props; the child reads them from its `props` parameter.
+
+```jsx
+// Child: reads props.name and props.role
+function UserRow(props) {
+  return (
+    <li>
+      {props.name} — <em>{props.role}</em>
+    </li>
+  )
+}
+
+// Parent: passes different props to each instance
+function Team() {
+  return (
+    <ul>
+      <UserRow name="Ada" role="Engineer" />
+      <UserRow name="Linus" role="Maintainer" />
+      <UserRow name="Grace" role="Admiral" />
+    </ul>
+  )
+}
+```
+
+One component, three uses, three outputs — this is reuse. The parent controls each child by choosing its props.
+
+```mermaid
+flowchart TD
+  T[Team] -->|name=Ada role=Engineer| R1[UserRow]
+  T -->|name=Linus role=Maintainer| R2[UserRow]
+  T -->|name=Grace role=Admiral| R3[UserRow]
+```
+
+> **🔍 Under the hood:** Data flows **down** — parent to child, always. The child has no way to reach "up" and grab data from the parent; it can only receive what the parent chose to pass. This one-directional flow (covered in §6) is what makes React apps predictable: to understand any component's output, you only need to know its props, not the entire app.
+
+**Key takeaways:**
+- The parent sets props in JSX; the child reads them from its parameter.
+- The same component renders differently for different props.
+- Data flows downward, parent → child.
+
+---
+
+## 3. Destructuring and default props
+
+Reading `props.name`, `props.role`, `props.everything` gets noisy. Since props is just an object, **destructure** it in the parameter list — this is the idiomatic style you'll see everywhere:
+
+```jsx
+// Destructure directly in the parameter — cleaner and self-documenting.
+function UserRow({ name, role }) {
+  return <li>{name} — <em>{role}</em></li>
+}
+```
+
+Provide **default values** for optional props with normal JS default parameters:
+
+```jsx
+function Button({ label, color = 'blue', disabled = false }) {
+  return (
+    <button className={`btn btn-${color}`} disabled={disabled}>
+      {label}
+    </button>
+  )
+}
+
+<Button label="Save" />                        {/* color defaults to blue */}
+<Button label="Delete" color="red" />          {/* color overridden */}
+<Button label="Wait" disabled />               {/* disabled = true */}
+```
+
+You can also grab "the rest" of the props with the **rest** syntax — handy for forwarding unknown props to a DOM element:
+
+```jsx
+// Pull out `label`; collect everything else into `rest`, spread onto <button>.
+function IconButton({ label, ...rest }) {
+  return <button {...rest}>{label}</button>
+}
+
+// onClick and aria-label flow through `rest` to the real button:
+<IconButton label="🔍" onClick={search} aria-label="Search" />
+```
+
+> **🔍 Under the hood:** `{...rest}` uses JS object spread — the same feature you use in backend code — to copy every remaining prop as an attribute onto the element. This "prop forwarding" pattern is how reusable UI libraries let you pass any native attribute (`id`, `onClick`, `data-*`) through their custom components without listing each one.
+
+> **⚠️ Common beginner mistake:** Destructuring a nested prop that might be undefined: `function Card({ user: { name } })` crashes if `user` is missing. Prefer `function Card({ user })` then read `user?.name`, or default it: `function Card({ user = {} })`.
+
+**Key takeaways:**
+- Destructure props in the parameter: `function C({ a, b })`.
+- Default optional props with `= value` in the destructure.
+- `{...rest}` forwards leftover props onto an element.
+
+---
+
+## 4. The children prop
+
+There's one special prop: **`children`**. It's whatever you put *between* a component's opening and closing tags. This unlocks composition.
+
+```jsx
+// Card renders a styled box AROUND whatever you nest inside it.
+function Card({ children }) {
+  return <div className="card">{children}</div>
+}
+
+// Usage — the <h2> and <p> become Card's `children`:
+<Card>
+  <h2>Welcome</h2>
+  <p>This content is passed as children.</p>
+</Card>
+```
+
+🎯 **Analogy:** `children` is like a picture frame. The `Card` is the frame — it provides border, padding, shadow — and it doesn't care what picture goes inside. You can put text, an image, other components, anything. The frame wraps the content without knowing what it is. This is *dramatically* more flexible than passing content as a string prop.
+
+Compare the two approaches:
+
+```jsx
+// ❌ Rigid: content locked to a single string prop
+<Card title="Welcome" body="This content is passed as a string." />
+
+// ✅ Flexible: any JSX can go inside
+<Card>
+  <h2>Welcome</h2>
+  <img src="/hero.png" alt="" />
+  <button>Go</button>
+</Card>
+```
+
+> **🔍 Under the hood:** `children` is a normal prop — `<Card>x</Card>` compiles to `createElement(Card, null, x)`, and that third `createElement` argument becomes `props.children`. It can be a string, a single element, or an array of elements (when there are multiple children). React renders it wherever you place `{children}` in your JSX.
+
+> **⚠️ Common beginner mistake:** Forgetting to actually render `{children}`. If your wrapper component doesn't include `{children}` somewhere in its returned JSX, the nested content silently vanishes — React has it, but you never told it where to put it.
+
+```mermaid
+flowchart LR
+  U["&lt;Card&gt;<br/>&lt;h2&gt;Hi&lt;/h2&gt;<br/>&lt;/Card&gt;"] -->|children = the h2| C["Card renders<br/>&lt;div&gt;{children}&lt;/div&gt;"]
+  C --> O["&lt;div class=card&gt;<br/>&lt;h2&gt;Hi&lt;/h2&gt;<br/>&lt;/div&gt;"]
+```
+
+**Key takeaways:**
+- `children` is the content nested between a component's tags.
+- Render it with `{children}` to wrap arbitrary JSX.
+- It's far more flexible than passing content via string props.
+
+---
+
+## 5. Composition over configuration
+
+**Composition** means building complex UI by nesting simple components — not by adding endless props/flags to one mega-component. This is React's core design philosophy, and it mirrors good backend design (compose small functions rather than write one giant function with 20 parameters).
+
+Consider a dialog. The "configuration" approach piles on props:
+
+```jsx
+// ❌ Configuration hell — every new need = a new prop
+<Dialog
+  title="Delete file?"
+  body="This cannot be undone."
+  showCancel={true}
+  cancelText="Keep"
+  confirmText="Delete"
+  confirmColor="red"
+  icon="warning"
+/>
+```
+
+The **composition** approach uses `children` and smaller components:
+
+```jsx
+// ✅ Composition — assemble from parts; infinitely flexible
+<Dialog>
+  <Dialog.Header icon={<WarningIcon />}>Delete file?</Dialog.Header>
+  <Dialog.Body>This cannot be undone.</Dialog.Body>
+  <Dialog.Footer>
+    <Button color="gray">Keep</Button>
+    <Button color="red">Delete</Button>
+  </Dialog.Footer>
+</Dialog>
+```
+
+The second version handles *any* header, body, or footer content without new props. You'll formalize this "compound component" pattern in Part 14 — for now, just internalize the principle.
+
+Another everyday composition tool: passing **elements as props** (not just `children`). This is common for "slots":
+
+```jsx
+// SplitPane takes two element props and lays them out.
+function SplitPane({ left, right }) {
+  return (
+    <div className="split">
+      <div className="pane">{left}</div>
+      <div className="pane">{right}</div>
+    </div>
+  )
+}
+
+<SplitPane left={<Sidebar />} right={<Content />} />
+```
+
+> **🎯 Rule of thumb:** When you find yourself adding a boolean prop like `showX` or a `xText` string, ask: *could this be `children` or an element prop instead?* Usually yes, and the component gets simpler and more reusable.
+
+**Key takeaways:**
+- Prefer composing small components over configuring one big component with many props.
+- `children` and element props ("slots") are your composition tools.
+- Composition keeps components simple and endlessly reusable.
+
+---
+
+## 6. Props are read-only: one-way data flow
+
+A hard rule: **a component must never modify its own props.** Props are read-only inputs. React relies on this — it's what makes rendering predictable.
+
+```jsx
+function Counter({ count }) {
+  count = count + 1        // ❌ NEVER mutate props
+  return <p>{count}</p>
+}
+```
+
+If a value needs to *change over time*, it isn't a prop — it's **state** (Part 3). Props come from the parent and are owned by the parent. State is owned by the component itself. This distinction is central.
+
+🎯 **Analogy:** Props are like function arguments passed **by value** in a language where you shouldn't reassign parameters — treat them as constants. If the caller (parent) changes what it passes, your function re-runs with the new value; but *you* don't get to change the argument and expect it to stick.
+
+This gives React **one-way data flow**: data always moves parent → child via props. A child that needs to affect its parent doesn't reach up and mutate — instead the parent passes down a **function** (a callback), and the child calls it (see §7). Data flows down; events flow up via callbacks.
+
+```mermaid
+flowchart TD
+  P[Parent owns the data] -->|props: data down| C[Child]
+  C -->|calls callback: event up| P
+  P -->|updates its own state,<br/>re-renders with new props| C
+```
+
+> **🔍 Under the hood:** React re-renders a child when its parent re-renders (Part 3/11 refine this). Each render, the child receives a *fresh* props object. Because props are immutable, React can safely reuse and compare them. Mutating props would corrupt this model and cause subtle, hard-to-trace bugs — which is why React (in Strict Mode) and linters actively discourage it.
+
+> **⚠️ Common beginner mistake:** Trying to "save" a prop into a variable and mutate that to update the UI. It won't re-render. To change what's displayed over time, you need `useState` — the entire subject of Part 3.
+
+**Key takeaways:**
+- Never mutate props; treat them as read-only constants.
+- Values that change over time are **state**, not props.
+- Data flows down (props); events flow up (callbacks) — one-way data flow.
+
+---
+
+## 7. Passing functions as props
+
+Since props can be any value, they can be **functions**. This is how a child communicates back to its parent — the parent hands down a callback, the child invokes it.
+
+```jsx
+// Parent owns what happens; passes a function down.
+function Toolbar() {
+  function handleSave() {
+    console.log('Saving...')     // parent decides the behavior
+  }
+  return <SaveButton onSave={handleSave} />
+}
+
+// Child just calls the function it was given, when clicked.
+function SaveButton({ onSave }) {
+  return <button onClick={onSave}>Save</button>
+}
+```
+
+Naming convention: props that *are* handlers are named `onSomething` (e.g., `onSave`, `onDelete`), and the internal functions are often `handleSomething`. This mirrors native events (`onClick`, `onChange`).
+
+A critical subtlety — **pass the function, don't call it:**
+
+```jsx
+<button onClick={onSave}>     {/* ✅ pass the reference — React calls it on click */}
+<button onClick={onSave()}>   {/* ❌ calls it NOW, during render, every render */}
+```
+
+If you need to pass arguments, wrap it in an inline arrow so it's *called later*:
+
+```jsx
+// ✅ Arrow creates a new function that calls onDelete(id) when clicked.
+<button onClick={() => onDelete(item.id)}>Delete</button>
+```
+
+> **🔍 Under the hood:** `onClick={onSave}` stores a reference to the function; React invokes it when the click happens. `onClick={onSave()}` *invokes it immediately during rendering* and uses its **return value** as the handler — usually `undefined`, and worse, it runs on every render (often causing infinite loops if it sets state). The arrow-wrapper `() => onDelete(id)` defers the call until the event fires.
+
+> **⚠️ Common beginner mistake:** `onClick={handleClick()}` — the #1 beginner bug. Symptoms: the handler runs on page load instead of on click, or you get "Too many re-renders." Fix: remove the `()`, or wrap in `() => handleClick(args)`.
+
+```mermaid
+sequenceDiagram
+  participant Parent
+  participant Child
+  participant User
+  Parent->>Child: onSave={handleSave} (function down)
+  User->>Child: clicks button
+  Child->>Parent: calls onSave() (event up)
+  Parent->>Parent: runs handleSave, maybe updates state
+```
+
+**Key takeaways:**
+- Functions are valid props; they let children notify parents (events up).
+- Name handler props `onX` and internal functions `handleX`.
+- Pass the function reference (`onClick={fn}`); use `() => fn(arg)` to pass arguments.
+
+---
+
+## 8. Thinking in components: splitting a UI
+
+A core React skill is looking at a design and deciding *where the component boundaries are*. The guideline: **one component = one job** (the single-responsibility principle you know from backend code).
+
+Take a product card mockup. Break it down by responsibility:
+
+```mermaid
+flowchart TD
+  PC[ProductCard] --> IMG[ProductImage]
+  PC --> INFO[ProductInfo]
+  INFO --> TITLE[title + price text]
+  INFO --> RATING[StarRating]
+  PC --> ACTIONS[CardActions]
+  ACTIONS --> BUY[Button: Buy]
+  ACTIONS --> FAV[Button: Favorite]
+```
+
+How to find the boundaries:
+- **Repetition** → a component. Three stars rendered the same way? That's a `Star`, mapped over.
+- **Reuse** → a component. Buttons appear everywhere? A shared `Button`.
+- **Complexity** → a component. A chunk of JSX doing its own thing? Extract it and name it.
+- **Data shape** → a component. Each item in a list often maps to one component.
+
+```jsx
+// Composed from focused pieces, each with a single responsibility.
+function ProductCard({ product }) {
+  return (
+    <article className="product">
+      <ProductImage src={product.image} alt={product.name} />
+      <ProductInfo name={product.name} price={product.price} rating={product.rating} />
+      <CardActions onBuy={() => buy(product.id)} onFav={() => fav(product.id)} />
+    </article>
+  )
+}
+```
+
+> **💡 Tip:** Don't over-split on day one. Start with a bigger component and extract pieces when they repeat, grow complex, or need reuse. Premature component-splitting is as bad as premature abstraction in backend code. A good trigger: "I'm scrolling to understand this component" → time to split.
+
+> **⚠️ Common beginner mistake:** The opposite extreme — a single 400-line `App` component doing everything. It's hard to read, test, and reuse. If a component has many distinct responsibilities, split by responsibility.
+
+**Key takeaways:**
+- One component, one job — split by responsibility.
+- Look for repetition, reuse, complexity, and per-item data shape.
+- Don't over-split early; extract when there's a real reason.
+
+---
+
+## 9. Mini-project: a reusable card system
+
+🏗️ Convert the Part 1 profile card into a **reusable, composable card system** driven entirely by props and children. This is the natural next step from E8.
+
+**Goal:** A generic `<Card>` wrapper plus focused sub-pieces, rendering a *list* of different users from data.
+
+```bash
+npm create vite@latest card-system   # React → JavaScript
+cd card-system && npm install && npm run dev
+```
+
+```jsx
+// src/App.jsx
+
+// 1. A generic wrapper using `children` (composition).
+function Card({ children }) {
+  return <article style={cardStyle}>{children}</article>
+}
+
+// 2. Focused, reusable sub-components driven by props.
+function Avatar({ src, alt, size = 88 }) {
+  return <img src={src} alt={alt} style={{ width: size, height: size, borderRadius: '50%' }} />
+}
+
+function Badge({ children, color = '#22d3ee' }) {
+  return <span style={{ ...badgeStyle, background: color }}>{children}</span>
+}
+
+function SkillList({ skills }) {
+  // Empty-state handled cleanly (guard the leaky 0 from Part 1).
+  if (skills.length === 0) return <p style={{ color: '#94a3b8' }}>No skills listed</p>
+  return (
+    <div>
+      {skills.map((s) => (
+        <Badge key={s} color="#334155">{s}</Badge>
+      ))}
+    </div>
+  )
+}
+
+// 3. Compose a full profile from the pieces — note: all data comes via props.
+function ProfileCard({ user }) {
+  return (
+    <Card>
+      <Avatar src={user.avatar} alt={user.name} />
+      <h2 style={{ margin: '10px 0 2px' }}>
+        {user.name} {user.isPro && <Badge>PRO</Badge>}
+      </h2>
+      <p style={{ color: '#64748b', marginTop: 0 }}>{user.role}</p>
+      <SkillList skills={user.skills} />
+    </Card>
+  )
+}
+
+// 4. Render a LIST of different users — the whole point of props.
+const users = [
+  { id: 1, name: 'Ada Lovelace', role: 'Engineer', isPro: true,
+    avatar: 'https://i.pravatar.cc/120?img=47', skills: ['React', 'JS', 'CSS'] },
+  { id: 2, name: 'Linus T.', role: 'Maintainer', isPro: false,
+    avatar: 'https://i.pravatar.cc/120?img=12', skills: ['C', 'Git'] },
+  { id: 3, name: 'Grace Hopper', role: 'Admiral', isPro: true,
+    avatar: 'https://i.pravatar.cc/120?img=32', skills: [] },
+]
+
+export default function App() {
+  return (
+    <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center', padding: 40 }}>
+      {users.map((u) => (
+        <ProfileCard key={u.id} user={u} />
+      ))}
+    </div>
+  )
+}
+
+const cardStyle = { width: 240, padding: 22, borderRadius: 16, textAlign: 'center',
+  fontFamily: 'system-ui', boxShadow: '0 8px 30px rgba(0,0,0,.12)' }
+const badgeStyle = { fontSize: 11, color: '#04121f', padding: '2px 8px', borderRadius: 999,
+  marginLeft: 4, fontWeight: 700, display: 'inline-block' }
+```
+
+**What just leveled up from Part 1:**
+
+```cards
+Reuse via props :: One ProfileCard renders three different people from data.
+Composition :: Card wraps arbitrary children; pieces snap together.
+Sub-components :: Avatar, Badge, SkillList each do one job and are reused.
+Empty states :: SkillList handles the no-skills case gracefully.
+```
+
+**Extend it (do at least three):**
+1. Add a `<Card>`-based `StatCard` (label + big number) reusing the same `Card` wrapper.
+2. Give `Badge` a `size` prop (`sm`/`lg`) and use both sizes.
+3. Add an `onSelect` function prop to `ProfileCard`; log the user's name when the card is clicked (preview of Part 3/7).
+4. Extract the header (`Avatar` + name + role) into `<CardHeader user={user} />`.
+5. Add a 4th user with no avatar; make `Avatar` show a placeholder when `src` is missing.
+
+> **💡 Tip:** Notice you didn't touch `Card`, `Avatar`, or `Badge` to render a completely different set of people — you only changed *data*. That's the power of props: components become stable, data becomes the variable. This separation is what makes React scale.
+
+**Key takeaways:**
+- Props turned one card into a reusable component rendering many people.
+- Composition (`children`) + focused sub-components = clean, flexible UI.
+- Components stay stable; data drives what appears.
+
+---
+
+## 10. Exercises and practice problems
+
+### 🧪 Warm-ups (easy)
+
+**E1.** Write `Price({ amount })` that renders `$` + the amount fixed to 2 decimals. Render `<Price amount={9.5} />`.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Price({ amount }) {
+  return <span>${amount.toFixed(2)}</span>
+}
+<Price amount={9.5} />   // $9.50
+```
+
+*Why:* Destructure `amount`, use it as a number (braces when passing!).
+</details>
+
+**E2.** Write `Alert({ children, type = 'info' })` that wraps `children` in a `<div className={\`alert alert-${type}\`}>`. Render an info alert and an error alert.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Alert({ children, type = 'info' }) {
+  return <div className={`alert alert-${type}`}>{children}</div>
+}
+<Alert>Saved!</Alert>
+<Alert type="error">Something broke.</Alert>
+```
+
+*Why:* `children` holds the message; `type` defaults to `'info'`.
+</details>
+
+### 🧪 Core (medium)
+
+**E3.** Fix this bug: the button fires immediately on render instead of on click.
+
+```jsx
+function Row({ id, onDelete }) {
+  return <button onClick={onDelete(id)}>Delete</button>
+}
+```
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Row({ id, onDelete }) {
+  return <button onClick={() => onDelete(id)}>Delete</button>
+}
+```
+
+*Why:* `onDelete(id)` *calls* the function during render. Wrap it in an arrow so it's called on click with the argument.
+</details>
+
+**E4.** Build `<List items={['a','b','c']} renderItem={fn} />` where `List` maps over `items` and calls `renderItem(item)` for each. Render the items as `<li>`s in uppercase.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function List({ items, renderItem }) {
+  return <ul>{items.map(renderItem)}</ul>
+}
+<List
+  items={['a', 'b', 'c']}
+  renderItem={(x) => <li key={x}>{x.toUpperCase()}</li>}
+/>
+```
+
+*Why:* A function prop (`renderItem`) lets the parent control how each item looks — a taste of the "render prop" pattern (Part 14).
+</details>
+
+**E5.** Create a `Stack({ children, gap = 8 })` layout component that renders its children in a vertical flex column with the given gap. Use it to stack three paragraphs.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Stack({ children, gap = 8 }) {
+  return <div style={{ display: 'flex', flexDirection: 'column', gap }}>{children}</div>
+}
+<Stack gap={16}>
+  <p>One</p><p>Two</p><p>Three</p>
+</Stack>
+```
+
+*Why:* A layout component wraps `children` and applies spacing — pure composition.
+</details>
+
+### 🧪 Challenge (hard)
+
+**E6.** Refactor this over-configured component into a composition-based one using `children` and sub-components:
+
+```jsx
+<Panel
+  title="Settings"
+  footerText="Save"
+  footerColor="blue"
+  bodyText="Adjust your preferences."
+/>
+```
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Panel({ children }) { return <section className="panel">{children}</section> }
+function PanelTitle({ children }) { return <h2>{children}</h2> }
+function PanelBody({ children }) { return <div className="panel-body">{children}</div> }
+function PanelFooter({ children }) { return <footer>{children}</footer> }
+
+<Panel>
+  <PanelTitle>Settings</PanelTitle>
+  <PanelBody>Adjust your preferences.</PanelBody>
+  <PanelFooter><Button color="blue">Save</Button></PanelFooter>
+</Panel>
+```
+
+*Why:* Composition removes the prop explosion and lets the footer contain *any* content (an icon, two buttons, etc.), not just text.
+</details>
+
+**E7 (forwarding).** Write `Input({ label, ...rest })` that renders a `<label>` with the text and an `<input>` that receives all other props (`type`, `placeholder`, `value`, `onChange`). Verify `<Input label="Email" type="email" placeholder="you@x.com" />` works.
+
+<details><summary>Show solution</summary>
+
+```jsx
+function Input({ label, ...rest }) {
+  return (
+    <label style={{ display: 'block' }}>
+      {label}
+      <input {...rest} />
+    </label>
+  )
+}
+```
+
+*Why:* `{...rest}` forwards every native input attribute through your wrapper — the pattern real UI libraries use.
+</details>
+
+**E8 (capstone step).** Take your card-system project and add a `<Grid columns={3}>{children}</Grid>` component that arranges its children in a CSS grid. Wrap your list of `ProfileCard`s in it. You now have reusable *layout* + *content* components — keep this; Part 3 will make the cards interactive (favoriting).
+
+<details><summary>Show hint</summary>
+
+```jsx
+function Grid({ columns = 2, children }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: 16 }}>
+      {children}
+    </div>
+  )
+}
+```
+
+Then `<Grid columns={3}>{users.map(u => <ProfileCard key={u.id} user={u} />)}</Grid>`.
+</details>
+
+---
+
+## 11. Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **Props** | Read-only inputs passed to a component (its "arguments"), as one object. |
+| **Destructuring** | Pulling named values out of the props object in the parameter list. |
+| **Default prop** | A fallback value via JS default parameters: `{ color = 'blue' }`. |
+| **`children`** | The special prop holding content nested between a component's tags. |
+| **Composition** | Building UI by nesting small components rather than configuring one big one. |
+| **Slot / element prop** | Passing a JSX element as a prop for the child to place. |
+| **One-way data flow** | Data moves parent → child (props); events move up via callbacks. |
+| **Prop forwarding** | Passing leftover props onto an inner element with `{...rest}`. |
+| **Callback prop** | A function passed down so the child can notify the parent. |
+
+---
+
+> **You can now build reusable, composable components.** But everything so far is static — the screen never changes after it loads. Time to bring components to life.
+>
+> **Next:** [Part 3 · State and Event Handling →](03-state-and-events.html)
+</script>
+
+<!-- default language for untagged code fences + jsx/tsx aliases -->
+<script>
+window.DOC_DEFAULT_LANG='javascript';
+(function(){try{
+  if(window.hljs&&hljs.registerAliases){
+    hljs.registerAliases(['jsx'],{languageName:'javascript'});
+    hljs.registerAliases(['tsx'],{languageName:'typescript'});
+  }
+}catch(e){}})();
+</script>
+
+<!-- mobile drawer toggle for the chip TOC -->
+<script>
+(function(){
+  var mt=document.getElementById('menuToggle'),toc=document.getElementById('toc'),ov=document.getElementById('overlay');
+  if(mt&&toc){mt.addEventListener('click',function(){toc.classList.toggle('open');if(ov)ov.classList.toggle('show');});}
+  if(ov){ov.addEventListener('click',function(){toc.classList.remove('open');ov.classList.remove('show');});}
+})();
+</script>
+
+<!-- cross-file series navigation: active chip + footer prev/next -->
+<script>
+(function(){
+  var order=['README.html','01-jsx-and-rendering.html','02-components-and-props.html','03-state-and-events.html','04-lists-keys-conditional.html','05-hooks-deep-dive.html','06-effects-and-data-fetching.html','07-forms.html','08-routing.html','09-state-management.html','10-styling.html','11-performance.html','12-typescript-react.html','13-testing.html','14-patterns-architecture.html','15-production-and-beyond.html'];
+  var titles={'README.html':'Series index','01-jsx-and-rendering.html':'1 · JSX & Rendering','02-components-and-props.html':'2 · Components & Props','03-state-and-events.html':'3 · State & Events','04-lists-keys-conditional.html':'4 · Lists, Keys & Conditionals','05-hooks-deep-dive.html':'5 · Hooks Deep Dive','06-effects-and-data-fetching.html':'6 · Effects & Data Fetching','07-forms.html':'7 · Forms','08-routing.html':'8 · Routing','09-state-management.html':'9 · State Management','10-styling.html':'10 · Styling','11-performance.html':'11 · Performance','12-typescript-react.html':'12 · TypeScript','13-testing.html':'13 · Testing','14-patterns-architecture.html':'14 · Patterns & Architecture','15-production-and-beyond.html':'15 · Production & Beyond'};
+  var here=(location.pathname.split('/').pop()||'README.html').toLowerCase();
+  if(here===''||here==='index.html')here='readme.html';
+  document.querySelectorAll('#seriesNavBar a').forEach(function(a){
+    if((a.getAttribute('href')||'').toLowerCase()===here){a.classList.add('active');a.setAttribute('aria-current','page');a.scrollIntoView({block:'nearest',inline:'center'});}
+  });
+  var norm=order.map(function(x){return x.toLowerCase();});
+  var i=norm.indexOf(here);
+  function fill(sel,file){var el=document.querySelector(sel);if(!el)return;if(!file){el.style.display='none';return;}el.style.display='';el.setAttribute('href',file);var b=el.querySelector('b');if(b)b.textContent=titles[file];}
+  if(i>=0){fill('.sn-prev',i>0?order[i-1]:null);fill('.sn-next',i<order.length-1?order[i+1]:null);}
+})();
+</script>
+
+<!-- rendering engine (inlined verbatim by build.ps1) -->
+<script>
+/*
+ * Deep Dive Docs — Rendering Engine (inline this verbatim into every generated .html)
+ * ---------------------------------------------------------------------------------
+ * This is the ONLY non-negotiable JavaScript. The visual design (CSS, layout, fonts,
+ * colors, decorative markup) is free to change per topic, but these element HOOKS must
+ * exist for the page to function. All hooks except #markdown-source and #content are
+ * OPTIONAL — the engine feature-detects each and silently skips what isn't present.
+ *
+ * REQUIRED hooks:
+ *   <script type="text/markdown" id="markdown-source">  ...raw markdown...  <\/script>
+ *   <... id="content">  (empty container that receives the rendered HTML)
+ *
+ * OPTIONAL hooks (include only the ones your design uses):
+ *   id="toc"          -> auto-filled with links to every h2/h3 (sidebar/top/drawer — your choice)
+ *   id="progress"     -> reading-progress bar; its style.width is set 0%..100%
+ *   id="themeToggle"  -> click toggles data-theme on <html>; persists to localStorage 'doc-theme'
+ *   id="themeLabel"   -> text set to "Dark"/"Light"
+ *   id="hljs-theme"   -> <link> whose href swaps between highlight.js dark/light CSS
+ *   id="menuToggle" + id="overlay"  -> mobile drawer open/close for #toc
+ *
+ * REQUIRED libraries (load via CDN or inline, before this script):
+ *   marked.js, highlight.js (+ a theme CSS), mermaid
+ *
+ * The default code language for un-tagged ``` blocks is set by:  window.DOC_DEFAULT_LANG
+ * (e.g. set <script>window.DOC_DEFAULT_LANG='python'<\/script> before this engine). Defaults to 'python'.
+ */
+(function () {
+  const src = document.getElementById('markdown-source');
+  const contentEl = document.getElementById('content');
+  if (!src || !contentEl) { console.error('[doc-engine] missing #markdown-source or #content'); return; }
+  // Un-escape any <\/script> the build wrote so an HTML example inside the docs can't close
+  // the <script id="markdown-source"> container early. See build.ps1's matching escape.
+  const raw = src.textContent.replace(/<\\\/script>/g, '<\/script>');
+  const $ = id => document.getElementById(id);
+  const defaultLang = window.DOC_DEFAULT_LANG || 'python';
+
+  // 1. Markdown -> HTML
+  if (window.marked) marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
+  contentEl.innerHTML = window.marked ? marked.parse(raw) : raw;
+
+  // 2. Convert ```mermaid fences into rendered diagrams
+  const mermaidBlocks = [];
+  contentEl.querySelectorAll('pre code.language-mermaid').forEach(code => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.dataset.src = code.textContent;
+    div.textContent = code.textContent;
+    code.parentElement.replaceWith(div);
+    mermaidBlocks.push(div);
+  });
+  function renderMermaid() {
+    if (!window.mermaid || mermaidBlocks.length === 0) return;
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' });
+    mermaidBlocks.forEach(div => { div.removeAttribute('data-processed'); div.innerHTML = div.dataset.src; });
+    try { mermaid.run({ nodes: mermaidBlocks }); }
+    catch (e) { try { mermaid.init(undefined, mermaidBlocks); } catch (_) {} }
+  }
+  renderMermaid();
+
+  // 3. Slugify + assign heading ids
+  const slug = t => t.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+  contentEl.querySelectorAll('h2, h3').forEach(h => { if (!h.id) h.id = slug(h.textContent); });
+
+  // 4. Build the TOC (optional)
+  const toc = $('toc');
+  if (toc) {
+    contentEl.querySelectorAll('h2, h3').forEach(h => {
+      if (/table of contents/i.test(h.textContent)) { h.style.display = 'none'; return; }
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      if (h.tagName === 'H3') a.className = 'h3';
+      a.addEventListener('click', closeMobile);
+      toc.appendChild(a);
+    });
+    // Remove the redundant in-document TOC list (right after the hidden "Table of Contents" heading)
+    const tocHeading = Array.from(contentEl.querySelectorAll('h2')).find(h => /table of contents/i.test(h.textContent));
+    if (tocHeading) {
+      let n = tocHeading.nextElementSibling;
+      while (n && n.tagName !== 'HR' && n.tagName !== 'H2') { const next = n.nextElementSibling; n.remove(); n = next; }
+      if (n && n.tagName === 'HR') n.remove();
+    }
+  }
+
+  // 5. Syntax highlight (mermaid already converted away)
+  contentEl.querySelectorAll('pre code').forEach(block => {
+    if (block.classList.contains('language-mermaid')) return;
+    if (!block.className) block.className = 'language-' + defaultLang;
+    if (window.hljs) { try { hljs.highlightElement(block); } catch (e) {} }
+  });
+
+  // 6. Scroll-spy (only if a TOC exists)
+  if (toc) {
+    const links = Array.from(toc.querySelectorAll('a'));
+    const map = {};
+    links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const link = map[e.target.id];
+          if (link) { link.classList.add('active'); link.scrollIntoView({ block: 'nearest' }); }
+        }
+      });
+    }, { rootMargin: '-70px 0px -75% 0px', threshold: 0 });
+    contentEl.querySelectorAll('h2, h3').forEach(h => { if (h.id) spy.observe(h); });
+  }
+
+  // 7. Reading-progress bar (optional)
+  const progress = $('progress');
+  if (progress) {
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      progress.style.width = ((h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100) + '%';
+    }, { passive: true });
+  }
+
+  // 8. Theme toggle (optional)
+  const root = document.documentElement;
+  const themeBtn = $('themeToggle');
+  const themeLabel = $('themeLabel');
+  const hljsTheme = $('hljs-theme');
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    const dark = t === 'dark';
+    if (themeBtn && themeBtn.firstChild) themeBtn.firstChild.textContent = dark ? '🌙 ' : '☀️ ';
+    if (themeLabel) themeLabel.textContent = dark ? 'Dark' : 'Light';
+    if (hljsTheme) hljsTheme.href = dark
+      ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
+      : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+    try { localStorage.setItem('doc-theme', t); } catch (e) {}
+    renderMermaid();
+  }
+  let saved = 'dark';
+  try { saved = localStorage.getItem('doc-theme') || root.getAttribute('data-theme') || 'dark'; } catch (e) {}
+  applyTheme(saved);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+  // 9. Mobile drawer (optional)
+  const menuToggle = $('menuToggle');
+  const overlay = $('overlay');
+  function closeMobile() { if (toc) toc.classList.remove('open'); if (overlay) overlay.classList.remove('show'); }
+  if (menuToggle && toc) menuToggle.addEventListener('click', () => { toc.classList.toggle('open'); if (overlay) overlay.classList.toggle('show'); });
+  if (overlay) overlay.addEventListener('click', closeMobile);
+})();
+
+/*
+ * STORYBOOK ENHANCEMENT LAYER (optional, additive)
+ * -------------------------------------------------
+ * Post-processes the already-rendered #content to add richer, less "wall-of-text"
+ * presentation. Everything here is feature-detected and fail-safe: if a hook is
+ * missing or a component block is malformed, it silently leaves the content as-is.
+ *
+ * Adds:
+ *   - Themed callouts     : auto-detected from emoji-led blockquotes (no authoring change)
+ *   - Section chrome      : turns "N. Heading" into a numbered badge + clean title
+ *   - Visual components   : fenced blocks  ```stat  ```flow  ```cards  ```tags  (and ~~~overlay)
+ *   - Inline tag pills    : [[decided]]  [[risk:Custom label]]  in normal prose
+ *   - Read-as-deck mode   : a top-bar button that reflows the page into keyboard-nav slides
+ */
+(function () {
+  const content = document.getElementById('content');
+  if (!content) return;
+  const hasMarked = !!window.marked;
+  const inlineMd = s => (hasMarked && marked.parseInline) ? marked.parseInline(s) : s;
+  const blockMd  = s => hasMarked ? marked.parse(s) : s;
+
+  const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+  const elText = (tag, txt) => { const n = document.createElement(tag); n.textContent = txt; return n; };
+  const elHTML = (tag, cls, html) => { const n = el(tag, cls); n.innerHTML = html; return n; };
+
+  // ---- Modal (shared by overlay components) ----
+  let modal, modalTitle, modalBody;
+  function ensureModal() {
+    if (modal) return;
+    modal = el('div', 'sb-modal');
+    const card = el('div', 'sb-modal-card');
+    const head = el('div', 'sb-modal-head');
+    modalTitle = el('h3');
+    const close = el('button', 'sb-modal-close'); close.type = 'button'; close.innerHTML = '&times;';
+    close.addEventListener('click', closeModal);
+    head.appendChild(modalTitle); head.appendChild(close);
+    modalBody = el('div', 'sb-modal-body');
+    card.appendChild(head); card.appendChild(modalBody); modal.appendChild(card);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.body.appendChild(modal);
+  }
+  function openModal(title, html) {
+    ensureModal();
+    modalTitle.textContent = title || 'Detail';
+    modalBody.innerHTML = html;
+    if (window.hljs) modalBody.querySelectorAll('pre code').forEach(b => { try { hljs.highlightElement(b); } catch (e) {} });
+    modal.classList.add('open');
+  }
+  function closeModal() { if (modal) modal.classList.remove('open'); }
+
+  // ---- Tag pill ----
+  const TAGS = ['decided', 'tbd', 'risk', 'info', 'new'];
+  function tagPill(type, label) {
+    const t = TAGS.indexOf(type) >= 0 ? type : 'info';
+    const s = el('span', 'sb-tag ' + t); s.textContent = label || type; return s;
+  }
+
+  // ---- 1. Visual components from fenced code blocks ----
+  const COMP = { stat: 'stat', 'sb-stat': 'stat', flow: 'flow', 'sb-flow': 'flow',
+    cards: 'cards', 'sb-cards': 'cards', tags: 'tags', 'sb-tags': 'tags',
+    overlay: 'overlay', 'sb-overlay': 'overlay' };
+  function build(kind, raw) {
+    const lines = raw.split('\n').map(l => l.replace(/\s+$/, '')).filter(l => l.trim());
+    if (kind === 'stat') {
+      const row = el('div', 'sb-stat-row');
+      lines.forEach(l => {
+        const i = l.indexOf('|');
+        const num = i >= 0 ? l.slice(0, i) : l;
+        const lbl = i >= 0 ? l.slice(i + 1) : '';
+        const s = el('div', 'sb-stat');
+        s.appendChild(elHTML('div', 'num', inlineMd(num.trim())));
+        s.appendChild(elHTML('div', 'lbl', inlineMd(lbl.trim())));
+        row.appendChild(s);
+      });
+      return row;
+    }
+    if (kind === 'flow') {
+      const wrap = el('div', 'sb-flow');
+      raw.replace(/\n/g, ' ').split('->').forEach((tok, idx) => {
+        tok = tok.trim(); if (!tok) return;
+        let cls = ''; const m = tok.match(/\{([a-z]+)\}\s*$/i);
+        if (m) { cls = m[1].toLowerCase(); tok = tok.replace(/\{[a-z]+\}\s*$/i, '').trim(); }
+        const parts = tok.split('::');
+        if (idx > 0) { const a = el('div', 'sb-flow-arrow'); a.textContent = '\u2192'; wrap.appendChild(a); }
+        const box = el('div', 'sb-flow-box' + (cls ? ' ' + cls : ''));
+        box.appendChild(elText('b', parts[0].trim()));
+        if (parts[1]) box.appendChild(elText('small', parts[1].trim()));
+        wrap.appendChild(box);
+      });
+      return wrap;
+    }
+    if (kind === 'cards') {
+      const cards = lines.map(l => {
+        const i = l.indexOf('::');
+        const t = i >= 0 ? l.slice(0, i) : l;
+        const d = i >= 0 ? l.slice(i + 2) : '';
+        const c = el('div', 'sb-card');
+        c.appendChild(elHTML('div', 'ct', inlineMd(t.trim())));
+        if (d.trim()) c.appendChild(elHTML('div', 'cd', inlineMd(d.trim())));
+        return c;
+      });
+      let cols = cards.length <= 4 ? cards.length : (cards.length % 3 === 0 ? 3 : (cards.length % 2 === 0 ? 2 : 3));
+      const grid = el('div', 'sb-cards' + (cols > 1 ? ' n' + cols : ''));
+      cards.forEach(c => grid.appendChild(c));
+      return grid;
+    }
+    if (kind === 'tags') {
+      const wrap = el('div'); wrap.style.margin = '1.2em 0';
+      raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean).forEach(item => {
+        const i = item.indexOf(':');
+        const type = (i >= 0 ? item.slice(0, i) : item).trim().toLowerCase();
+        const label = (i >= 0 ? item.slice(i + 1) : item).trim();
+        wrap.appendChild(tagPill(type, label));
+      });
+      return wrap;
+    }
+    if (kind === 'overlay') {
+      const nl = raw.indexOf('\n');
+      const label = (nl >= 0 ? raw.slice(0, nl) : raw).trim();
+      const body = (nl >= 0 ? raw.slice(nl + 1) : '').trim();
+      const btn = el('button', 'sb-ov-btn'); btn.type = 'button';
+      btn.textContent = label || 'Show detail';
+      btn.addEventListener('click', () => openModal(label, blockMd(body)));
+      return btn;
+    }
+    return null;
+  }
+  Array.from(content.querySelectorAll('pre > code')).forEach(code => {
+    let kind = null;
+    code.classList.forEach(c => { const k = c.replace(/^language-/, ''); if (COMP[k]) kind = COMP[k]; });
+    if (!kind) return;
+    let node = null;
+    try { node = build(kind, code.textContent.replace(/\s+$/, '')); } catch (e) { return; }
+    if (node) code.parentElement.replaceWith(node);
+  });
+
+  // ---- 2. Themed callouts from emoji-led blockquotes ----
+  const EMOJI = [
+    [/^\s*(\uD83D\uDD0D|\u2699)/, 'cx-info'],   // magnifier / gear
+    [/^\s*(\u26A0)/, 'cx-warn'],                // warning
+    [/^\s*(\uD83D\uDCA1|\uD83C\uDFAF)/, 'cx-tip'], // bulb / target
+    [/^\s*(\u2705|\uD83D\uDFE2)/, 'cx-ok'],     // check / green
+    [/^\s*(\uD83D\uDD34|\u26D4|\uD83D\uDEA8)/, 'cx-risk'] // red / no-entry / siren
+  ];
+  Array.from(content.querySelectorAll('blockquote')).forEach(bq => {
+    const txt = bq.textContent || '';
+    for (const [rx, cls] of EMOJI) { if (rx.test(txt)) { bq.classList.add('callout', cls); return; } }
+  });
+
+  // ---- 3. Section chrome: "N. Heading" -> numbered badge + clean title ----
+  Array.from(content.querySelectorAll('h2')).forEach(h => {
+    const m = h.textContent.match(/^\s*(\d+)[.):]\s+(.*)$/);
+    if (!m) return;
+    h.textContent = m[2];
+    const badge = el('span', 'sec-badge'); badge.textContent = m[1];
+    h.insertBefore(badge, h.firstChild);
+    h.classList.add('has-badge');
+    // First blockquote right after the heading becomes a purpose block (unless it's a callout).
+    const n = h.nextElementSibling;
+    if (n && n.tagName === 'BLOCKQUOTE' && !n.classList.contains('callout')) n.classList.add('purpose-block');
+  });
+
+  // ---- 4. Inline [[tag]] / [[tag:label]] pills in prose (skip code/links) ----
+  const rx = /\[\[([a-zA-Z]+)(?::([^\]]+))?\]\]/g;
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      if (!n.nodeValue || n.nodeValue.indexOf('[[') < 0) return NodeFilter.FILTER_REJECT;
+      let p = n.parentElement;
+      while (p && p !== content) {
+        const t = p.tagName;
+        if (t === 'PRE' || t === 'CODE' || t === 'A' || t === 'SCRIPT' || t === 'STYLE') return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes = []; while (walker.nextNode()) textNodes.push(walker.currentNode);
+  textNodes.forEach(tn => {
+    const val = tn.nodeValue; rx.lastIndex = 0;
+    if (!rx.test(val)) return; rx.lastIndex = 0;
+    const frag = document.createDocumentFragment(); let last = 0, m;
+    while ((m = rx.exec(val))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(val.slice(last, m.index)));
+      frag.appendChild(tagPill(m[1].toLowerCase(), m[2] ? m[2].trim() : m[1]));
+      last = m.index + m[0].length;
+    }
+    if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));
+    tn.parentNode.replaceChild(frag, tn);
+  });
+
+  // ---- 5. Read-as-deck slide mode ----
+  const topbar = document.querySelector('.topbar');
+  const themeBtn = document.getElementById('themeToggle');
+  let deckRoot, deckStage, deckTitle, deckCounter, deckDots, deckPrev, deckNext;
+  const slides = []; let cur = 0;
+  function slideTitle(i) {
+    const h = slides[i] && slides[i].querySelector('h1, h2');
+    if (!h) return 'Slide ' + (i + 1);
+    const c = h.cloneNode(true); const b = c.querySelector('.sec-badge'); if (b) b.remove();
+    return c.textContent.trim();
+  }
+  function go(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[cur].classList.remove('active'); cur = i; slides[cur].classList.add('active');
+    Array.from(deckDots.children).forEach((d, k) => d.classList.toggle('active', k === cur));
+    deckCounter.textContent = (cur + 1) + ' / ' + slides.length;
+    deckPrev.disabled = cur === 0; deckNext.disabled = cur === slides.length - 1;
+    deckStage.scrollTop = 0; deckTitle.textContent = slideTitle(cur);
+  }
+  function stripIds(node) {
+    const c = node.cloneNode(true);
+    // Clear ids so cloned headings/anchors don't collide with the live DOM, but
+    // PRESERVE ids inside rendered SVG: Mermaid scopes its <style>, arrow markers
+    // and gradients by #id / url(#id), so stripping them breaks the diagram.
+    if (c.removeAttribute && !(c.tagName && c.tagName.toLowerCase() === 'svg')) c.removeAttribute('id');
+    if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(e => { if (!e.closest('svg')) e.removeAttribute('id'); });
+    return c;
+  }
+  function buildDeck() {
+    if (deckRoot) return;
+    deckRoot = el('div', 'deck-root');
+    const top = el('div', 'deck-top');
+    deckTitle = el('div', 'dt-title');
+    const exit = el('button', 'deck-exit'); exit.type = 'button'; exit.textContent = '\u2715 Exit';
+    exit.addEventListener('click', closeDeck);
+    top.appendChild(deckTitle); top.appendChild(exit);
+    deckStage = el('div', 'deck-stage');
+    const nav = el('div', 'deck-nav');
+    deckPrev = el('button', 'deck-arrow'); deckPrev.type = 'button'; deckPrev.innerHTML = '&#8592;';
+    deckPrev.addEventListener('click', () => go(cur - 1));
+    deckNext = el('button', 'deck-arrow'); deckNext.type = 'button'; deckNext.innerHTML = '&#8594;';
+    deckNext.addEventListener('click', () => go(cur + 1));
+    deckCounter = el('div', 'deck-counter');
+    deckDots = el('div', 'deck-dots');
+    nav.appendChild(deckPrev); nav.appendChild(deckDots); nav.appendChild(deckCounter); nav.appendChild(deckNext);
+    deckRoot.appendChild(top); deckRoot.appendChild(deckStage); deckRoot.appendChild(nav);
+    document.body.appendChild(deckRoot);
+    let slide = null;
+    Array.from(content.children).forEach(node => {
+      if (node.tagName === 'H2' || !slide) { slide = el('div', 'deck-slide'); deckStage.appendChild(slide); slides.push(slide); }
+      slide.appendChild(stripIds(node));
+    });
+    slides.forEach((s, i) => { const d = el('button', 'deck-dot'); d.type = 'button'; d.addEventListener('click', () => go(i)); deckDots.appendChild(d); });
+  }
+  function openDeck() { buildDeck(); if (!slides.length) return; deckRoot.classList.add('open'); document.body.style.overflow = 'hidden'; go(Math.min(cur, slides.length - 1)); }
+  function closeDeck() { if (deckRoot) deckRoot.classList.remove('open'); document.body.style.overflow = ''; }
+  if (topbar) {
+    const deckBtn = el('button', 'deck-btn'); deckBtn.type = 'button'; deckBtn.textContent = '\u25A4 Deck';
+    if (themeBtn) topbar.insertBefore(deckBtn, themeBtn); else topbar.appendChild(deckBtn);
+    deckBtn.addEventListener('click', openDeck);
+  }
+  document.addEventListener('keydown', e => {
+    if (modal && modal.classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
+    if (!deckRoot || !deckRoot.classList.contains('open')) return;
+    if (e.key === 'Escape') closeDeck();
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(cur - 1); }
+  });
+})();
+
+</script>
+</body>
+</html>

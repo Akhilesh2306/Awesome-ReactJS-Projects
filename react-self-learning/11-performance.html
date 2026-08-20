@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Performance Optimization · React from Scratch</title>
+<meta name="description" content="Performance Optimization — a deep, hands-on guide to learning React JS from scratch to production." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<!-- Libraries (CDN; needs internet on first view) -->
+<link id="hljs-theme" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+<style>
+/* =====================================================================
+   BENTO / DASHBOARD skin — rounded cards, gradient hero, sticky chip TOC.
+   Rethemed to a React cyan/blue palette. Dark by default.
+   ===================================================================== */
+:root{
+  --font-head:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --r:18px; --r-sm:12px;
+  /* ---- alias vars so the enhancement kit (--sb-* chain) themes to this skin ---- */
+  --primary:var(--a1); --primary-2:var(--a3); --accent:var(--a2);
+  --panel:var(--card); --panel-2:var(--card2); --border:var(--line);
+  --text:var(--fg); --text-dim:var(--fg-soft); --text-mut:var(--fg-faint);
+  --hero-grad:var(--grad); --serif:var(--font-head); --mono:var(--font-mono);
+  --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+}
+[data-theme="dark"]{
+  --bg:#080d18; --card:#111a2b; --card2:#0c1322; --line:#1e2942; --line-soft:#16203a;
+  --fg:#e6eef9; --fg-soft:#9fb2cd; --fg-faint:#65748f;
+  --a1:#61dafb; --a2:#38bdf8; --a3:#818cf8;
+  --grad:linear-gradient(135deg,#61dafb,#38bdf8 55%,#818cf8);
+  --code:#070c16; --code-fg:#e2e8f0; --sel:#173453;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#eef3fb; --card:#ffffff; --card2:#f5f8fe; --line:#e0e8f4; --line-soft:#eef3fb;
+  --fg:#0e1c33; --fg-soft:#44566f; --fg-faint:#8494ac;
+  --a1:#0284c7; --a2:#0891b2; --a3:#4f46e5;
+  --grad:linear-gradient(135deg,#0284c7,#0891b2 55%,#4f46e5);
+  --code:#0f1729; --code-fg:#e2e8f0; --sel:#dbeafe;
+  --shadow:0 6px 22px rgba(15,23,42,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.7;
+  font-size:16.5px;-webkit-font-smoothing:antialiased}
+::selection{background:var(--sel)}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:var(--grad);
+  box-shadow:0 0 12px var(--a2)}
+
+/* top nav */
+header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-row{display:flex;align-items:center;gap:14px;padding:12px clamp(16px,4vw,40px)}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--font-head);font-weight:700;
+  font-size:1.02rem;text-decoration:none;color:inherit}
+.logo .mark{width:32px;height:32px;border-radius:9px;background:var(--grad);display:grid;
+  place-items:center;color:#04121f;font-weight:800;font-size:16px;box-shadow:0 4px 16px rgba(97,218,251,.35)}
+.logo small{display:block;font-family:var(--font-body);font-weight:500;font-size:11.5px;color:var(--fg-faint)}
+header .spacer{flex:1}
+.btn{cursor:pointer;font-family:var(--font-body);font-size:.85rem;color:var(--fg-soft);
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 15px;transition:.2s}
+.btn:hover{color:var(--fg);border-color:var(--a1)}
+#menuToggle{display:none;cursor:pointer;border:1px solid var(--line);background:var(--card);
+  color:var(--fg);padding:6px 11px;border-radius:9px;font-size:18px;line-height:1}
+
+/* series cross-file nav */
+.series-nav-bar{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 10px;
+  scrollbar-width:thin}
+.series-nav-bar::-webkit-scrollbar{height:5px}
+.series-nav-bar::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.series-nav-bar .slabel{flex:0 0 auto;font-family:var(--font-head);font-size:11px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;color:var(--fg-faint);padding-right:2px}
+.series-nav-bar a{flex:0 0 auto;text-decoration:none;font-size:12.5px;white-space:nowrap;color:var(--fg-soft);
+  border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--card);transition:.15s}
+.series-nav-bar a:hover{color:var(--fg);border-color:var(--a1)}
+.series-nav-bar a.active{color:#04121f;background:var(--grad);border-color:transparent;font-weight:700}
+
+/* on-page chip TOC */
+nav#toc{display:flex;gap:8px;overflow-x:auto;padding:0 clamp(16px,4vw,40px) 12px;scrollbar-width:none}
+nav#toc::-webkit-scrollbar{display:none}
+nav#toc a{white-space:nowrap;flex:none;font-size:.82rem;color:var(--fg-soft);text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;transition:.15s}
+nav#toc a:hover{color:var(--fg);border-color:var(--a1)}
+nav#toc a.h3{font-size:.78rem;color:var(--fg-faint)}
+nav#toc a.active{background:var(--grad);color:#04121f;border-color:transparent;font-weight:600}
+
+/* hero + bento */
+main{max-width:1000px;margin:0 auto;padding:30px clamp(16px,4vw,40px) 120px}
+.hero{background:var(--grad);border-radius:24px;padding:30px 32px;color:#04121f;margin-bottom:16px;
+  box-shadow:var(--shadow)}
+.hero .eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.hero h1{font-family:var(--font-head);font-weight:700;font-size:clamp(1.6rem,4vw,2.15rem);margin:6px 0 8px;
+  letter-spacing:-.02em;line-height:1.12}
+.hero p{opacity:.9;max-width:60ch;font-size:.98rem}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.bento .cell{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;
+  box-shadow:var(--shadow)}
+.bento .cell .k{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.bento .cell .v{font-family:var(--font-head);font-weight:700;font-size:1.24rem;margin-top:4px}
+.bento .cell.wide{grid-column:span 2}
+@media(max-width:720px){.bento{grid-template-columns:repeat(2,1fr)}.bento .cell.wide{grid-column:span 2}}
+
+/* content card */
+article.content{background:var(--card);border:1px solid var(--line);border-radius:24px;
+  padding:clamp(22px,4vw,46px);box-shadow:var(--shadow)}
+#content{animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.content h1{font-family:var(--font-head);font-weight:700;font-size:2.1rem;letter-spacing:-.02em;margin:0 0 6px;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.content h1 + blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a1);
+  border-radius:var(--r-sm);padding:14px 18px;margin:14px 0 8px;color:var(--fg-soft)}
+.content h2{font-family:var(--font-head);font-weight:700;font-size:1.5rem;margin:48px 0 14px;
+  scroll-margin-top:150px;display:flex;align-items:center;gap:12px}
+.content h2::before{content:'';width:10px;height:26px;border-radius:6px;background:var(--grad);flex:none}
+.content h2.has-badge::before{display:none}
+.content h3{font-family:var(--font-head);font-weight:600;font-size:1.2rem;margin:30px 0 10px;
+  scroll-margin-top:150px;color:var(--a2)}
+.content h4{font-weight:600;font-size:1rem;margin:20px 0 8px;color:var(--fg-soft)}
+.content p{margin:14px 0}
+.content a{color:var(--a1);text-decoration:none;font-weight:500;border-bottom:1px dashed color-mix(in srgb,var(--a1) 45%,transparent)}
+.content a:hover{border-bottom-style:solid}
+.content strong{color:var(--fg);font-weight:700}
+.content ul,.content ol{margin:14px 0 14px 24px}
+.content li{margin:6px 0}
+.content hr{border:0;border-top:1px solid var(--line);margin:38px 0}
+
+/* code */
+.content code{font-family:var(--font-mono);font-size:.85em;background:var(--card2);color:var(--a2);
+  padding:2px 6px;border-radius:6px;border:1px solid var(--line-soft)}
+.code-wrap{position:relative;margin:20px 0}
+.content pre{background:var(--code);border-radius:var(--r-sm);padding:18px 20px;overflow-x:auto;border:1px solid var(--line)}
+.content pre code{background:none;border:0;padding:0;color:var(--code-fg);font-size:.84rem;line-height:1.62}
+.code-lang{position:absolute;top:10px;right:70px;font-family:var(--font-mono);font-size:.68rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+.code-copy{position:absolute;top:8px;right:10px;font-family:var(--font-body);font-size:.74rem;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#cbd5e1;border-radius:8px;
+  padding:4px 11px;cursor:pointer;transition:.18s}
+.code-copy:hover{background:rgba(255,255,255,.16)}
+.code-copy.copied{color:var(--a1)}
+
+/* callouts (base; kit refines) */
+.content blockquote{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--a2);
+  border-radius:var(--r-sm);padding:14px 18px;margin:20px 0;color:var(--fg-soft)}
+.content blockquote p{margin:4px 0}
+.content blockquote strong{color:var(--fg)}
+
+/* tables */
+.content table{width:100%;border-collapse:separate;border-spacing:0;margin:22px 0;font-size:.92rem;
+  border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.content th{background:var(--card2);text-align:left;padding:12px 16px;font-weight:600;font-family:var(--font-head);
+  border-bottom:1px solid var(--line)}
+.content td{padding:10px 16px;border-bottom:1px solid var(--line-soft);color:var(--fg-soft);vertical-align:top}
+.content tbody tr:last-child td{border-bottom:0}
+.content tbody tr:hover{background:var(--card2)}
+
+/* details / exercises */
+.content details{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);margin:16px 0;overflow:hidden}
+.content summary{cursor:pointer;padding:12px 18px;font-family:var(--font-head);font-weight:600;color:var(--a1);
+  list-style:none;user-select:none;display:flex;align-items:center;gap:8px}
+.content summary::-webkit-details-marker{display:none}
+.content summary::before{content:'+';display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;
+  background:var(--grad);color:#04121f;font-weight:800}
+.content details[open] summary::before{content:'\2212'}
+.content details>*:not(summary){padding:0 18px}
+.content details>.code-wrap{margin:10px 18px 16px}
+.content details>p:last-child{padding-bottom:14px}
+
+/* mermaid */
+.mermaid{display:flex;justify-content:center;margin:22px 0;padding:20px;background:var(--card2);
+  border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.mermaid svg{max-width:100%;height:auto}
+
+/* series footer nav */
+.series-footer{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.series-footer a{flex:1;min-width:200px;text-decoration:none;border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;background:var(--card);color:var(--fg);transition:.15s;box-shadow:var(--shadow)}
+.series-footer a:hover{border-color:var(--a1);transform:translateY(-2px)}
+.series-footer small{display:block;color:var(--fg-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.series-footer b{font-family:var(--font-head)}
+.series-footer .sn-next{text-align:right}
+
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80}
+#overlay.show{display:block}
+@media(max-width:720px){#menuToggle{display:inline-block}}
+
+/* ===== enhancement kit CSS (inlined by build.ps1) ===== */
+/* ============================================================
+   DEEP-DIVE DOCS — STORYBOOK ENHANCEMENT KIT (skin-agnostic CSS)
+   ------------------------------------------------------------
+   Callouts, section chrome, visual components (stat / flow / cards /
+   tags), deck (slide) mode, and progressive-disclosure overlays.
+
+   Skin-agnostic: every color/font resolves from a --sb-* variable whose
+   fallback chain covers the known skins (agentic-ai uses --primary /
+   --panel-2 / --hero-grad; editorial skins use --accent / --card /
+   --font-head; …) and ends in a hard-coded default. Inline this whole
+   block into any skin's <style>; it adapts to that skin automatically.
+   Pairs with assets/enhancements.js.
+   ============================================================ */
+:root{
+  --sb-accent: var(--primary, var(--accent, #7c6cff));
+  --sb-info:   var(--accent, var(--primary, #38d6f0));
+  --sb-tip:    var(--primary-2, var(--accent-soft, var(--accent, #9b8cff)));
+  --sb-ok:     var(--ok, #23b784);
+  --sb-warn:   var(--warn, #e0a52a);
+  --sb-danger: var(--danger, #e5484d);
+  --sb-bg:     var(--bg, var(--paper, #0b0f1a));
+  --sb-panel:  var(--panel-2, var(--card, #131a2b));
+  --sb-solid:  var(--panel, var(--card, #141824));
+  --sb-border: var(--border, var(--rule, #232c42));
+  --sb-text:   var(--text, var(--ink, #dbe3f4));
+  --sb-dim:    var(--text-dim, var(--ink-soft, #93a0bd));
+  --sb-mut:    var(--text-mut, var(--ink-faint, #63708f));
+  --sb-head:   var(--serif, var(--font-head, system-ui, sans-serif));
+  --sb-mono:   var(--mono, var(--font-mono, ui-monospace, monospace));
+  --sb-grad:   var(--hero-grad, linear-gradient(135deg, var(--sb-accent), var(--sb-info)));
+  --sb-shadow: var(--shadow, 0 18px 44px rgba(0,0,0,.35));
+}
+
+/* --- Section chrome: "N. Heading" -> numbered badge + purpose block --- */
+#content h2.has-badge{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sec-badge{display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;
+  background:var(--sb-grad);color:#fff;font-family:var(--sb-head);font-weight:700;font-size:17px;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+#content blockquote.purpose-block{border-left:4px solid var(--sb-info);
+  background:color-mix(in srgb,var(--sb-info) 10%,transparent);border-radius:0 12px 12px 0;
+  padding:14px 18px;margin:1em 0 1.4em;color:var(--sb-dim)}
+
+/* --- Callouts (auto-themed from emoji-led blockquotes) --- */
+#content blockquote.callout{border-left-width:4px;border-radius:0 12px 12px 0}
+#content blockquote.cx-info{border-left-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 9%,transparent)}
+#content blockquote.cx-warn{border-left-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 11%,transparent)}
+#content blockquote.cx-tip{border-left-color:var(--sb-tip);background:color-mix(in srgb,var(--sb-tip) 12%,transparent)}
+#content blockquote.cx-ok{border-left-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 11%,transparent)}
+#content blockquote.cx-risk{border-left-color:var(--sb-danger);background:color-mix(in srgb,var(--sb-danger) 11%,transparent)}
+
+/* --- Stat row --- */
+.sb-stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:1.4em 0}
+.sb-stat{flex:1;min-width:120px;background:var(--sb-panel);border:1px solid var(--sb-border);
+  border-radius:14px;padding:18px 16px;text-align:center}
+.sb-stat .num{font-family:var(--sb-head);font-size:30px;font-weight:700;line-height:1.1;
+  background:var(--sb-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sb-stat .lbl{font-size:12px;color:var(--sb-mut);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
+
+/* --- Flow diagram --- */
+.sb-flow{display:flex;align-items:stretch;flex-wrap:wrap;justify-content:center;background:var(--sb-panel);
+  border:1px solid var(--sb-border);border-radius:14px;padding:20px 14px;margin:1.4em 0}
+.sb-flow-box{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:110px;text-align:center;
+  padding:12px 14px;border:1.5px solid var(--sb-border);border-radius:10px;background:var(--sb-solid);font-size:13px}
+.sb-flow-box b{font-family:var(--sb-head);font-size:13.5px}
+.sb-flow-box small{color:var(--sb-mut);font-size:11px}
+.sb-flow-arrow{display:flex;align-items:center;color:var(--sb-mut);font-size:20px;padding:0 10px}
+.sb-flow-box.accent{border-color:var(--sb-info);background:color-mix(in srgb,var(--sb-info) 12%,transparent)}
+.sb-flow-box.primary{border-color:var(--sb-accent);background:color-mix(in srgb,var(--sb-accent) 15%,transparent)}
+.sb-flow-box.ok{border-color:var(--sb-ok);background:color-mix(in srgb,var(--sb-ok) 12%,transparent)}
+.sb-flow-box.warn{border-color:var(--sb-warn);background:color-mix(in srgb,var(--sb-warn) 12%,transparent)}
+
+/* --- Card grid --- */
+.sb-cards{display:grid;gap:14px;margin:1.4em 0;grid-template-columns:1fr}
+.sb-cards.n2{grid-template-columns:repeat(2,1fr)}
+.sb-cards.n3{grid-template-columns:repeat(3,1fr)}
+.sb-cards.n4{grid-template-columns:repeat(4,1fr)}
+.sb-card{background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:14px;padding:18px;transition:.18s}
+.sb-card:hover{border-color:var(--sb-accent);transform:translateY(-3px);box-shadow:var(--sb-shadow)}
+.sb-card .ct{font-family:var(--sb-head);font-weight:700;margin-bottom:6px;color:var(--sb-tip)}
+.sb-card .cd{font-size:13.5px;color:var(--sb-dim);line-height:1.6}
+@media(max-width:820px){.sb-cards.n3,.sb-cards.n4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.sb-cards{grid-template-columns:1fr!important}}
+
+/* --- Tag pills --- */
+.sb-tag{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  padding:2px 9px;border-radius:999px;margin:0 3px;vertical-align:middle;border:1px solid transparent}
+.sb-tag.decided{background:color-mix(in srgb,var(--sb-ok) 18%,transparent);color:var(--sb-ok);border-color:color-mix(in srgb,var(--sb-ok) 40%,transparent)}
+.sb-tag.tbd{background:color-mix(in srgb,var(--sb-warn) 18%,transparent);color:var(--sb-warn);border-color:color-mix(in srgb,var(--sb-warn) 40%,transparent)}
+.sb-tag.risk{background:color-mix(in srgb,var(--sb-danger) 18%,transparent);color:var(--sb-danger);border-color:color-mix(in srgb,var(--sb-danger) 40%,transparent)}
+.sb-tag.info{background:color-mix(in srgb,var(--sb-info) 18%,transparent);color:var(--sb-info);border-color:color-mix(in srgb,var(--sb-info) 40%,transparent)}
+.sb-tag.new{background:color-mix(in srgb,var(--sb-accent) 20%,transparent);color:var(--sb-tip);border-color:color-mix(in srgb,var(--sb-accent) 45%,transparent)}
+
+/* --- Overlay (progressive disclosure) trigger + modal --- */
+.sb-ov-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-size:14px;
+  color:var(--sb-text);background:var(--sb-panel);border:1px solid var(--sb-border);border-radius:10px;padding:10px 16px;margin:1em 0;transition:.15s}
+.sb-ov-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.sb-ov-btn::before{content:"\2922";font-size:15px;color:var(--sb-info)}
+.sb-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(2,4,10,.68);backdrop-filter:blur(4px)}
+.sb-modal.open{display:flex}
+.sb-modal-card{background:var(--sb-solid);border:1px solid var(--sb-border);border-radius:18px;max-width:820px;width:100%;
+  max-height:86vh;overflow:auto;box-shadow:var(--sb-shadow);padding:8px 28px 28px;color:var(--sb-text)}
+.sb-modal-head{position:sticky;top:0;background:var(--sb-solid);display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0 12px;border-bottom:1px solid var(--sb-border);margin-bottom:14px}
+.sb-modal-head h3{font-family:var(--sb-head);margin:0;font-size:18px}
+.sb-modal-close{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;width:34px;height:34px;font-size:16px}
+.sb-modal-close:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+
+/* --- Deck (slide) mode --- */
+.deck-btn{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  padding:6px 12px;border-radius:999px;font-size:13px;font-family:inherit;margin-right:8px}
+.deck-btn:hover{border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-root{position:fixed;inset:0;z-index:150;background:var(--sb-bg);display:none;flex-direction:column;color:var(--sb-text)}
+.deck-root.open{display:flex}
+.deck-top{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:14px;padding:0 20px;
+  border-bottom:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-top .dt-title{font-family:var(--sb-head);font-weight:700;font-size:15px;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deck-exit{cursor:pointer;border:1px solid var(--sb-border);background:var(--sb-panel);color:var(--sb-text);
+  border-radius:9px;padding:6px 12px;font-size:13px}
+.deck-exit:hover{border-color:var(--sb-danger);color:var(--sb-danger)}
+.deck-stage{flex:1;overflow:auto;display:grid;place-items:start center;padding:38px clamp(18px,5vw,80px) 90px}
+.deck-slide{display:none;max-width:1000px;width:100%;animation:deckIn .35s ease}
+.deck-slide.active{display:block}
+@keyframes deckIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.deck-nav{height:60px;flex:0 0 60px;display:flex;align-items:center;justify-content:center;gap:10px;
+  border-top:1px solid var(--sb-border);background:color-mix(in srgb,var(--sb-bg) 85%,transparent)}
+.deck-arrow{width:42px;height:42px;border-radius:11px;border:1px solid var(--sb-border);
+  background:var(--sb-panel);color:var(--sb-text);cursor:pointer;font-size:18px}
+.deck-arrow:hover:not(:disabled){border-color:var(--sb-accent);color:var(--sb-tip)}
+.deck-arrow:disabled{opacity:.35;cursor:default}
+.deck-dots{display:flex;gap:6px;align-items:center;max-width:60vw;overflow:auto;padding:0 6px}
+.deck-dot{width:9px;height:9px;border-radius:50%;background:var(--sb-border);border:none;cursor:pointer;flex:0 0 auto}
+.deck-dot.active{background:var(--sb-accent);width:24px;border-radius:6px}
+.deck-counter{font-family:var(--sb-mono);font-size:12px;color:var(--sb-mut);margin:0 6px}
+
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header>
+  <div class="nav-row topbar">
+    <button id="menuToggle" aria-label="Menu">☰</button>
+    <a class="logo" href="README.html">
+      <span class="mark">⚛</span>
+      <span>React from Scratch<small>Part 11 / 15</small></span>
+    </a>
+    <div class="spacer"></div>
+    <span class="btn" style="cursor:default">Vite · React 19</span>
+    <button class="btn" id="themeToggle">🌙 <span id="themeLabel">Dark</span></button>
+  </div>
+  <nav class="series-nav-bar" id="seriesNavBar" aria-label="Series parts">
+    <span class="slabel">Series</span>
+    <a href="README.html">Index</a>
+    <a href="01-jsx-and-rendering.html">1 · JSX</a>
+    <a href="02-components-and-props.html">2 · Components</a>
+    <a href="03-state-and-events.html">3 · State</a>
+    <a href="04-lists-keys-conditional.html">4 · Lists & Keys</a>
+    <a href="05-hooks-deep-dive.html">5 · Hooks</a>
+    <a href="06-effects-and-data-fetching.html">6 · Effects & Data</a>
+    <a href="07-forms.html">7 · Forms</a>
+    <a href="08-routing.html">8 · Routing</a>
+    <a href="09-state-management.html">9 · State Mgmt</a>
+    <a href="10-styling.html">10 · Styling</a>
+    <a href="11-performance.html">11 · Performance</a>
+    <a href="12-typescript-react.html">12 · TypeScript</a>
+    <a href="13-testing.html">13 · Testing</a>
+    <a href="14-patterns-architecture.html">14 · Patterns</a>
+    <a href="15-production-and-beyond.html">15 · Production</a>
+  </nav>
+  <nav id="toc"></nav>
+</header>
+<div id="overlay"></div>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">React from Scratch · Part 11 / 15</div>
+    <h1>Performance Optimization</h1>
+    <p>memo, useMemo, useCallback, code splitting, Suspense, virtualization, and profiling real bottlenecks.</p>
+  </section>
+  <section class="bento">
+    <div class="cell"><div class="k">Track</div><div class="v">15 Parts</div></div>
+    <div class="cell"><div class="k">Stack</div><div class="v">Vite · React 19</div></div>
+    <div class="cell wide"><div class="k">Approach</div><div class="v">Learn by building — many exercises + projects</div></div>
+  </section>
+  <article class="content" id="content"></article>
+  <nav class="series-footer" id="seriesFooter">
+    <a class="sn-prev" href="README.html" style="display:none"><small>Previous</small><b></b></a>
+    <a class="sn-index" href="README.html"><small>Series index</small><b>⚛ All parts</b></a>
+    <a class="sn-next" href="README.html" style="display:none"><small>Next</small><b></b></a>
+  </nav>
+</main>
+
+<!-- raw markdown (source of truth) -->
+<script type="text/markdown" id="markdown-source"># Part 11 · Performance Optimization
+
+> Most React apps are fast enough without any optimization — and premature optimization adds complexity for no gain. But when an app *does* get slow, you need to know exactly why and which tool fixes it. This part teaches performance the right way: first *measure* to find the real bottleneck, then apply the right fix — `React.memo`, `useMemo`/`useCallback`, code splitting, `Suspense`, or list virtualization. You'll learn what actually causes slow renders and how to reason about them, not just cargo-cult `useMemo` everywhere.
+
+## Table of Contents
+
+1. [The golden rule: measure first](#1-the-golden-rule-measure-first)
+2. [What causes re-renders](#2-what-causes-re-renders)
+3. [React.memo: skipping re-renders](#3-reactmemo-skipping-re-renders)
+4. [useMemo and useCallback in depth](#4-usememo-and-usecallback-in-depth)
+5. [The React DevTools Profiler](#5-the-react-devtools-profiler)
+6. [Code splitting and lazy loading](#6-code-splitting-and-lazy-loading)
+7. [Suspense for loading states](#7-suspense-for-loading-states)
+8. [List virtualization](#8-list-virtualization)
+9. [Mini-project: optimize a slow dashboard](#9-mini-project-optimize-a-slow-dashboard)
+10. [Exercises and practice problems](#10-exercises-and-practice-problems)
+11. [Glossary](#11-glossary)
+
+> **💡 Suggested learning order:** §1–2 are the mindset and mental model — the most important part. §3–5 are the "reduce re-renders" toolkit. §6–8 are the "load less, render less" techniques. Never apply §3–4 without §1 and §5.
+
+---
+
+## 1. The golden rule: measure first
+
+The most important performance lesson: **don't optimize blindly.** Adding `useMemo`, `useCallback`, and `React.memo` everywhere makes code harder to read, adds its own overhead, and usually helps nothing — because you're guessing at the bottleneck. Always **measure first**, fix the actual hot spot, then measure again.
+
+🎯 **Analogy:** You already know this from backend work: you don't add database indexes to every column "for speed" — you profile the slow query, find it's missing one index, add that index, and verify. React is identical. Optimize the *measured* bottleneck, not every component. Blind `useMemo` is like indexing every column: overhead everywhere, benefit nowhere.
+
+The correct workflow:
+
+```mermaid
+flowchart LR
+  A[App feels slow] --> B[Profile with<br/>React DevTools]
+  B --> C[Find the actual<br/>bottleneck]
+  C --> D[Apply the specific fix]
+  D --> E[Measure again]
+  E --> F{Fixed?}
+  F -->|no| B
+  F -->|yes| G[Stop — don't over-optimize]
+```
+
+> **🔍 Under the hood:** React is genuinely fast by default. A re-render is just calling your function and diffing — cheap for most components. Problems arise from *specific* causes: a huge list rendering thousands of nodes, an expensive computation running every keystroke, or a large component tree re-rendering needlessly. Each has a *specific* fix. Sprinkling memoization randomly addresses none of them and clutters the code with dependency arrays to maintain.
+
+> **⚠️ Common beginner mistake:** Wrapping every value in `useMemo` and every function in `useCallback` "to be safe." This is *negative* value: the caching itself costs CPU and memory, the deps arrays are bug-prone, and readability drops — all with no measured benefit. Write clear code first; optimize the measured hot spot only.
+
+**Key takeaways:**
+- Measure before optimizing — profile to find the *real* bottleneck.
+- React is fast by default; slowness comes from specific, identifiable causes.
+- Blind memoization adds overhead and complexity with no benefit — resist it.
+
+---
+
+## 2. What causes re-renders
+
+To optimize renders, you must know *when* React re-renders a component. There are exactly three triggers:
+
+1. **Its state changed** (a `useState`/`useReducer` update).
+2. **Its parent re-rendered** (by default, children re-render when the parent does).
+3. **A context it consumes changed** (Part 5/9).
+
+The one that surprises beginners is #2: **when a component re-renders, all its children re-render by default** — even if their props didn't change. Usually this is fine (cheap). It becomes a problem only when a child is expensive *and* re-renders needlessly.
+
+```jsx
+function Parent() {
+  const [count, setCount] = useState(0)
+  return (
+    <div>
+      <button onClick={() => setCount((c) => c + 1)}>{count}</button>
+      <ExpensiveList />    {/* re-renders every click, though its props never change! */}
+    </div>
+  )
+}
+```
+
+Clicking the button re-renders `Parent`, which re-renders `ExpensiveList` — even though `ExpensiveList` has no props that changed. If `ExpensiveList` is heavy, that's wasted work.
+
+```mermaid
+flowchart TD
+  S[Parent state changes] --> P[Parent re-renders]
+  P --> C1[Child A re-renders]
+  P --> C2[Child B re-renders]
+  P --> C3["ExpensiveList re-renders<br/>(even with unchanged props)"]
+  N["Default: children re-render<br/>when parent does"]
+```
+
+The fixes map directly to the causes:
+- Child re-renders needlessly from a parent → **`React.memo`** (§3).
+- Expensive computation reruns → **`useMemo`** (§4).
+- New function identity breaks a memoized child → **`useCallback`** (§4).
+- Context change re-renders too much → split contexts / selectors (Part 9).
+
+> **🔍 Under the hood:** "Re-render" means React calls the component function and diffs the result — it does *not* necessarily touch the DOM (Part 1 §5: render vs commit). So a re-render with identical output causes *zero* DOM changes; it just costs the function call + diff. That's why most re-renders are harmless. You only optimize when the re-render itself (the function work) is expensive or frequent enough to matter — which you confirm by measuring.
+
+> **⚠️ Common beginner mistake:** Believing every re-render is a performance problem. It usually isn't — React re-renders constantly and cheaply. A re-render only matters if it does expensive work or updates a large subtree. Don't fight re-renders you can't measure.
+
+**Key takeaways:**
+- Re-render triggers: own state changed, parent re-rendered, or consumed context changed.
+- By default, children re-render when the parent does — usually harmless.
+- Each cause has a specific fix; a re-render with unchanged output makes no DOM changes.
+
+---
+
+## 3. React.memo: skipping re-renders
+
+**`React.memo`** wraps a component so it **skips re-rendering when its props haven't changed** (by shallow comparison). It targets cause #2 from §2 — a child re-rendering because its parent did, despite unchanged props.
+
+```jsx
+import { memo } from 'react'
+
+// Without memo: re-renders whenever Parent renders.
+// With memo: re-renders only when its props actually change.
+const ExpensiveList = memo(function ExpensiveList({ items }) {
+  console.log('rendering ExpensiveList')
+  return <ul>{items.map((i) => <li key={i.id}>{i.name}</li>)}</ul>
+})
+```
+
+Now if `Parent` re-renders but passes the *same* `items`, `ExpensiveList` skips re-rendering. React compares each prop shallowly (`Object.is`); if all are equal, it reuses the previous result.
+
+**The catch — memo only helps if props are stable.** Objects, arrays, and functions created *inline* in the parent get a **new identity every render**, so shallow comparison always sees them as "changed," and memo does nothing:
+
+```jsx
+function Parent() {
+  const [count, setCount] = useState(0)
+  return (
+    <div>
+      <button onClick={() => setCount((c) => c + 1)}>{count}</button>
+      {/* ❌ New array + new function every render → memo is defeated */}
+      <ExpensiveList items={[1, 2, 3]} onSelect={() => {}} />
+    </div>
+  )
+}
+```
+
+To make memo work, the props must keep a stable identity — which is exactly what `useMemo`/`useCallback` provide (§4):
+
+```jsx
+const items = useMemo(() => [1, 2, 3], [])            // stable array
+const onSelect = useCallback((id) => {...}, [])       // stable function
+<ExpensiveList items={items} onSelect={onSelect} />   // now memo actually skips
+```
+
+```mermaid
+flowchart TD
+  P[Parent re-renders] --> M{memo: did props<br/>change shallowly?}
+  M -->|No: stable identities| SK[Skip re-render ✅]
+  M -->|Yes: new inline object/fn| RE[Re-render anyway ❌]
+```
+
+> **🔍 Under the hood:** `React.memo` does a **shallow** prop comparison: it checks each prop with `Object.is`. Primitives (strings, numbers, booleans) compare by value, so they're stable. But `{...}`, `[...]`, and `() => {}` create new references each render, so they're never "equal" to last time — defeating memo unless you stabilize them. You can pass a custom comparison function as memo's second argument for special cases, but stabilizing props is the usual approach.
+
+> **⚠️ Common beginner mistake:** Wrapping a component in `memo` but still passing inline objects/functions as props — memo silently does nothing, and you wonder why it "didn't work." Memo and `useMemo`/`useCallback` are a *team*: memo the child, stabilize the props.
+
+**Key takeaways:**
+- `React.memo` skips a child's re-render when its props are shallowly unchanged.
+- Inline objects/arrays/functions get new identities each render, defeating memo.
+- Pair memo with `useMemo`/`useCallback` to stabilize prop identities.
+
+---
+
+## 4. useMemo and useCallback in depth
+
+You met these in Part 5 §6. Now their real purpose in performance. Both **cache across renders**, recomputing only when dependencies change.
+
+**`useMemo`** — cache an expensive *computed value*:
+
+```jsx
+function ProductTable({ products, query }) {
+  // Without: this filter+sort runs on EVERY render (e.g., every keystroke elsewhere).
+  // With: runs only when products or query changes.
+  const visible = useMemo(
+    () => products.filter((p) => p.name.includes(query)).sort(byPrice),
+    [products, query]
+  )
+  return <Table rows={visible} />
+}
+```
+
+**`useCallback`** — cache a *function identity* (so memoized children don't re-render, or effect deps stay stable):
+
+```jsx
+function Parent({ items }) {
+  // Without: new handleSelect every render → any memo'd child using it re-renders.
+  // With: same identity until nothing in deps changes.
+  const handleSelect = useCallback((id) => {
+    console.log('selected', id)
+  }, [])   // empty deps → stable forever
+
+  return <MemoizedList items={items} onSelect={handleSelect} />
+}
+```
+
+`useCallback(fn, deps)` is literally `useMemo(() => fn, deps)` — one memoizes a value, the other a function.
+
+**When each is actually worth it:**
+
+| Use `useMemo` when | Use `useCallback` when |
+| --- | --- |
+| A computation is genuinely expensive (big filter/sort/derive) | Passing a callback to a `React.memo` child |
+| A referenced object must stay stable for a memo'd child | The function is an effect dependency (Part 6) |
+| — | The function goes into another hook's deps |
+
+```mermaid
+flowchart LR
+  A[Expensive value that<br/>recomputes needlessly] --> UM[useMemo]
+  B[Function passed to<br/>a memoized child / effect dep] --> UC[useCallback]
+  C[Cheap value, no memo'd<br/>child, no dep needs] --> N[Don't memoize]
+```
+
+> **🔍 Under the hood:** Both store their result plus the previous deps array. On each render, they shallow-compare the new deps to the old; if equal, return the cached value/function; if not, recompute and re-cache. This comparison + storage has a real (small) cost. So memoizing a *cheap* value is net-negative — you pay the caching cost to avoid a cheaper recompute. This is why "measure first" (§1) matters: only memoize when the thing being cached is more expensive than the caching.
+
+> **⚠️ Common beginner mistake:** Memoizing trivially-cheap values (`useMemo(() => a + b, [a, b])`) — the memo overhead exceeds the addition it avoids. And "lying" to deps arrays to keep something stable, causing stale bugs (Part 6). Only reach for these when there's a measured expensive computation or a genuine identity-stability need.
+
+**Key takeaways:**
+- `useMemo` caches an expensive computed value; `useCallback` caches a function identity.
+- Use them for measured-expensive computations or to keep props stable for memoized children.
+- The caching has a cost — memoizing cheap values is counterproductive.
+
+---
+
+## 5. The React DevTools Profiler
+
+The **React DevTools Profiler** (a browser extension) is how you *measure* — it shows which components rendered, how often, and how long each took. This is step 1 of §1's workflow, and it turns guessing into knowing.
+
+The workflow:
+1. Install the **React Developer Tools** browser extension.
+2. Open DevTools → **Profiler** tab → click **record** ⏺.
+3. Interact with your app (type, click, navigate).
+4. Stop recording and read the **flamegraph**.
+
+What the flamegraph tells you:
+- **Which components rendered** during the interaction (highlighted).
+- **How long each took** (wider/colored bars = slower).
+- **Why they rendered** (props changed, state changed, parent rendered) — enable "Record why each component rendered" in settings.
+
+```cards
+Highlight updates :: a setting that flashes components as they re-render — spot needless renders visually.
+Ranked view :: sorts components by render time — your bottleneck is at the top.
+Commit list :: each state update is a "commit"; step through to see what changed.
+"Why did this render?" :: tells you if it was props, state, hooks, or parent.
+```
+
+🎯 **Analogy:** The Profiler is your `EXPLAIN ANALYZE` for React. Just as you'd never optimize a SQL query without seeing its execution plan, you shouldn't optimize a component without the Profiler showing you which renders are slow and why. It replaces "I think this is slow" with "this component rendered 60 times and took 400ms."
+
+```mermaid
+flowchart LR
+  R[Record interaction] --> F[Read flamegraph]
+  F --> W["'Why did this render?'"]
+  W --> ID[Identify the slow /<br/>needless render]
+  ID --> FIX["Apply memo / useMemo /<br/>split state"]
+  FIX --> V[Record again to verify]
+```
+
+> **🔍 Under the hood:** The Profiler hooks into React's render cycle to time each component's render and record what triggered it. A "commit" corresponds to one render→commit cycle (Part 1 §5). The "highlight updates" feature is especially useful: flashing borders around re-rendering components instantly reveals a child that re-renders on every keystroke when it shouldn't — the exact target for `React.memo`.
+
+> **⚠️ Common beginner mistake:** Optimizing based on feel instead of the Profiler. You'll often find the *actual* bottleneck is somewhere you didn't expect — and the component you "optimized" wasn't the problem. Let the Profiler point you; don't guess.
+
+**Key takeaways:**
+- The React DevTools Profiler measures which components render, how often, and why.
+- Use the flamegraph, ranked view, and "why did this render?" to find the real bottleneck.
+- It's your `EXPLAIN ANALYZE` — always profile before and after optimizing.
+
+---
+
+## 6. Code splitting and lazy loading
+
+Beyond render performance, there's **load** performance — how fast the app starts. By default, Vite bundles your whole app into files the browser downloads before anything shows. **Code splitting** breaks the bundle into chunks loaded *on demand*, so the initial download is smaller and the app starts faster.
+
+**`React.lazy`** loads a component only when it's first rendered:
+
+```jsx
+import { lazy, Suspense } from 'react'
+
+// This component's code is split into a separate chunk, loaded when first needed.
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Settings = lazy(() => import('./pages/Settings'))
+
+function App() {
+  return (
+    <Suspense fallback={<Spinner />}>   {/* shown while the chunk downloads */}
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </Suspense>
+  )
+}
+```
+
+The most impactful place to split is **at routes** (Part 8): each page becomes its own chunk, so visiting `/` doesn't download the code for `/settings`. The user downloads a page's code only when they navigate to it.
+
+```mermaid
+flowchart TD
+  subgraph "Without splitting"
+    A[One big bundle] --> B[Download everything<br/>before app shows]
+  end
+  subgraph "With route splitting"
+    C[Small initial bundle] --> D[App shows fast]
+    D -->|navigate to /settings| E[Download settings chunk<br/>on demand]
+  end
+```
+
+> **🔍 Under the hood:** `lazy(() => import('./X'))` uses a **dynamic `import()`**, which the bundler (Vite/Rollup) recognizes as a split point — it emits `X` as a separate JS chunk. When React first renders `<X/>`, the browser fetches that chunk; `Suspense` shows the fallback until it arrives, then renders the component. This is the single biggest lever for initial-load performance in large SPAs — split by route, and heavy components (charts, editors, modals) that aren't needed immediately.
+
+> **⚠️ Common beginner mistake:** Lazy-loading *everything*, including tiny components — each split adds a network request, and over-splitting can make navigation feel laggier (many small fetches). Split at meaningful boundaries: routes first, then genuinely heavy components (rich text editors, charting libs, maps). Don't split a 2 KB button.
+
+**Key takeaways:**
+- Code splitting loads parts of your app on demand, shrinking the initial download.
+- `React.lazy` + dynamic `import()` split a component into its own chunk; wrap in `Suspense`.
+- Split at routes first, then heavy components — don't over-split tiny ones.
+
+---
+
+## 7. Suspense for loading states
+
+**`Suspense`** is a component that shows a **fallback** UI while its children are "not ready" — either their lazy-loaded code is still downloading (§6) or (with modern data APIs) their data is still loading. It declaratively handles the "loading" state for a whole subtree.
+
+```jsx
+<Suspense fallback={<PageSkeleton />}>
+  <Dashboard />        {/* while Dashboard's code/data loads, PageSkeleton shows */}
+</Suspense>
+```
+
+You can nest Suspense boundaries to control *where* loading states appear — a granular skeleton per section instead of one whole-page spinner:
+
+```jsx
+<Suspense fallback={<HeaderSkeleton />}>
+  <Header />
+</Suspense>
+<Suspense fallback={<FeedSkeleton />}>
+  <Feed />           {/* Feed can load independently of Header */}
+</Suspense>
+```
+
+**Data + Suspense** — modern data fetching integrates with Suspense so a component can "suspend" while its data loads. TanStack Query supports this via `useSuspenseQuery`, and React 19's `use()` (Part 5 §7) reads a promise directly:
+
+```jsx
+import { useSuspenseQuery } from '@tanstack/react-query'
+
+function Profile({ id }) {
+  // Suspends until data is ready — no isLoading branch needed here.
+  const { data } = useSuspenseQuery({ queryKey: ['user', id], queryFn: () => fetchUser(id) })
+  return <h1>{data.name}</h1>
+}
+// The nearest <Suspense fallback> handles the loading UI.
+```
+
+```mermaid
+flowchart TD
+  S["&lt;Suspense fallback={skeleton}&gt;"] --> C[Child]
+  C --> R{Ready?<br/>code + data loaded}
+  R -->|No| F[Show fallback skeleton]
+  R -->|Yes| Show[Render the child]
+```
+
+> **🔍 Under the hood:** When a component "suspends" (throws a promise internally), React catches it at the nearest `Suspense` boundary and shows the fallback until the promise resolves, then retries rendering. This lets you declare loading UI *structurally* (where the boundary is) rather than threading `isLoading` flags through every component. Combined with lazy loading and error boundaries (Part 14), it gives clean loading + error handling for entire subtrees.
+
+> **⚠️ Common beginner mistake:** Putting one giant `Suspense` at the app root so the *entire* app shows a spinner while any one thing loads. Place boundaries thoughtfully — around independently-loading sections — so ready content shows immediately while slow parts fill in.
+
+**Key takeaways:**
+- `Suspense` shows a fallback while its subtree's code or data isn't ready.
+- Nest boundaries to control where loading skeletons appear (granular, not whole-page).
+- Modern data (TanStack Query's `useSuspenseQuery`, React 19's `use`) integrates with Suspense.
+
+---
+
+## 8. List virtualization
+
+Rendering a list of 10,000 rows creates 10,000 DOM nodes — slow to render and scroll, even though the user sees maybe 20 at a time. **Virtualization** renders only the visible rows (plus a small buffer), recycling them as you scroll. It's the fix for genuinely huge lists.
+
+```bash
+npm install @tanstack/react-virtual
+```
+
+```jsx
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { useRef } from 'react'
+
+function BigList({ rows }) {          // rows could be 100,000 items
+  const parentRef = useRef(null)
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 40,           // estimated row height in px
+  })
+
+  return (
+    <div ref={parentRef} style={{ height: 400, overflow: 'auto' }}>
+      {/* A spacer div sized to the FULL list height, so the scrollbar is correct */}
+      <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+        {/* Only the visible rows are actually rendered */}
+        {virtualizer.getVirtualItems().map((virtualRow) => (
+          <div key={virtualRow.key}
+            style={{ position: 'absolute', top: 0, transform: `translateY(${virtualRow.start}px)`, height: 40, width: '100%' }}>
+            {rows[virtualRow.index].name}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+Instead of 100,000 DOM nodes, you render ~15 (the visible ones), repositioned as you scroll. The scrollbar still reflects the full list because the spacer div has the full height.
+
+🎯 **Analogy:** Virtualization is like **pagination the user can't see**. A database doesn't load a million rows into memory to show page 1 — it fetches just what's displayed. Virtualization does the same for the DOM: only what's on screen exists, everything else is "loaded" (rendered) as it scrolls into view.
+
+```mermaid
+flowchart LR
+  A[100,000 items in data] --> V[Virtualizer]
+  V --> R["Render only ~15 visible rows<br/>+ small buffer"]
+  R --> S[Scroll → recycle rows<br/>with new data]
+```
+
+> **🔍 Under the hood:** The virtualizer measures the scroll container, calculates which item indices are visible from the scroll position and estimated row heights, and renders only those — absolutely positioned inside a full-height spacer. As you scroll, it recomputes the visible window and updates. This keeps the DOM node count constant (~visible rows) regardless of list size, so a 1,000,000-row list scrolls as smoothly as a 20-row one.
+
+> **⚠️ Common beginner mistake:** Reaching for virtualization on a 50-item list — it adds complexity for no benefit; plain rendering is faster there. Virtualize only genuinely large lists (hundreds to thousands+). Also: forgetting the full-height spacer, which breaks the scrollbar and scroll position.
+
+**Key takeaways:**
+- Virtualization renders only visible rows, keeping DOM node count constant for huge lists.
+- Use a library (`@tanstack/react-virtual`) with a full-height spacer for correct scrolling.
+- Only for genuinely large lists (hundreds+); it's overkill for small ones.
+
+---
+
+## 9. Mini-project: optimize a slow dashboard
+
+🏗️ Take a deliberately-slow dashboard and *measure-then-fix* it — the whole Part 11 workflow. Build this slow version, profile it, then apply each optimization and verify the improvement.
+
+```jsx
+// src/App.jsx — a SLOW dashboard (intentionally)
+import { useState, useMemo, useCallback, memo } from 'react'
+
+// A big dataset generated once.
+const DATA = Array.from({ length: 5000 }, (_, i) => ({ id: i, name: `Item ${i}`, value: Math.random() }))
+
+// An expensive computation — sorting + summing 5000 items.
+function computeStats(data) {
+  const sorted = [...data].sort((a, b) => b.value - a.value)
+  const total = data.reduce((s, d) => s + d.value, 0)
+  return { top: sorted.slice(0, 5), total }
+}
+
+// A heavy child list — wrap in memo so it skips re-renders when props are stable.
+const ItemList = memo(function ItemList({ items, onSelect }) {
+  return (
+    <ul style={{ maxHeight: 200, overflow: 'auto' }}>
+      {items.map((it) => (
+        <li key={it.id} onClick={() => onSelect(it.id)}>{it.name}: {it.value.toFixed(3)}</li>
+      ))}
+    </ul>
+  )
+})
+
+export default function App() {
+  const [count, setCount] = useState(0)
+  const [selected, setSelected] = useState(null)
+
+  // ✅ Memoize the expensive computation — recompute only when DATA changes (never here).
+  const stats = useMemo(() => computeStats(DATA), [])
+
+  // ✅ Stable callback so the memoized ItemList doesn't re-render on count changes.
+  const handleSelect = useCallback((id) => setSelected(id), [])
+
+  return (
+    <main style={{ maxWidth: 500, margin: '40px auto', fontFamily: 'system-ui' }}>
+      {/* This counter re-renders App every click. Without the memoization above,
+          computeStats would rerun and ItemList would re-render every click. */}
+      <button onClick={() => setCount((c) => c + 1)}>Clicked {count} times</button>
+
+      <h2>Total: {stats.total.toFixed(2)}</h2>
+      <h3>Top 5</h3>
+      <ul>{stats.top.map((t) => <li key={t.id}>{t.name}</li>)}</ul>
+
+      <h3>All items {selected != null && `(selected #${selected})`}</h3>
+      <ItemList items={DATA} onSelect={handleSelect} />
+    </main>
+  )
+}
+```
+
+**The measure-then-fix workflow to actually do:**
+
+```cards
+1. Profile first :: Remove the useMemo/useCallback/memo. Profile clicking the counter — see computeStats rerun + ItemList re-render every click.
+2. Fix the computation :: Add useMemo around computeStats. Re-profile — the expensive sort no longer runs on click.
+3. Fix the child :: Add memo to ItemList + useCallback for onSelect. Re-profile — ItemList stops re-rendering on counter clicks.
+4. Verify :: Confirm the counter now updates without touching the list or recomputing stats.
+```
+
+> **💡 Tip:** Do this with the Profiler open and "Highlight updates" on. You'll *see* `ItemList` flash on every click before the fix, and stop flashing after. That visual confirmation is the whole point of §1/§5 — you optimized a *measured* problem and *verified* the fix, rather than guessing.
+
+**Extend it (do at least three):**
+1. Bump `DATA` to 100,000 items and add virtualization (§8) to `ItemList`.
+2. Route-split a second "Reports" page with `lazy` + `Suspense` (§6–7).
+3. Add a search input and confirm `computeStats` still doesn't rerun on unrelated typing.
+4. Intentionally pass an inline `onSelect={() => ...}` and watch memo break in the Profiler.
+5. Add `useSuspenseQuery` for real data behind a Suspense skeleton.
+
+**Key takeaways:**
+- You practiced the full loop: measure → fix the specific cause → verify.
+- `useMemo` fixed the expensive computation; `memo` + `useCallback` fixed the needless child re-render.
+- The Profiler's "highlight updates" makes wasted renders visible and fixes provable.
+
+---
+
+## 10. Exercises and practice problems
+
+### 🧪 Warm-ups (easy)
+
+**E1.** Name the three things that cause a component to re-render.
+
+<details><summary>Show solution</summary>
+
+1. Its own state changed. 2. Its parent re-rendered. 3. A context it consumes changed. *(§2)*
+</details>
+
+**E2.** Why does wrapping a component in `React.memo` sometimes do nothing?
+
+<details><summary>Show solution</summary>
+
+Because it's passed inline objects/arrays/functions as props, which get a new identity every render, so the shallow prop comparison always sees "changed." Stabilize props with `useMemo`/`useCallback`. *(§3)*
+</details>
+
+### 🧪 Core (medium)
+
+**E3.** This filter reruns on every keystroke of an *unrelated* input. Fix it.
+
+```jsx
+const expensive = hugeList.filter(complexPredicate).sort(complexSort)
+```
+
+<details><summary>Show solution</summary>
+
+```jsx
+const expensive = useMemo(() => hugeList.filter(complexPredicate).sort(complexSort), [hugeList])
+```
+
+*Why:* Memoize so it recomputes only when `hugeList` changes, not on every render (§4).
+</details>
+
+**E4.** Make this memoized child actually skip re-renders when the parent's counter changes.
+
+```jsx
+const List = memo(({ items, onPick }) => ...)
+function Parent() {
+  const [n, setN] = useState(0)
+  return <><button onClick={() => setN(n+1)}>{n}</button>
+    <List items={[1,2,3]} onPick={(x) => console.log(x)} /></>
+}
+```
+
+<details><summary>Show solution</summary>
+
+```jsx
+const items = useMemo(() => [1, 2, 3], [])
+const onPick = useCallback((x) => console.log(x), [])
+<List items={items} onPick={onPick} />
+```
+
+*Why:* Stable identities let memo's shallow compare skip the re-render (§3–4).
+</details>
+
+**E5.** Route-split three pages with `lazy` and a shared `Suspense` fallback.
+
+<details><summary>Show solution</summary>
+
+```jsx
+const Home = lazy(() => import('./Home'))
+const About = lazy(() => import('./About'))
+const Contact = lazy(() => import('./Contact'))
+<Suspense fallback={<Spinner />}><Routes>...</Routes></Suspense>
+```
+
+*Why:* Each page becomes a chunk loaded on demand, shrinking initial load (§6).
+</details>
+
+### 🧪 Challenge (hard)
+
+**E6.** You profiled and found a parent re-renders a 2,000-row table on every keystroke in a search box. Outline the full fix.
+
+<details><summary>Show solution</summary>
+
+1. Memoize the filtered rows: `const rows = useMemo(() => filter(all, query), [all, query])`.
+2. Wrap the table row component in `memo` and give it stable props (`useCallback` for handlers).
+3. If still slow with thousands of visible rows, **virtualize** the table (§8).
+4. Re-profile to confirm keystrokes no longer re-render off-screen rows.
+
+*Why:* Combines memoization + virtualization, driven by profiling — the real-world pattern.
+</details>
+
+**E7.** Explain why `useMemo(() => a + b, [a, b])` is a bad use of `useMemo`.
+
+<details><summary>Show solution</summary>
+
+`a + b` is trivially cheap. `useMemo` adds overhead (storing the value + comparing deps each render) that exceeds the cost of just recomputing the addition. Memoization is only worth it when the cached computation is more expensive than the caching machinery (§1, §4).
+</details>
+
+**E8 (capstone step).** Profile your Data Dashboard (Part 6) and Contacts Manager (Part 8): find any needless re-renders, memoize the right things, route-split pages, and virtualize any long list. Document before/after render counts from the Profiler. Keep them — Part 12 adds TypeScript, Part 13 tests them.
+
+<details><summary>Show hint</summary>
+
+Record a Profiler session for a typical interaction (searching, navigating). Look for components that render but shouldn't (props unchanged). Apply `memo`+`useCallback` there. Route-split each page with `lazy`. If a list has hundreds+ of rows, virtualize it. The deliverable is a before/after render-count comparison — proving you measured, not guessed.
+</details>
+
+---
+
+## 11. Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **Re-render** | React calling a component function again to compute new output. |
+| **`React.memo`** | Wraps a component to skip re-renders when props are shallowly unchanged. |
+| **Shallow comparison** | Comparing each prop by reference/value (`Object.is`), not deeply. |
+| **`useMemo`** | Caches an expensive computed value across renders. |
+| **`useCallback`** | Caches a function's identity across renders. |
+| **Profiler** | React DevTools tool that measures which components render and how long. |
+| **Code splitting** | Breaking the bundle into chunks loaded on demand. |
+| **`React.lazy`** | Loads a component as a separate chunk via dynamic `import()`. |
+| **`Suspense`** | Shows a fallback while a subtree's code or data isn't ready. |
+| **Virtualization** | Rendering only visible list rows to handle huge lists efficiently. |
+
+---
+
+> **You can now make React apps fast — the right way:** measure, fix the real bottleneck, verify. You know how to reduce re-renders and load less code. Next, we add a safety net that catches whole classes of bugs before they run: TypeScript.
+>
+> **Next:** [Part 12 · TypeScript with React →](12-typescript-react.html)
+</script>
+
+<!-- default language for untagged code fences + jsx/tsx aliases -->
+<script>
+window.DOC_DEFAULT_LANG='javascript';
+(function(){try{
+  if(window.hljs&&hljs.registerAliases){
+    hljs.registerAliases(['jsx'],{languageName:'javascript'});
+    hljs.registerAliases(['tsx'],{languageName:'typescript'});
+  }
+}catch(e){}})();
+</script>
+
+<!-- mobile drawer toggle for the chip TOC -->
+<script>
+(function(){
+  var mt=document.getElementById('menuToggle'),toc=document.getElementById('toc'),ov=document.getElementById('overlay');
+  if(mt&&toc){mt.addEventListener('click',function(){toc.classList.toggle('open');if(ov)ov.classList.toggle('show');});}
+  if(ov){ov.addEventListener('click',function(){toc.classList.remove('open');ov.classList.remove('show');});}
+})();
+</script>
+
+<!-- cross-file series navigation: active chip + footer prev/next -->
+<script>
+(function(){
+  var order=['README.html','01-jsx-and-rendering.html','02-components-and-props.html','03-state-and-events.html','04-lists-keys-conditional.html','05-hooks-deep-dive.html','06-effects-and-data-fetching.html','07-forms.html','08-routing.html','09-state-management.html','10-styling.html','11-performance.html','12-typescript-react.html','13-testing.html','14-patterns-architecture.html','15-production-and-beyond.html'];
+  var titles={'README.html':'Series index','01-jsx-and-rendering.html':'1 · JSX & Rendering','02-components-and-props.html':'2 · Components & Props','03-state-and-events.html':'3 · State & Events','04-lists-keys-conditional.html':'4 · Lists, Keys & Conditionals','05-hooks-deep-dive.html':'5 · Hooks Deep Dive','06-effects-and-data-fetching.html':'6 · Effects & Data Fetching','07-forms.html':'7 · Forms','08-routing.html':'8 · Routing','09-state-management.html':'9 · State Management','10-styling.html':'10 · Styling','11-performance.html':'11 · Performance','12-typescript-react.html':'12 · TypeScript','13-testing.html':'13 · Testing','14-patterns-architecture.html':'14 · Patterns & Architecture','15-production-and-beyond.html':'15 · Production & Beyond'};
+  var here=(location.pathname.split('/').pop()||'README.html').toLowerCase();
+  if(here===''||here==='index.html')here='readme.html';
+  document.querySelectorAll('#seriesNavBar a').forEach(function(a){
+    if((a.getAttribute('href')||'').toLowerCase()===here){a.classList.add('active');a.setAttribute('aria-current','page');a.scrollIntoView({block:'nearest',inline:'center'});}
+  });
+  var norm=order.map(function(x){return x.toLowerCase();});
+  var i=norm.indexOf(here);
+  function fill(sel,file){var el=document.querySelector(sel);if(!el)return;if(!file){el.style.display='none';return;}el.style.display='';el.setAttribute('href',file);var b=el.querySelector('b');if(b)b.textContent=titles[file];}
+  if(i>=0){fill('.sn-prev',i>0?order[i-1]:null);fill('.sn-next',i<order.length-1?order[i+1]:null);}
+})();
+</script>
+
+<!-- rendering engine (inlined verbatim by build.ps1) -->
+<script>
+/*
+ * Deep Dive Docs — Rendering Engine (inline this verbatim into every generated .html)
+ * ---------------------------------------------------------------------------------
+ * This is the ONLY non-negotiable JavaScript. The visual design (CSS, layout, fonts,
+ * colors, decorative markup) is free to change per topic, but these element HOOKS must
+ * exist for the page to function. All hooks except #markdown-source and #content are
+ * OPTIONAL — the engine feature-detects each and silently skips what isn't present.
+ *
+ * REQUIRED hooks:
+ *   <script type="text/markdown" id="markdown-source">  ...raw markdown...  <\/script>
+ *   <... id="content">  (empty container that receives the rendered HTML)
+ *
+ * OPTIONAL hooks (include only the ones your design uses):
+ *   id="toc"          -> auto-filled with links to every h2/h3 (sidebar/top/drawer — your choice)
+ *   id="progress"     -> reading-progress bar; its style.width is set 0%..100%
+ *   id="themeToggle"  -> click toggles data-theme on <html>; persists to localStorage 'doc-theme'
+ *   id="themeLabel"   -> text set to "Dark"/"Light"
+ *   id="hljs-theme"   -> <link> whose href swaps between highlight.js dark/light CSS
+ *   id="menuToggle" + id="overlay"  -> mobile drawer open/close for #toc
+ *
+ * REQUIRED libraries (load via CDN or inline, before this script):
+ *   marked.js, highlight.js (+ a theme CSS), mermaid
+ *
+ * The default code language for un-tagged ``` blocks is set by:  window.DOC_DEFAULT_LANG
+ * (e.g. set <script>window.DOC_DEFAULT_LANG='python'<\/script> before this engine). Defaults to 'python'.
+ */
+(function () {
+  const src = document.getElementById('markdown-source');
+  const contentEl = document.getElementById('content');
+  if (!src || !contentEl) { console.error('[doc-engine] missing #markdown-source or #content'); return; }
+  // Un-escape any <\/script> the build wrote so an HTML example inside the docs can't close
+  // the <script id="markdown-source"> container early. See build.ps1's matching escape.
+  const raw = src.textContent.replace(/<\\\/script>/g, '<\/script>');
+  const $ = id => document.getElementById(id);
+  const defaultLang = window.DOC_DEFAULT_LANG || 'python';
+
+  // 1. Markdown -> HTML
+  if (window.marked) marked.setOptions({ gfm: true, breaks: false, headerIds: true, mangle: false });
+  contentEl.innerHTML = window.marked ? marked.parse(raw) : raw;
+
+  // 2. Convert ```mermaid fences into rendered diagrams
+  const mermaidBlocks = [];
+  contentEl.querySelectorAll('pre code.language-mermaid').forEach(code => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.dataset.src = code.textContent;
+    div.textContent = code.textContent;
+    code.parentElement.replaceWith(div);
+    mermaidBlocks.push(div);
+  });
+  function renderMermaid() {
+    if (!window.mermaid || mermaidBlocks.length === 0) return;
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'loose' });
+    mermaidBlocks.forEach(div => { div.removeAttribute('data-processed'); div.innerHTML = div.dataset.src; });
+    try { mermaid.run({ nodes: mermaidBlocks }); }
+    catch (e) { try { mermaid.init(undefined, mermaidBlocks); } catch (_) {} }
+  }
+  renderMermaid();
+
+  // 3. Slugify + assign heading ids
+  const slug = t => t.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+  contentEl.querySelectorAll('h2, h3').forEach(h => { if (!h.id) h.id = slug(h.textContent); });
+
+  // 4. Build the TOC (optional)
+  const toc = $('toc');
+  if (toc) {
+    contentEl.querySelectorAll('h2, h3').forEach(h => {
+      if (/table of contents/i.test(h.textContent)) { h.style.display = 'none'; return; }
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      if (h.tagName === 'H3') a.className = 'h3';
+      a.addEventListener('click', closeMobile);
+      toc.appendChild(a);
+    });
+    // Remove the redundant in-document TOC list (right after the hidden "Table of Contents" heading)
+    const tocHeading = Array.from(contentEl.querySelectorAll('h2')).find(h => /table of contents/i.test(h.textContent));
+    if (tocHeading) {
+      let n = tocHeading.nextElementSibling;
+      while (n && n.tagName !== 'HR' && n.tagName !== 'H2') { const next = n.nextElementSibling; n.remove(); n = next; }
+      if (n && n.tagName === 'HR') n.remove();
+    }
+  }
+
+  // 5. Syntax highlight (mermaid already converted away)
+  contentEl.querySelectorAll('pre code').forEach(block => {
+    if (block.classList.contains('language-mermaid')) return;
+    if (!block.className) block.className = 'language-' + defaultLang;
+    if (window.hljs) { try { hljs.highlightElement(block); } catch (e) {} }
+  });
+
+  // 6. Scroll-spy (only if a TOC exists)
+  if (toc) {
+    const links = Array.from(toc.querySelectorAll('a'));
+    const map = {};
+    links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const link = map[e.target.id];
+          if (link) { link.classList.add('active'); link.scrollIntoView({ block: 'nearest' }); }
+        }
+      });
+    }, { rootMargin: '-70px 0px -75% 0px', threshold: 0 });
+    contentEl.querySelectorAll('h2, h3').forEach(h => { if (h.id) spy.observe(h); });
+  }
+
+  // 7. Reading-progress bar (optional)
+  const progress = $('progress');
+  if (progress) {
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      progress.style.width = ((h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100) + '%';
+    }, { passive: true });
+  }
+
+  // 8. Theme toggle (optional)
+  const root = document.documentElement;
+  const themeBtn = $('themeToggle');
+  const themeLabel = $('themeLabel');
+  const hljsTheme = $('hljs-theme');
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    const dark = t === 'dark';
+    if (themeBtn && themeBtn.firstChild) themeBtn.firstChild.textContent = dark ? '🌙 ' : '☀️ ';
+    if (themeLabel) themeLabel.textContent = dark ? 'Dark' : 'Light';
+    if (hljsTheme) hljsTheme.href = dark
+      ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
+      : 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css';
+    try { localStorage.setItem('doc-theme', t); } catch (e) {}
+    renderMermaid();
+  }
+  let saved = 'dark';
+  try { saved = localStorage.getItem('doc-theme') || root.getAttribute('data-theme') || 'dark'; } catch (e) {}
+  applyTheme(saved);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+  // 9. Mobile drawer (optional)
+  const menuToggle = $('menuToggle');
+  const overlay = $('overlay');
+  function closeMobile() { if (toc) toc.classList.remove('open'); if (overlay) overlay.classList.remove('show'); }
+  if (menuToggle && toc) menuToggle.addEventListener('click', () => { toc.classList.toggle('open'); if (overlay) overlay.classList.toggle('show'); });
+  if (overlay) overlay.addEventListener('click', closeMobile);
+})();
+
+/*
+ * STORYBOOK ENHANCEMENT LAYER (optional, additive)
+ * -------------------------------------------------
+ * Post-processes the already-rendered #content to add richer, less "wall-of-text"
+ * presentation. Everything here is feature-detected and fail-safe: if a hook is
+ * missing or a component block is malformed, it silently leaves the content as-is.
+ *
+ * Adds:
+ *   - Themed callouts     : auto-detected from emoji-led blockquotes (no authoring change)
+ *   - Section chrome      : turns "N. Heading" into a numbered badge + clean title
+ *   - Visual components   : fenced blocks  ```stat  ```flow  ```cards  ```tags  (and ~~~overlay)
+ *   - Inline tag pills    : [[decided]]  [[risk:Custom label]]  in normal prose
+ *   - Read-as-deck mode   : a top-bar button that reflows the page into keyboard-nav slides
+ */
+(function () {
+  const content = document.getElementById('content');
+  if (!content) return;
+  const hasMarked = !!window.marked;
+  const inlineMd = s => (hasMarked && marked.parseInline) ? marked.parseInline(s) : s;
+  const blockMd  = s => hasMarked ? marked.parse(s) : s;
+
+  const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+  const elText = (tag, txt) => { const n = document.createElement(tag); n.textContent = txt; return n; };
+  const elHTML = (tag, cls, html) => { const n = el(tag, cls); n.innerHTML = html; return n; };
+
+  // ---- Modal (shared by overlay components) ----
+  let modal, modalTitle, modalBody;
+  function ensureModal() {
+    if (modal) return;
+    modal = el('div', 'sb-modal');
+    const card = el('div', 'sb-modal-card');
+    const head = el('div', 'sb-modal-head');
+    modalTitle = el('h3');
+    const close = el('button', 'sb-modal-close'); close.type = 'button'; close.innerHTML = '&times;';
+    close.addEventListener('click', closeModal);
+    head.appendChild(modalTitle); head.appendChild(close);
+    modalBody = el('div', 'sb-modal-body');
+    card.appendChild(head); card.appendChild(modalBody); modal.appendChild(card);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.body.appendChild(modal);
+  }
+  function openModal(title, html) {
+    ensureModal();
+    modalTitle.textContent = title || 'Detail';
+    modalBody.innerHTML = html;
+    if (window.hljs) modalBody.querySelectorAll('pre code').forEach(b => { try { hljs.highlightElement(b); } catch (e) {} });
+    modal.classList.add('open');
+  }
+  function closeModal() { if (modal) modal.classList.remove('open'); }
+
+  // ---- Tag pill ----
+  const TAGS = ['decided', 'tbd', 'risk', 'info', 'new'];
+  function tagPill(type, label) {
+    const t = TAGS.indexOf(type) >= 0 ? type : 'info';
+    const s = el('span', 'sb-tag ' + t); s.textContent = label || type; return s;
+  }
+
+  // ---- 1. Visual components from fenced code blocks ----
+  const COMP = { stat: 'stat', 'sb-stat': 'stat', flow: 'flow', 'sb-flow': 'flow',
+    cards: 'cards', 'sb-cards': 'cards', tags: 'tags', 'sb-tags': 'tags',
+    overlay: 'overlay', 'sb-overlay': 'overlay' };
+  function build(kind, raw) {
+    const lines = raw.split('\n').map(l => l.replace(/\s+$/, '')).filter(l => l.trim());
+    if (kind === 'stat') {
+      const row = el('div', 'sb-stat-row');
+      lines.forEach(l => {
+        const i = l.indexOf('|');
+        const num = i >= 0 ? l.slice(0, i) : l;
+        const lbl = i >= 0 ? l.slice(i + 1) : '';
+        const s = el('div', 'sb-stat');
+        s.appendChild(elHTML('div', 'num', inlineMd(num.trim())));
+        s.appendChild(elHTML('div', 'lbl', inlineMd(lbl.trim())));
+        row.appendChild(s);
+      });
+      return row;
+    }
+    if (kind === 'flow') {
+      const wrap = el('div', 'sb-flow');
+      raw.replace(/\n/g, ' ').split('->').forEach((tok, idx) => {
+        tok = tok.trim(); if (!tok) return;
+        let cls = ''; const m = tok.match(/\{([a-z]+)\}\s*$/i);
+        if (m) { cls = m[1].toLowerCase(); tok = tok.replace(/\{[a-z]+\}\s*$/i, '').trim(); }
+        const parts = tok.split('::');
+        if (idx > 0) { const a = el('div', 'sb-flow-arrow'); a.textContent = '\u2192'; wrap.appendChild(a); }
+        const box = el('div', 'sb-flow-box' + (cls ? ' ' + cls : ''));
+        box.appendChild(elText('b', parts[0].trim()));
+        if (parts[1]) box.appendChild(elText('small', parts[1].trim()));
+        wrap.appendChild(box);
+      });
+      return wrap;
+    }
+    if (kind === 'cards') {
+      const cards = lines.map(l => {
+        const i = l.indexOf('::');
+        const t = i >= 0 ? l.slice(0, i) : l;
+        const d = i >= 0 ? l.slice(i + 2) : '';
+        const c = el('div', 'sb-card');
+        c.appendChild(elHTML('div', 'ct', inlineMd(t.trim())));
+        if (d.trim()) c.appendChild(elHTML('div', 'cd', inlineMd(d.trim())));
+        return c;
+      });
+      let cols = cards.length <= 4 ? cards.length : (cards.length % 3 === 0 ? 3 : (cards.length % 2 === 0 ? 2 : 3));
+      const grid = el('div', 'sb-cards' + (cols > 1 ? ' n' + cols : ''));
+      cards.forEach(c => grid.appendChild(c));
+      return grid;
+    }
+    if (kind === 'tags') {
+      const wrap = el('div'); wrap.style.margin = '1.2em 0';
+      raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean).forEach(item => {
+        const i = item.indexOf(':');
+        const type = (i >= 0 ? item.slice(0, i) : item).trim().toLowerCase();
+        const label = (i >= 0 ? item.slice(i + 1) : item).trim();
+        wrap.appendChild(tagPill(type, label));
+      });
+      return wrap;
+    }
+    if (kind === 'overlay') {
+      const nl = raw.indexOf('\n');
+      const label = (nl >= 0 ? raw.slice(0, nl) : raw).trim();
+      const body = (nl >= 0 ? raw.slice(nl + 1) : '').trim();
+      const btn = el('button', 'sb-ov-btn'); btn.type = 'button';
+      btn.textContent = label || 'Show detail';
+      btn.addEventListener('click', () => openModal(label, blockMd(body)));
+      return btn;
+    }
+    return null;
+  }
+  Array.from(content.querySelectorAll('pre > code')).forEach(code => {
+    let kind = null;
+    code.classList.forEach(c => { const k = c.replace(/^language-/, ''); if (COMP[k]) kind = COMP[k]; });
+    if (!kind) return;
+    let node = null;
+    try { node = build(kind, code.textContent.replace(/\s+$/, '')); } catch (e) { return; }
+    if (node) code.parentElement.replaceWith(node);
+  });
+
+  // ---- 2. Themed callouts from emoji-led blockquotes ----
+  const EMOJI = [
+    [/^\s*(\uD83D\uDD0D|\u2699)/, 'cx-info'],   // magnifier / gear
+    [/^\s*(\u26A0)/, 'cx-warn'],                // warning
+    [/^\s*(\uD83D\uDCA1|\uD83C\uDFAF)/, 'cx-tip'], // bulb / target
+    [/^\s*(\u2705|\uD83D\uDFE2)/, 'cx-ok'],     // check / green
+    [/^\s*(\uD83D\uDD34|\u26D4|\uD83D\uDEA8)/, 'cx-risk'] // red / no-entry / siren
+  ];
+  Array.from(content.querySelectorAll('blockquote')).forEach(bq => {
+    const txt = bq.textContent || '';
+    for (const [rx, cls] of EMOJI) { if (rx.test(txt)) { bq.classList.add('callout', cls); return; } }
+  });
+
+  // ---- 3. Section chrome: "N. Heading" -> numbered badge + clean title ----
+  Array.from(content.querySelectorAll('h2')).forEach(h => {
+    const m = h.textContent.match(/^\s*(\d+)[.):]\s+(.*)$/);
+    if (!m) return;
+    h.textContent = m[2];
+    const badge = el('span', 'sec-badge'); badge.textContent = m[1];
+    h.insertBefore(badge, h.firstChild);
+    h.classList.add('has-badge');
+    // First blockquote right after the heading becomes a purpose block (unless it's a callout).
+    const n = h.nextElementSibling;
+    if (n && n.tagName === 'BLOCKQUOTE' && !n.classList.contains('callout')) n.classList.add('purpose-block');
+  });
+
+  // ---- 4. Inline [[tag]] / [[tag:label]] pills in prose (skip code/links) ----
+  const rx = /\[\[([a-zA-Z]+)(?::([^\]]+))?\]\]/g;
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      if (!n.nodeValue || n.nodeValue.indexOf('[[') < 0) return NodeFilter.FILTER_REJECT;
+      let p = n.parentElement;
+      while (p && p !== content) {
+        const t = p.tagName;
+        if (t === 'PRE' || t === 'CODE' || t === 'A' || t === 'SCRIPT' || t === 'STYLE') return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes = []; while (walker.nextNode()) textNodes.push(walker.currentNode);
+  textNodes.forEach(tn => {
+    const val = tn.nodeValue; rx.lastIndex = 0;
+    if (!rx.test(val)) return; rx.lastIndex = 0;
+    const frag = document.createDocumentFragment(); let last = 0, m;
+    while ((m = rx.exec(val))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(val.slice(last, m.index)));
+      frag.appendChild(tagPill(m[1].toLowerCase(), m[2] ? m[2].trim() : m[1]));
+      last = m.index + m[0].length;
+    }
+    if (last < val.length) frag.appendChild(document.createTextNode(val.slice(last)));
+    tn.parentNode.replaceChild(frag, tn);
+  });
+
+  // ---- 5. Read-as-deck slide mode ----
+  const topbar = document.querySelector('.topbar');
+  const themeBtn = document.getElementById('themeToggle');
+  let deckRoot, deckStage, deckTitle, deckCounter, deckDots, deckPrev, deckNext;
+  const slides = []; let cur = 0;
+  function slideTitle(i) {
+    const h = slides[i] && slides[i].querySelector('h1, h2');
+    if (!h) return 'Slide ' + (i + 1);
+    const c = h.cloneNode(true); const b = c.querySelector('.sec-badge'); if (b) b.remove();
+    return c.textContent.trim();
+  }
+  function go(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[cur].classList.remove('active'); cur = i; slides[cur].classList.add('active');
+    Array.from(deckDots.children).forEach((d, k) => d.classList.toggle('active', k === cur));
+    deckCounter.textContent = (cur + 1) + ' / ' + slides.length;
+    deckPrev.disabled = cur === 0; deckNext.disabled = cur === slides.length - 1;
+    deckStage.scrollTop = 0; deckTitle.textContent = slideTitle(cur);
+  }
+  function stripIds(node) {
+    const c = node.cloneNode(true);
+    // Clear ids so cloned headings/anchors don't collide with the live DOM, but
+    // PRESERVE ids inside rendered SVG: Mermaid scopes its <style>, arrow markers
+    // and gradients by #id / url(#id), so stripping them breaks the diagram.
+    if (c.removeAttribute && !(c.tagName && c.tagName.toLowerCase() === 'svg')) c.removeAttribute('id');
+    if (c.querySelectorAll) c.querySelectorAll('[id]').forEach(e => { if (!e.closest('svg')) e.removeAttribute('id'); });
+    return c;
+  }
+  function buildDeck() {
+    if (deckRoot) return;
+    deckRoot = el('div', 'deck-root');
+    const top = el('div', 'deck-top');
+    deckTitle = el('div', 'dt-title');
+    const exit = el('button', 'deck-exit'); exit.type = 'button'; exit.textContent = '\u2715 Exit';
+    exit.addEventListener('click', closeDeck);
+    top.appendChild(deckTitle); top.appendChild(exit);
+    deckStage = el('div', 'deck-stage');
+    const nav = el('div', 'deck-nav');
+    deckPrev = el('button', 'deck-arrow'); deckPrev.type = 'button'; deckPrev.innerHTML = '&#8592;';
+    deckPrev.addEventListener('click', () => go(cur - 1));
+    deckNext = el('button', 'deck-arrow'); deckNext.type = 'button'; deckNext.innerHTML = '&#8594;';
+    deckNext.addEventListener('click', () => go(cur + 1));
+    deckCounter = el('div', 'deck-counter');
+    deckDots = el('div', 'deck-dots');
+    nav.appendChild(deckPrev); nav.appendChild(deckDots); nav.appendChild(deckCounter); nav.appendChild(deckNext);
+    deckRoot.appendChild(top); deckRoot.appendChild(deckStage); deckRoot.appendChild(nav);
+    document.body.appendChild(deckRoot);
+    let slide = null;
+    Array.from(content.children).forEach(node => {
+      if (node.tagName === 'H2' || !slide) { slide = el('div', 'deck-slide'); deckStage.appendChild(slide); slides.push(slide); }
+      slide.appendChild(stripIds(node));
+    });
+    slides.forEach((s, i) => { const d = el('button', 'deck-dot'); d.type = 'button'; d.addEventListener('click', () => go(i)); deckDots.appendChild(d); });
+  }
+  function openDeck() { buildDeck(); if (!slides.length) return; deckRoot.classList.add('open'); document.body.style.overflow = 'hidden'; go(Math.min(cur, slides.length - 1)); }
+  function closeDeck() { if (deckRoot) deckRoot.classList.remove('open'); document.body.style.overflow = ''; }
+  if (topbar) {
+    const deckBtn = el('button', 'deck-btn'); deckBtn.type = 'button'; deckBtn.textContent = '\u25A4 Deck';
+    if (themeBtn) topbar.insertBefore(deckBtn, themeBtn); else topbar.appendChild(deckBtn);
+    deckBtn.addEventListener('click', openDeck);
+  }
+  document.addEventListener('keydown', e => {
+    if (modal && modal.classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
+    if (!deckRoot || !deckRoot.classList.contains('open')) return;
+    if (e.key === 'Escape') closeDeck();
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(cur - 1); }
+  });
+})();
+
+</script>
+</body>
+</html>
