@@ -7,13 +7,14 @@ rather than following along with tutorials.
 
 ## Projects
 
-| #   | Project                              | Key Concepts                                                                                   | Status      |
-| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------- |
-| 01  | [Quiz App](./quiz-app)               | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks     | ✅ Complete |
-| 02  | [Movie Search](./movie-search-app)       | useEffect, fetch API, loading/error states, API integration, environment variables             | ✅ Complete |
-| 03  | [Expense Tracker](./expense-tracker-app) | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries    | ✅ Complete |
-| 04  | [Job Tracker](./job-tracker-app)         | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext | ✅ Complete |
-| 05  | [Notes App](./notes-fullstack-app)   | Full stack — React + FastAPI, fetch API, async handlers, API layer separation, env variables   | ✅ Complete |
+| #   | Project                                                                | Key Concepts                                                                                               | Status      |
+| --- | ---                                                                    | ---                                                                                                        | ---         |
+| 01  | [Quiz App](./quiz-app)                                                 | Components, props, useState, state lifting, conditional rendering, useEffect, custom hooks                 | ✅ Complete |
+| 02  | [Movie Search](./movie-search-app)                                     | useEffect, fetch API, loading/error states, API integration, environment variables                         | ✅ Complete |
+| 03  | [Expense Tracker](./expense-tracker-app)                               | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries                | ✅ Complete |
+| 04  | [Job Tracker](./job-tracker-app)                                       | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext             | ✅ Complete |
+| 05  | [Notes App](./notes-fullstack-app)                                     | Full stack — React + FastAPI, fetch API, async handlers, API layer separation, env variables               | ✅ Complete |
+| 06  | [Tic-Tac-Toe](./react-udemy-learning/07-tic-tac-toe-starting-project/) | useState, derived state, component decomposition, conditional rendering, controlled inputs, callback props | ✅ Complete |
 
 ## Concepts Learned So Far
 
@@ -62,6 +63,14 @@ cd project-name
 npm install
 npm run dev
 ```
+
+## Reference & Learning Notes
+
+In addition to the runnable apps above, this repo tracks learning material:
+
+- `react-self-learning/theory/` — a 15-part, build-first React guide (JSX → production) with a paired `.md` + rendered `.html` per topic, 100+ exercises and 3 capstones. Read top-to-bottom the first time, then keep as a reference.
+- `react-self-learning/projects/` — exercise scratch space for the guide.
+- `.learning/` — concept notes (`concepts.md`), gotchas (`gotchas.md`), and a rolling plan (`plan.md`); updated after each session and read on-demand by Copilot for deeper explanations.
 
 ## Tech Stack
 
