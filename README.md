@@ -14,8 +14,9 @@ rather than following along with tutorials.
 | 03  | [Expense Tracker](./expense-tracker-app)                                       | useReducer, controlled forms, input validation, derived state, array reduce, Object.entries                                                           | ✅ Complete |
 | 04  | [Job Tracker](./job-tracker-app)                                               | React Router, nested routes, dynamic routes, useParams, useNavigate, useContext, createContext                                                        | ✅ Complete |
 | 05  | [Notes App](./notes-fullstack-app)                                             | Full stack — React + FastAPI, fetch API, async handlers, API layer separation, env variables                                                          | ✅ Complete |
-| 06  | [Tic-Tac-Toe](./react-udemy-learning/07-tic-tac-toe-starting-project/)         | useState, derived state, component decomposition, conditional rendering, controlled inputs, callback props                                            | ✅ Complete |
+| 06  | [Tic-Tac-Toe](./react-udemy-learning/tic-tac-toe-starting-project/)            | useState, derived state, component decomposition, conditional rendering, controlled inputs, callback props                                            | ✅ Complete |
 | 07  | [Investment Calculator](./react-udemy-learning/investment-calculator-project/) | useState, controlled components, component composition, derived state, utility separation, Intl.NumberFormat, conditional rendering, .map() rendering | ✅ Complete |
+| 08  | [Countdown Timer](./react-udemy-learning/countdown-timer-project/)             | useState, useRef, setInterval, useImperativeHandle, createPortal, modal dialogs                                                                      | ✅ Complete |
 
 ## Concepts Learned So Far
 
